@@ -2,6 +2,10 @@ import type {Track} from './domain';
 
 const clean=(value:string)=>value.normalize('NFKD').toLowerCase().replace(/\p{M}/gu,'').replace(/[^\p{L}\p{N}]/gu,'');
 export const primaryArtist=(track:Track)=>track.artistNames?.[0]??track.artist;
+export function spread<T>(items:T[],limit:number):T[] {
+  if(items.length<=limit)return items.slice();if(limit===1)return items.slice(0,1);
+  return Array.from({length:limit},(_,i)=>items[Math.round(i*(items.length-1)/(limit-1))]);
+}
 export function songKey(track:{title:string;artist:string;artistNames?:string[]}):string {
   // Album reissues should not turn a familiar song into a discovery. Keep live,
   // acoustic and remix titles distinct; only strip explicit mastering suffixes.
@@ -15,7 +19,8 @@ export function uniqueMusic(tracks:Track[],limit=200):Track[] {
 }
 export function tasteSeeds(tracks:Track[],limit=12):Track[] {
   const groups=new Map<string,Track[]>();for(const track of uniqueMusic(tracks)){const artist=clean(primaryArtist(track));const group=groups.get(artist)??[];group.push(track);groups.set(artist,group);}
+  const representative=spread([...groups.values()],limit);
   const out:Track[]=[];
-  for(let row=0;out.length<limit;row++){let found=false;for(const group of groups.values()){if(group[row]){out.push(group[row]);found=true;if(out.length===limit)break;}}if(!found)break;}
+  for(let row=0;out.length<limit;row++){let found=false;for(const group of representative){if(group[row]){out.push(group[row]);found=true;if(out.length===limit)break;}}if(!found)break;}
   return out;
 }

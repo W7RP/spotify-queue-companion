@@ -53,7 +53,7 @@ test('music like recent plays discovers new tracks on a fresh session instead of
   const f=fixture({recent:async()=>[seedA,seedA,seedB],search:async artist=>{searches.push(artist);return [seedA,seedB,t(9),t(20,'catalogue'),t(21,'catalogue')];},generate:async data=>({ids:data.candidates.map((t:Track)=>t.id),suggestions:[{title:'Song 1',artist:'Rock Artist'},{title:'Related song',artist:'Related Artist'}],generationMs:1}),resolve:async title=>{assert.equal(title,'Related song');return {...t(22,'catalogue'),title,artist:'Related Artist'};}});
   const result=await f.pipeline.run('more music just like my recently played tracks',{...preferences,length:3});
   assert.deepEqual(searches,['Rock Artist','Soul Artist']);assert.equal(f.requests.length,1);assert.equal(f.requests[0].restricted,false);assert.equal(f.requests[0].seeds.length,2);
-  assert.equal(result.count,3);assert.deepEqual(f.writes[0].map(t=>t.id),[20,21,22].map(n=>t(n).id));assert.equal(result.selection.previous,1);assert.match(result.coverage,/Inspired/);
+  assert.equal(result.count,3);assert.deepEqual(f.writes[0].map(t=>t.id),[20,22,21].map(n=>t(n).id));assert.equal(result.selection.previous,1);assert.match(result.coverage,/Inspired/);
 });
 
 test('plain recent replay removes repeated history entries before taking the target',async()=>{

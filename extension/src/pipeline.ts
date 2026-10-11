@@ -1,7 +1,7 @@
 import {balancedMix,parseIntent,playlistMatches,validateSelection,type Playlist,type Track,type Intent,type Mode} from './domain';
 import {Spotify} from './spotify';import {Helper} from './ipc';import {QueueWriter} from './queue';
 import {shortfallReason,type SelectionDiagnostics} from './selection';
-import {primaryArtist,songKey,tasteSeeds,uniqueMusic} from './music';
+import {primaryArtist,songKey,spread,tasteSeeds,uniqueMusic} from './music';
 export interface Preferences {length:number;cap:number;mode:Mode;model?:string;history:boolean;provider?:'claude'|'chatgpt';claudeModel?:string}
 export class Pipeline {
   private generation?:AbortController;private mutation=false;private previous:Track[]=[];private previousAccount='';private previousSources:{liked:boolean;playlists:string[]}={liked:false,playlists:[]};
@@ -62,7 +62,7 @@ export class Pipeline {
       if(groups.length){candidates=intent.repeat?balancedMix(groups,200):uniqueMusic(balancedMix(groups,200));sourceSet=new Set(candidates.map(t=>t.uri));selection.kind='sources';}
       else if(seeds.length||intent.more&&this.previous.length){
         const references=seeds.length?seeds:tasteSeeds(this.previous);
-        const artists=[...new Set(references.map(primaryArtist))].slice(0,4);
+        const artists=spread([...new Set(references.map(primaryArtist))],4);
         const perArtist=Math.max(20,Math.ceil(intent.count*2/artists.length));
         this.activity('Searching for similar music…');
         const found=await Promise.all(artists.map(artist=>this.spotify.search(artist,perArtist)));check();
@@ -109,6 +109,10 @@ export class Pipeline {
         if(groups.length>1){const selected=new Set(tracks.map(t=>t.uri));const mixed=balancedMix(groups.map(g=>g.filter(t=>selected.has(t.uri))),200,intent.repeat);tracks=intent.repeat?mixed.slice(0,intent.count):uniqueMusic(mixed,intent.count);}
         resolutionMs=Math.round(performance.now()-resolvingAt);
       }
+    }
+    if(seeds.length&&!sourceSet){
+      const artists=new Map<string,Track[]>();for(const track of tracks){const artist=primaryArtist(track);const group=artists.get(artist)??[];group.push(track);artists.set(artist,group);}
+      tracks=balancedMix([...artists.values()],intent.count,intent.repeat);
     }
     check();validateSelection(tracks,sourceSet,intent.count,intent.repeat);
     if(intent.history)retrievalMs=Math.round(performance.now()-start);

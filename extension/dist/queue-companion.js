@@ -459,6 +459,11 @@
   // src/music.ts
   var clean = (value) => value.normalize("NFKD").toLowerCase().replace(new RegExp("\\p{M}", "gu"), "").replace(/[^\p{L}\p{N}]/gu, "");
   var primaryArtist = (track) => track.artistNames?.[0] ?? track.artist;
+  function spread(items, limit) {
+    if (items.length <= limit) return items.slice();
+    if (limit === 1) return items.slice(0, 1);
+    return Array.from({ length: limit }, (_, i) => items[Math.round(i * (items.length - 1) / (limit - 1))]);
+  }
   function songKey(track) {
     const title = track.title.replace(/\s*(?:-\s*|\(|\[)(?:\d{4}\s+)?(?:remaster(?:ed)?(?:\s+\d{4})?|mono(?: version)?|stereo(?: version)?)\s*[)\]]?$/i, "");
     return clean(title) + "|" + clean(track.artistNames?.[0] ?? track.artist);
@@ -484,10 +489,11 @@
       group.push(track);
       groups.set(artist, group);
     }
+    const representative = spread([...groups.values()], limit);
     const out = [];
     for (let row = 0; out.length < limit; row++) {
       let found = false;
-      for (const group of groups.values()) {
+      for (const group of representative) {
         if (group[row]) {
           out.push(group[row]);
           found = true;
@@ -617,7 +623,7 @@
           selection.kind = "sources";
         } else if (seeds.length || intent.more && this.previous.length) {
           const references2 = seeds.length ? seeds : tasteSeeds(this.previous);
-          const artists = [...new Set(references2.map(primaryArtist))].slice(0, 4);
+          const artists = spread([...new Set(references2.map(primaryArtist))], 4);
           const perArtist = Math.max(20, Math.ceil(intent.count * 2 / artists.length));
           this.activity("Searching for similar music\u2026");
           const found = await Promise.all(artists.map((artist) => this.spotify.search(artist, perArtist)));
@@ -706,6 +712,16 @@
           }
           resolutionMs = Math.round(performance.now() - resolvingAt);
         }
+      }
+      if (seeds.length && !sourceSet) {
+        const artists = /* @__PURE__ */ new Map();
+        for (const track of tracks) {
+          const artist = primaryArtist(track);
+          const group = artists.get(artist) ?? [];
+          group.push(track);
+          artists.set(artist, group);
+        }
+        tracks = balancedMix([...artists.values()], intent.count, intent.repeat);
       }
       check();
       validateSelection(tracks, sourceSet, intent.count, intent.repeat);
