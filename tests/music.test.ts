@@ -17,3 +17,9 @@ test('bounded taste references cover artists before repeating an artist',()=>{
   assert.deepEqual(tasteSeeds(recent,3).map(t=>t.id),[1,4,5].map(n=>track(n).id));
   assert.equal(tasteSeeds(Array.from({length:50},(_,i)=>track(i))).length,12);
 });
+
+
+test('reordered or expanded collaborator credits identify the same recording',()=>{
+ const a={...track(1),title:'Shared song',artist:'Singer, Guest',artistNames:['Singer','Guest']},b={...track(2),title:'Shared song',artist:'Guest, Singer, Soundtrack',artistNames:['Guest','Singer','Soundtrack']};
+ assert.deepEqual(uniqueMusic([a,b,{...track(3),title:'Shared song',artist:'Different cover artist'},{...b,...track(4),title:'Shared song (Live)'}]).map(t=>t.uri),[a.uri,track(3).uri,track(4).uri]);
+});

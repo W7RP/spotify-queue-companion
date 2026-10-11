@@ -189,3 +189,13 @@ test('a playlist reused as reference and original source needs only one ambiguit
  let choices=0;const chosen='spotify:playlist:'+String(2).padStart(22,'0');const f=fixture({playlists:async()=>[{name:'Road',uri:'spotify:playlist:'+String(1).padStart(22,'0')},{name:'Road',uri:chosen}],choose:async(_name,options)=>{choices++;return options[1];},playlist:async uri=>{assert.equal(uri,chosen);return [t(1,uri)];},search:async()=>[t(20)],generate:async data=>({ids:[data.playlistIds[0],data.candidates.find((t:Track)=>!data.playlistIds.includes(t.id)).id],suggestions:[],generationMs:1})});
  const result=await f.pipeline.run('songs like "Road", include one song from it',{...preferences,length:2});assert.equal(result.count,2);assert.equal(choices,1);assert.equal(f.writes[0].find(candidate=>candidate.uri===t(1).uri)?.source,chosen);
 });
+
+
+test('a mixed selection skips recordings with reordered artist credits and fills from reserves',async()=>{
+ const familiar={...t(1),artist:'Singer, Guest',artistNames:['Singer','Guest']};
+ const alternate={...t(3),title:'Song 1',artist:'Guest, Singer',artistNames:['Guest','Singer']};
+ const newSong={...t(20),artist:'Band, Guest',artistNames:['Band','Guest']};
+ const duplicate={...t(21),title:'Song 20',artist:'Guest, Band, Soundtrack',artistNames:['Guest','Band','Soundtrack']};
+ const f=fixture({playlist:async uri=>[{...familiar,source:uri},t(2,uri)],search:async()=>[alternate,newSong,duplicate,t(22),t(23)],generate:async data=>({ids:[data.playlistIds[0],...data.candidates.filter((c:Track)=>!data.playlistIds.includes(c.id)).map((c:Track)=>c.id)],suggestions:[],generationMs:1})});
+ const result=await f.pipeline.run('songs like "Road", include one song from it',{...preferences,length:4});assert.deepEqual(result.blend,{requested:1,included:1,discovered:3});assert.deepEqual(new Set(f.writes[0].map(t=>t.uri)),new Set([familiar.uri,newSong.uri,t(22).uri,t(23).uri]));
+});

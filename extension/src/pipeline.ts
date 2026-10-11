@@ -1,7 +1,7 @@
 import {balancedMix,parseIntent,playlistMatches,validateSelection,type Playlist,type Track,type Intent,type Mode} from './domain';
 import {Spotify} from './spotify';import {Helper} from './ipc';import {QueueWriter} from './queue';
 import {shortfallReason,type SelectionDiagnostics} from './selection';
-import {primaryArtist,songKey,spread,tasteSeeds,uniqueMusic} from './music';
+import {primaryArtist,songKey,songKeys,spread,tasteSeeds,uniqueMusic} from './music';
 export interface Preferences {length:number;cap:number;mode:Mode;model?:string;history:boolean;provider?:'claude'|'chatgpt';claudeModel?:string}
 export class Pipeline {
   private generation?:AbortController;private mutation=false;private previous:Track[]=[];private previousReferences:Track[]=[];private previousAccount='';private previousSources:{liked:boolean;playlists:string[]}={liked:false,playlists:[]};
@@ -60,14 +60,14 @@ export class Pipeline {
     const excludedUris=new Set<string>(),excludedSongs=new Set<string>(),hardUris=new Set<string>(),hardSongs=new Set<string>();
     if(!intent.repeat&&!intent.history){
       const previous=intent.more||!intent.liked&&!intent.playlistNames.length&&!intent.playlistUris.length?this.previous:[];
-      for(const t of previous){hardUris.add(t.uri);hardSongs.add(songKey(t));}
+      for(const t of previous){hardUris.add(t.uri);for(const key of songKeys(t))hardSongs.add(key);}
       hardUris.add(initial.current);if(intent.mode==='append')for(const entry of initial.entries)hardUris.add(entry.uri);
-      for(const t of references){excludedUris.add(t.uri);excludedSongs.add(songKey(t));}
+      for(const t of references){excludedUris.add(t.uri);for(const key of songKeys(t))excludedSongs.add(key);}
       for(const uri of hardUris)excludedUris.add(uri);for(const key of hardSongs)excludedSongs.add(key);
     }
-    const excluded=(track:Track)=>excludedUris.has(track.uri)||excludedSongs.has(songKey(track));
-    const hardExcluded=(track:Track)=>hardUris.has(track.uri)||hardSongs.has(songKey(track));
-    const referenceSongs=new Set(references.map(songKey));
+    const excluded=(track:Track)=>excludedUris.has(track.uri)||songKeys(track).some(key=>excludedSongs.has(key));
+    const hardExcluded=(track:Track)=>hardUris.has(track.uri)||songKeys(track).some(key=>hardSongs.has(key));
+    const referenceSongs=new Set(references.flatMap(songKeys));
     const originalUris=new Set<string>();let originalSelected=0;
     if(intent.history) {
       if(/most played|top tracks/i.test(prompt)){
@@ -86,7 +86,7 @@ export class Pipeline {
         for(const p of [...new Map(sourcePlaylists.map(p=>[p.uri,p])).values()]){const songs=playlistTracks.get(p.uri)!;groups.push(intent.liked?songs.filter(t=>likedSet.has(t.uri)):songs);}
       }
       const allowedSources=groups.length?new Set(groups.flat().map(t=>t.uri)):null;
-      if(!intent.repeat||intent.playlistCount)groups=groups.map(g=>g.filter(t=>!excluded(t)&&(!intent.playlistCount||!referenceSongs.has(songKey(t)))));
+      if(!intent.repeat||intent.playlistCount)groups=groups.map(g=>g.filter(t=>!excluded(t)&&(!intent.playlistCount||!songKeys(t).some(key=>referenceSongs.has(key)))));
       if(groups.length){candidates=intent.repeat?balancedMix(groups,200):uniqueMusic(balancedMix(groups,200));sourceSet=new Set(candidates.map(t=>t.uri));selection.kind='sources';}
       else if(seeds.length||intent.more&&this.previous.length){
         const references=seeds.length?seeds:tasteSeeds(this.previous);
@@ -100,7 +100,7 @@ export class Pipeline {
         const term=prompt.replace(/\b(something|songs?|tracks?|for|working|listening|add|another|start over|please|my|only)\b/gi,' ').replace(/\d+/g,' ').trim();
         candidates=await this.spotify.search(term||'mellow',Math.max(40,intent.count*2));
       }
-      if(!intent.repeat||intent.playlistCount)candidates=uniqueMusic(candidates.filter(t=>!excluded(t)&&(!intent.playlistCount||!referenceSongs.has(songKey(t)))));
+      if(!intent.repeat||intent.playlistCount)candidates=uniqueMusic(candidates.filter(t=>!excluded(t)&&(!intent.playlistCount||!songKeys(t).some(key=>referenceSongs.has(key)))));
       if(intent.playlistCount){
         const originals=uniqueMusic(balancedMix(includedGroups,1200).filter(t=>!hardExcluded(t)&&(!allowedSources||allowedSources.has(t.uri))));
         // Reserve room for both portions inside the existing 200-candidate bound.
@@ -131,15 +131,15 @@ export class Pipeline {
         const acceptedUris=new Set<string>(),acceptedSongs=new Set<string>();
         const accept=(t:Track|null,fromId=false)=>{
           if(!t){selection.unmatched++;return;}
-          const key=songKey(t);
+          const keys=songKeys(t);
           const original=intent.playlistCount>0&&originalUris.has(t.uri);
           if(intent.playlistCount){
             if(original&&(!fromId||originalSelected>=intent.playlistCount))return;
-            if(!original&&(referenceSongs.has(key)||tracks.length-originalSelected>=intent.count-intent.playlistCount))return;
+            if(!original&&(keys.some(key=>referenceSongs.has(key))||tracks.length-originalSelected>=intent.count-intent.playlistCount))return;
           }
-          if(!intent.repeat&&(acceptedUris.has(t.uri)||acceptedSongs.has(key))){selection.duplicates++;return;}
+          if(!intent.repeat&&(acceptedUris.has(t.uri)||keys.some(key=>acceptedSongs.has(key)))){selection.duplicates++;return;}
           if(!intent.repeat&&(original?hardExcluded(t):excluded(t))){selection.previous++;return;}
-          if(tracks.length<intent.count){tracks.push(t);if(original)originalSelected++;acceptedUris.add(t.uri);acceptedSongs.add(key);}
+          if(tracks.length<intent.count){tracks.push(t);if(original)originalSelected++;acceptedUris.add(t.uri);for(const key of keys)acceptedSongs.add(key);}
         };
         for(const t of proposed){if(tracks.length===intent.count)break;accept(t,true);}
         const suggestedKeys=new Set<string>();const pending:any[]=[];

@@ -518,18 +518,19 @@
     if (limit === 1) return items.slice(0, 1);
     return Array.from({ length: limit }, (_, i) => items[Math.round(i * (items.length - 1) / (limit - 1))]);
   }
-  function songKey(track) {
+  function songKeys(track) {
     const title = track.title.replace(/\s*(?:-\s*|\(|\[)(?:\d{4}\s+)?(?:remaster(?:ed)?(?:\s+\d{4})?|mono(?: version)?|stereo(?: version)?)\s*[)\]]?$/i, "");
-    return clean(title) + "|" + clean(track.artistNames?.[0] ?? track.artist);
+    return [...new Set((track.artistNames?.length ? track.artistNames : [track.artist]).map((artist) => clean(title) + "|" + clean(artist)))];
   }
+  var songKey = (track) => songKeys(track)[0];
   function uniqueMusic(tracks, limit = 200) {
     const uris = /* @__PURE__ */ new Set(), songs = /* @__PURE__ */ new Set();
     const out = [];
     for (const track of tracks) {
-      const key = songKey(track);
-      if (uris.has(track.uri) || songs.has(key)) continue;
+      const keys = songKeys(track);
+      if (uris.has(track.uri) || keys.some((key) => songs.has(key))) continue;
       uris.add(track.uri);
-      songs.add(key);
+      for (const key of keys) songs.add(key);
       out.push(track);
       if (out.length === limit) break;
     }
@@ -675,20 +676,20 @@
         const previous = intent.more || !intent.liked && !intent.playlistNames.length && !intent.playlistUris.length ? this.previous : [];
         for (const t of previous) {
           hardUris.add(t.uri);
-          hardSongs.add(songKey(t));
+          for (const key of songKeys(t)) hardSongs.add(key);
         }
         hardUris.add(initial.current);
         if (intent.mode === "append") for (const entry of initial.entries) hardUris.add(entry.uri);
         for (const t of references) {
           excludedUris.add(t.uri);
-          excludedSongs.add(songKey(t));
+          for (const key of songKeys(t)) excludedSongs.add(key);
         }
         for (const uri of hardUris) excludedUris.add(uri);
         for (const key of hardSongs) excludedSongs.add(key);
       }
-      const excluded = (track) => excludedUris.has(track.uri) || excludedSongs.has(songKey(track));
-      const hardExcluded = (track) => hardUris.has(track.uri) || hardSongs.has(songKey(track));
-      const referenceSongs = new Set(references.map(songKey));
+      const excluded = (track) => excludedUris.has(track.uri) || songKeys(track).some((key) => excludedSongs.has(key));
+      const hardExcluded = (track) => hardUris.has(track.uri) || songKeys(track).some((key) => hardSongs.has(key));
+      const referenceSongs = new Set(references.flatMap(songKeys));
       const originalUris = /* @__PURE__ */ new Set();
       let originalSelected = 0;
       if (intent.history) {
@@ -717,7 +718,7 @@
           }
         }
         const allowedSources = groups.length ? new Set(groups.flat().map((t) => t.uri)) : null;
-        if (!intent.repeat || intent.playlistCount) groups = groups.map((g) => g.filter((t) => !excluded(t) && (!intent.playlistCount || !referenceSongs.has(songKey(t)))));
+        if (!intent.repeat || intent.playlistCount) groups = groups.map((g) => g.filter((t) => !excluded(t) && (!intent.playlistCount || !songKeys(t).some((key) => referenceSongs.has(key)))));
         if (groups.length) {
           candidates = intent.repeat ? balancedMix(groups, 200) : uniqueMusic(balancedMix(groups, 200));
           sourceSet = new Set(candidates.map((t) => t.uri));
@@ -734,7 +735,7 @@
           const term = prompt.replace(/\b(something|songs?|tracks?|for|working|listening|add|another|start over|please|my|only)\b/gi, " ").replace(/\d+/g, " ").trim();
           candidates = await this.spotify.search(term || "mellow", Math.max(40, intent.count * 2));
         }
-        if (!intent.repeat || intent.playlistCount) candidates = uniqueMusic(candidates.filter((t) => !excluded(t) && (!intent.playlistCount || !referenceSongs.has(songKey(t)))));
+        if (!intent.repeat || intent.playlistCount) candidates = uniqueMusic(candidates.filter((t) => !excluded(t) && (!intent.playlistCount || !songKeys(t).some((key) => referenceSongs.has(key)))));
         if (intent.playlistCount) {
           const originals = uniqueMusic(balancedMix(includedGroups, 1200).filter((t) => !hardExcluded(t) && (!allowedSources || allowedSources.has(t.uri))));
           const pool = spread(originals, Math.min(75, Math.max(12, intent.playlistCount * 2)));
@@ -772,13 +773,13 @@
               selection.unmatched++;
               return;
             }
-            const key = songKey(t);
+            const keys = songKeys(t);
             const original = intent.playlistCount > 0 && originalUris.has(t.uri);
             if (intent.playlistCount) {
               if (original && (!fromId || originalSelected >= intent.playlistCount)) return;
-              if (!original && (referenceSongs.has(key) || tracks.length - originalSelected >= intent.count - intent.playlistCount)) return;
+              if (!original && (keys.some((key) => referenceSongs.has(key)) || tracks.length - originalSelected >= intent.count - intent.playlistCount)) return;
             }
-            if (!intent.repeat && (acceptedUris.has(t.uri) || acceptedSongs.has(key))) {
+            if (!intent.repeat && (acceptedUris.has(t.uri) || keys.some((key) => acceptedSongs.has(key)))) {
               selection.duplicates++;
               return;
             }
@@ -790,7 +791,7 @@
               tracks.push(t);
               if (original) originalSelected++;
               acceptedUris.add(t.uri);
-              acceptedSongs.add(key);
+              for (const key of keys) acceptedSongs.add(key);
             }
           };
           for (const t of proposed) {
