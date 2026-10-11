@@ -11,7 +11,7 @@ async Task Reject(Func<Task> body, string expected) { try { await body(); } catc
 void Credentials() => store.WriteSecret("credentials.dat", new Registration("test-registration", "test-subject", "test@example.invalid", null, "FAKE_TEST_ACCESS_ONLY", "FAKE_TEST_REFRESH_ONLY", ["chatgpt.tokens.use.direct"], DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow));
 var track = new Track("0000000000000000000001", "spotify:track:0000000000000000000001", "Candidate", "Artist");
 string Stream(string answer, bool completed = true) => "data: " + JsonSerializer.Serialize(new { type = "response.output_text.delta", delta = answer }) + "\n\n" + (completed ? "data: {\"type\":\"response.completed\"}\n\n" : "");
-async Task<Selection> Select(string stream, bool restricted = true, HttpStatusCode status = HttpStatusCode.OK)
+async Task<Selection> Select(string stream, bool restricted = true, HttpStatusCode status = HttpStatusCode.OK, int reserve = 0)
 {
     Credentials();
     using var client = new HttpClient(new FakeHandler(async request => {
@@ -21,9 +21,11 @@ async Task<Selection> Select(string stream, bool restricted = true, HttpStatusCo
         Assert(!body.RootElement.GetProperty("store").GetBoolean(), "Store must be false.");
         Assert(!body.RootElement.TryGetProperty("max_output_tokens", out _), "Unsupported API field.");
         Assert(!body.RootElement.GetProperty("input")[0].GetProperty("content").GetString()!.Contains("spotify:track:"), "Unnecessary catalogue URIs sent to inference.");
+        using var compact = JsonDocument.Parse(body.RootElement.GetProperty("input")[0].GetProperty("content").GetString()!);
+        Assert(compact.RootElement.GetProperty("count").GetInt32() == 1 && compact.RootElement.GetProperty("selectionLimit").GetInt32() == 1 + reserve, "Queue target or reserve budget lost.");
         return new(status) { Content = new StringContent(stream, Encoding.UTF8, "text/event-stream") };
     }));
-    return await new ChatGptProvider(new OAuth(store, client), client).Select(new("Only liked mellow songs", 1, [track], restricted), null, default);
+    return await new ChatGptProvider(new OAuth(store, client), client).Select(new("Only liked mellow songs", 1, [track], restricted, Reserve: reserve), null, default);
 }
 try
 {
@@ -47,6 +49,10 @@ try
     });
     await Test("DPAPI encrypted round-trip; plaintext absent on disk", () => { Credentials(); Assert(store.ReadSecret<Registration>("credentials.dat")!.AccessToken == "FAKE_TEST_ACCESS_ONLY", "DPAPI round-trip failed."); Assert(!Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(root, "credentials.dat"))).Contains("FAKE_TEST_ACCESS_ONLY"), "Plaintext leaked."); return Task.CompletedTask; });
     await Test("streaming contract and valid completed selection", async () => { var s = await Select("" + Stream("{\"ids\":[\"" + track.Id + "\"],\"suggestions\":[]}")); Assert(s.Ids.Single() == track.Id, "Wrong candidate."); });
+    await Test("ChatGPT accepts bounded discovery reserves", async () => {
+        var s = await Select(Stream("{\"ids\":[\"" + track.Id + "\"],\"suggestions\":[{\"title\":\"Reserve\",\"artist\":\"Artist\"}]}"), false, reserve: 1);
+        Assert(s.Ids.Length == 1 && s.Suggestions?.Length == 1, "Reserve choice lost.");
+    });
     await Test("truncated inference never becomes a selection", () => Reject(() => Select(Stream("{\"ids\":[\"" + track.Id + "\"]}", false)), "ended before completion"));
     await Test("terminal provider failure rejects partial output", () => Reject(() => Select("data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"usage_limit\"}}}\n\n"), "usage_limit"));
     await Test("fabricated IDs are rejected", () => Reject(() => Select(Stream("{\"ids\":[\"unknown\"]}")), "invalid candidate"));
@@ -66,6 +72,7 @@ try
     });
     passed += await ClaudeTests.Run(Path.Combine(root, "Claude"));
     passed += MinimalRuntimeTests.Run(root);
+    passed += SelectionTests.Run();
     Console.WriteLine($"{passed} helper tests passed (isolated stubs; no live acceptance claim).");
 }
 finally { if (Path.GetFullPath(root).StartsWith(Path.GetFullPath(Path.GetTempPath()) + "QueueCompanion-tests-", StringComparison.OrdinalIgnoreCase)) Directory.Delete(root, true); }

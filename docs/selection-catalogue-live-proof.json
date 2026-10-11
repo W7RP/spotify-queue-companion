@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "candidates": 89,
+  "uniqueCandidates": 89,
+  "queueUnchanged": true,
+  "spotifyVersion": "1.3.4.258",
+  "aiCalls": 0,
+  "queueWrites": 0
+}

@@ -45,7 +45,7 @@ async function run(prompt:string) {
     await refreshSettings();
     const result=await pipeline.run(prompt,preferences);if(call!==epoch)return;
     const amount=`${result.count}${result.count<result.requested?' of '+result.requested:''} ${result.count===1?'song':'songs'}`;
-    message((result.mode==='replace'?'Updated your queue'+(result.count<result.requested?' · '+amount:'.'):'Added '+amount)+(result.coverage?' · '+result.coverage:''));
+    message((result.mode==='replace'?'Updated your queue'+(result.count<result.requested?' · '+amount:'.'):'Added '+amount)+(result.shortfall?' · '+result.shortfall:'')+(result.coverage?' · '+result.coverage:''));
     window.__queueCompanion!.lastResult=result;
     lastSuccessPrompt=prompt.trim();lastSuccessAt=performance.now();
   }catch(e){if(call!==epoch||e instanceof DOMException&&e.name==='AbortError')return;message(e instanceof Error?e.message:'Selection failed. Try again.',true,true);}

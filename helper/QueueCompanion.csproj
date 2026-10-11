@@ -6,7 +6,7 @@
     <RuntimeFrameworkVersion>10.0.8</RuntimeFrameworkVersion>
     <PublishSingleFile>true</PublishSingleFile><EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <Version>0.2.2</Version><RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <Version>0.2.3</Version><RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup><Compile Include="../shared/SpotifyInstallation.cs" Link="SpotifyInstallation.cs" /></ItemGroup>
 </Project>

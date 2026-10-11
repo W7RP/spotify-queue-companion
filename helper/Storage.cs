@@ -69,6 +69,6 @@ public record Pairing(string Token, int Port = 43829, int V = 1);
 public record Registration(string ClientId, string Subject, string Email, string? IdToken, string? AccessToken, string? RefreshToken, string[] Scopes, DateTimeOffset Expires, DateTimeOffset EarliestRefresh);
 public record Track(string Id, string Uri, string Title, string Artist, string Source = "catalogue");
 public record ModelChoice(string Slug, string DisplayName, string? Line = null);
-public record Generation(string Prompt, int Count, Track[] Candidates, bool Restricted, SongSuggestion[]? Previous = null);
+public record Generation(string Prompt, int Count, Track[] Candidates, bool Restricted, SongSuggestion[]? Previous = null, int Reserve = 0);
 public record Selection(string[] Ids, SongSuggestion[]? Suggestions, long GenerationMs);
 public record SongSuggestion(string Title, string Artist);

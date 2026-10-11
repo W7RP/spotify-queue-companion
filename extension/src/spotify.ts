@@ -44,11 +44,21 @@ export class Spotify implements QueueAdapter {
     const data=await load();if(account!==await this.account())throw Error('Spotify account changed during retrieval.');await this.helper.request('cache.put',{account,key,ttl,value:data});return data;
   }
   async search(term:string,limit=30):Promise<Track[]> {
-    return this.cached('search:v2:'+term+':'+limit,300,async()=>{
-      const result=await Spicetify.GraphQL.Request(SEARCH,{searchTerm:term,offset:0,limit,numberOfTopResults:Math.min(limit,30),includeAudiobooks:true,includeAuthors:true,includePreReleases:false,includeArtistHasConcertsField:false,includeEpisodeContentRatingsV2:false});
-      if(result.errors?.length)throw Error('Spotify catalogue search is unavailable on this build. Repair and retry.');
-      const items=result.data?.searchV2?.tracksV2?.items;if(!Array.isArray(items))throw Error('Spotify search returned an unsupported response.');
-      return items.map((x:any)=>normalize(x)).filter((x:Track|null):x is Track=>!!x);
+    if(!Number.isInteger(limit)||limit<1||limit>200)throw Error('Catalogue search exceeds the candidate limit.');
+    return this.cached('search:v3:'+term+':'+limit,300,async()=>{
+      const tracks=new Map<string,Track>();let offset=0;
+      for(let pages=0;offset<limit&&pages<5;pages++){
+        const pageLimit=Math.min(40,limit-offset);
+        const result=await Spicetify.GraphQL.Request(SEARCH,{searchTerm:term,offset,limit:pageLimit,numberOfTopResults:Math.min(pageLimit,30),includeAudiobooks:true,includeAuthors:true,includePreReleases:false,includeArtistHasConcertsField:false,includeEpisodeContentRatingsV2:false});
+        if(result.errors?.length)throw Error('Spotify catalogue search is unavailable on this build. Repair and retry.');
+        const page=result.data?.searchV2?.tracksV2;const items=page?.items;if(!Array.isArray(items))throw Error('Spotify search returned an unsupported response.');
+        for(const item of items){const track=normalize(item);if(track)tracks.set(track.uri,track);}
+        if(!items.length||typeof page.totalCount==='number'&&offset+items.length>=page.totalCount)break;
+        const next=page.pagingInfo?.nextOffset??offset+items.length;
+        if(!Number.isInteger(next)||next<offset+items.length||items.length<pageLimit&&page.pagingInfo?.nextOffset==null)break;
+        offset=next;
+      }
+      return [...tracks.values()].slice(0,limit);
     });
   }
   async resolve(title:string,artist:string):Promise<Track|null> {

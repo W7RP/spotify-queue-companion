@@ -50,6 +50,19 @@ static class ClaudeTests
             Assert(status.GetProperty("lastUsage").GetProperty("inputTokens").GetInt32() == 321 && status.GetProperty("lastUsage").GetProperty("outputTokens").GetInt32() == 42, "Usage not recorded.");
             Assert(!status.ToString().Contains(Key) && !Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(root, "claude-key.dat"))).Contains(Key), "Key exposed in status or disk.");
         });
+        await Test("discovery reserves retain one Messages call and a bounded token budget", async () => {
+            Credentials(); var posts = 0;
+            using var client = new HttpClient(new FakeHandler(async request => {
+                if (request.Method == HttpMethod.Get) return Response(Catalogue);
+                posts++; using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+                Assert(body.RootElement.GetProperty("max_tokens").GetInt32() == 782, "Reserves missing from token budget.");
+                using var compact = JsonDocument.Parse(body.RootElement.GetProperty("messages")[0].GetProperty("content").GetString()!);
+                Assert(compact.RootElement.GetProperty("count").GetInt32() == 2 && compact.RootElement.GetProperty("selectionLimit").GetInt32() == 3, "Queue target changed.");
+                return Response(Stream(JsonSerializer.Serialize(new { ids = new[] { track.Id }, suggestions = new[] { new SongSuggestion("Song A", "Artist"), new SongSuggestion("Song B", "Artist") } })));
+            }));
+            var selected = await new ClaudeProvider(store, client).Select(generation with { Count = 2, Restricted = false, Reserve = 1 }, null, default);
+            Assert(posts == 1 && selected.Ids.Length + (selected.Suggestions?.Length ?? 0) == 3, "Wrong call count or reserve selection.");
+        });
         await Test("catalogue pagination, retired exclusion and unavailable-model rejection", async () => {
             Credentials(); var gets = 0; var posts = 0;
             using var client = new HttpClient(new FakeHandler(request => {
