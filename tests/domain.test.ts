@@ -20,3 +20,29 @@ test('negated repetition never enables intentional duplicates',()=>{
   assert.equal(parseIntent('repeat these songs twice').repeat,true);assert.equal(parseIntent('allow duplicates').repeat,true);
   assert.equal(parseIntent('more music like these').more,true);
 });
+
+
+test('playlist similarity uses references, including fresh more-music requests and links',()=>{
+  for(const prompt of ['songs similar to the ones in my "Road" playlist, but branch out a bit','more music just like my "Road" playlist','recommend songs based on my "Road" playlist','songs from my "Road" playlist, but branch out a bit']){
+    const intent=parseIntent(prompt);assert.deepEqual(intent.referencePlaylistNames,['Road']);assert.deepEqual(intent.playlistNames,[]);assert.equal(intent.more,false);
+  }
+  const linked=parseIntent('songs like https://open.spotify.com/playlist/0000000000000000000001?si=test');
+  assert.deepEqual(linked.referencePlaylistUris,['spotify:playlist:0000000000000000000001']);assert.deepEqual(linked.playlistUris,[]);
+});
+test('direct playlist requests and explicit only remain source restrictions',()=>{
+  for(const prompt of ['songs from my "Road" playlist','songs only from my "Road" playlist','similar rock songs, but only from my "Road" playlist','songs like my "Road" playlist, but only from it','songs from "Road" playlist only','only from "Road", but branch out a bit']){
+    const intent=parseIntent(prompt);assert.deepEqual(intent.playlistNames,['Road'],prompt);assert.deepEqual(intent.referencePlaylistNames,[],prompt);
+  }
+  assert.deepEqual(parseIntent('songs from spotify:playlist:0000000000000000000001').playlistUris,['spotify:playlist:0000000000000000000001']);
+  assert.equal(parseIntent('more songs from "Road" playlist').more,false);
+});
+test('playlist references and restricted sources can coexist in either order',()=>{
+  for(const prompt of ['songs like "Road", only from "Summer" playlist','songs like "Road", only "Summer" playlist','songs only from "Summer" playlist, similar to "Road"']){
+    const intent=parseIntent(prompt);assert.deepEqual(intent.referencePlaylistNames,['Road']);assert.deepEqual(intent.playlistNames,['Summer']);
+  }
+  const liked=parseIntent('only from my liked songs, similar to "Road" playlist');assert.equal(liked.liked,true);assert.deepEqual(liked.playlistNames,[]);assert.deepEqual(liked.referencePlaylistNames,['Road']);
+  assert.deepEqual(parseIntent('songs like "Road" and "Summer" playlists').referencePlaylistNames,['Road','Summer']);
+});
+test('playlist title words cannot turn a mix into discovery',()=>{
+  const intent=parseIntent('Mix my "Songs Like Summer" and "Branch Out" playlists');assert.deepEqual(intent.playlistNames,['Songs Like Summer','Branch Out']);assert.deepEqual(intent.referencePlaylistNames,[]);
+});

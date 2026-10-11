@@ -113,7 +113,7 @@ public sealed class ClaudeProvider(Storage store, HttpClient http) : IProvider
     static HttpRequestMessage Request(HttpMethod method, string path, string key)
     {
         var request = new HttpRequestMessage(method, "https://api.anthropic.com/v1/" + path);
-        request.Headers.Add("x-api-key", key); request.Headers.Add("anthropic-version", "2023-06-01"); request.Headers.UserAgent.ParseAdd("QueueCompanion/0.2.4"); return request;
+        request.Headers.Add("x-api-key", key); request.Headers.Add("anthropic-version", "2023-06-01"); request.Headers.UserAgent.ParseAdd("QueueCompanion/0.2.5"); return request;
     }
     static async Task Check(HttpResponseMessage response, CancellationToken ct)
     {

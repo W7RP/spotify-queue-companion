@@ -4,7 +4,7 @@ import {shortfallReason,type SelectionDiagnostics} from './selection';
 import {primaryArtist,songKey,spread,tasteSeeds,uniqueMusic} from './music';
 export interface Preferences {length:number;cap:number;mode:Mode;model?:string;history:boolean;provider?:'claude'|'chatgpt';claudeModel?:string}
 export class Pipeline {
-  private generation?:AbortController;private mutation=false;private previous:Track[]=[];private previousAccount='';private previousSources:{liked:boolean;playlists:string[]}={liked:false,playlists:[]};
+  private generation?:AbortController;private mutation=false;private previous:Track[]=[];private previousReferences:Track[]=[];private previousAccount='';private previousSources:{liked:boolean;playlists:string[]}={liked:false,playlists:[]};
   constructor(private spotify:Spotify,private helper:Helper,private writer:QueueWriter,private choose:(name:string,options:Playlist[],signal:AbortSignal)=>Promise<Playlist>,private activity:(text:string,writing?:boolean)=>void){}
   async run(prompt:string,settings:Preferences) {
     if(this.mutation)throw Error('Finishing the current queue change. Please wait.');
@@ -12,7 +12,7 @@ export class Pipeline {
     const check=()=>{if(signal.aborted)throw new DOMException('Cancelled','AbortError');};
     const intent=parseIntent(prompt,settings.length,settings.cap,settings.mode);const start=performance.now();this.activity('Selecting songs…');
     const initial=await this.spotify.snapshot();if(!initial.local)throw Error('Choose this computer in Spotify’s device menu before queueing.');
-    const account=initial.account;if(this.previousAccount!==account){this.previous=[];this.previousSources={liked:false,playlists:[]};this.previousAccount=account;}
+    const account=initial.account;if(this.previousAccount!==account){this.previous=[];this.previousReferences=[];this.previousSources={liked:false,playlists:[]};this.previousAccount=account;}
     if(intent.more&&!this.previous.length)throw Error('Make a selection first, then ask for more like it.');
     if(intent.more&&!intent.liked&&!intent.playlistNames.length&&!intent.playlistUris.length){intent.liked=this.previousSources.liked;intent.playlistUris=this.previousSources.playlists.slice();}
     const usedSources:{liked:boolean;playlists:string[]}={liked:intent.liked,playlists:[]};let tracks:Track[]=[];let coverage='';let generationMs=0,retrievalMs=0,resolutionMs=0;let sourceSet:Set<string>|null=null;
@@ -29,7 +29,31 @@ export class Pipeline {
       references=uniqueMusic(references);seeds=tasteSeeds(references);
       if(!seeds.length)throw Error('No listening references are available yet. Play a few songs or describe a genre or mood.');
     }
-    if(intent.more)seeds=tasteSeeds(this.previous);
+    const sourcePlaylists:Playlist[]=[],referencePlaylists:Playlist[]=[];const playlistTracks=new Map<string,Track[]>();
+    if(intent.playlistNames.length||intent.playlistUris.length||intent.referencePlaylistNames.length||intent.referencePlaylistUris.length){
+      this.activity('Reading your playlists…');
+      const playlists=await this.spotify.playlists();
+      const resolve=async(names:string[],uris:string[],target:Playlist[])=>{
+        for(const name of names){check();const matches=playlistMatches(name,playlists);if(!matches.length)throw Error(`No playlist named “${name}” was found.`);target.push(matches.length===1?matches[0]:await this.choose(name,matches,signal));}
+        for(const uri of uris)target.push(playlists.find(p=>p.uri===uri)??{uri,name:uri});
+      };
+      await resolve(intent.playlistNames,intent.playlistUris,sourcePlaylists);
+      await resolve(intent.referencePlaylistNames,intent.referencePlaylistUris,referencePlaylists);
+      const resolved=[...new Map([...sourcePlaylists,...referencePlaylists].map(p=>[p.uri,p])).values()];
+      if(resolved.length>6)throw Error('Use up to six playlists per request.');
+      for(const p of resolved){check();playlistTracks.set(p.uri,await this.spotify.playlist(p.uri,200));}
+      check();if(await this.spotify.account()!==account)throw Error('Spotify account changed while reading your playlists.');
+      usedSources.playlists=[...new Set(sourcePlaylists.map(p=>p.uri))];
+      if(referencePlaylists.length){
+        const groups=referencePlaylists.map(p=>playlistTracks.get(p.uri)!);
+        if(groups.some(g=>!g.length))throw Error('A reference playlist has no available playable songs. Choose another playlist or describe a genre or mood.');
+        // Exclude every retrieved reference song, not just the compact seed sample.
+        seeds=tasteSeeds([...seeds,...balancedMix(groups,200)]);
+        references=uniqueMusic([...references,...groups.flat()],1400);
+        coverage+=(coverage?' · ':'')+'Inspired by the available playlist songs; reference songs are excluded.';
+      }
+    }
+    if(intent.more){seeds=tasteSeeds(this.previous);references=uniqueMusic([...references,...this.previousReferences],1400);}
     const excludedUris=new Set<string>(),excludedSongs=new Set<string>();
     if(!intent.repeat&&!intent.history){
       const previous=intent.more||!intent.liked&&!intent.playlistNames.length&&!intent.playlistUris.length?this.previous:[];
@@ -44,19 +68,14 @@ export class Pipeline {
         tracks=result.tracks.map((t:any)=>({id:t.uri.split(':')[2],uri:t.uri,title:t.title,artist:t.artist,source:'observed history'}));
       }else{const recent=await this.spotify.recent();tracks=(intent.repeat?recent:uniqueMusic(recent)).slice(0,intent.count);coverage='Spotify’s available recent songs; no play counts or complete historical coverage.';}
       if(!intent.repeat)tracks=uniqueMusic(tracks,intent.count);
-      if(intent.liked||intent.playlistNames.length||intent.playlistUris.length)throw Error('Combine history with a library restriction in a separate request for now.');
+      if(intent.liked||sourcePlaylists.length||referencePlaylists.length)throw Error('Combine history with a library restriction in a separate request for now.');
     } else {
       let candidates:Track[]=[];let groups:Track[][]=[];
       const likedTracks=intent.liked?await this.spotify.liked(200):[];
       if(intent.liked&&!intent.playlistNames.length&&!intent.playlistUris.length)groups.push(likedTracks);
-      if(intent.playlistNames.length||intent.playlistUris.length) {
-        const playlists=await this.spotify.playlists();const resolved:Playlist[]=[];
-        for(const name of intent.playlistNames){check();const matches=playlistMatches(name,playlists);if(!matches.length)throw Error(`No playlist named “${name}” was found.`);resolved.push(matches.length===1?matches[0]:await this.choose(name,matches,signal));}
-        for(const uri of intent.playlistUris)resolved.push(playlists.find(p=>p.uri===uri)??{uri,name:uri});
-        if(resolved.length>6)throw Error('Mix up to six playlists per request.');
-        usedSources.playlists=[...new Set(resolved.map(p=>p.uri))];
+      if(sourcePlaylists.length) {
         const likedSet=new Set(likedTracks.map(t=>t.uri));
-        for(const p of [...new Map(resolved.map(p=>[p.uri,p])).values()]){check();const songs=await this.spotify.playlist(p.uri,200);groups.push(intent.liked?songs.filter(t=>likedSet.has(t.uri)):songs);}
+        for(const p of [...new Map(sourcePlaylists.map(p=>[p.uri,p])).values()]){const songs=playlistTracks.get(p.uri)!;groups.push(intent.liked?songs.filter(t=>likedSet.has(t.uri)):songs);}
       }
       if(!intent.repeat)groups=groups.map(g=>g.filter(t=>!excluded(t)));
       if(groups.length){candidates=intent.repeat?balancedMix(groups,200):uniqueMusic(balancedMix(groups,200));sourceSet=new Set(candidates.map(t=>t.uri));selection.kind='sources';}
@@ -124,7 +143,7 @@ export class Pipeline {
     if(sourceSet){let fresh=new Set<string>();const playlists=[...new Set(tracks.map(t=>t.source).filter(s=>s.startsWith('spotify:playlist:')))];for(const source of playlists){for(const t of await this.spotify.playlist(source,200))fresh.add(t.uri);}if(intent.liked){const likes=new Set((await this.spotify.liked(200)).map(t=>t.uri));fresh=playlists.length?new Set([...fresh].filter(uri=>likes.has(uri))):likes;}validateSelection(tracks,fresh,intent.count,intent.repeat);}
     const validationMs=Math.round(performance.now()-validatingAt);
     check();this.mutation=true;this.activity('Updating Spotify’s queue…',true);
-    try{const result=await this.writer.commit(tracks,intent.mode,initial);this.previous=tracks;this.previousSources=usedSources;return {...result,requested:intent.count,generationMs,totalMs:Math.round(performance.now()-start),timings:{retrievalMs,resolutionMs,validationMs},coverage,mode:intent.mode,selection,shortfall:shortfallReason(result.count,intent.count,selection)};}
+    try{const result=await this.writer.commit(tracks,intent.mode,initial);this.previous=tracks;this.previousReferences=sourceSet?[]:references;this.previousSources=usedSources;return {...result,requested:intent.count,generationMs,totalMs:Math.round(performance.now()-start),timings:{retrievalMs,resolutionMs,validationMs},coverage,mode:intent.mode,selection,shortfall:shortfallReason(result.count,intent.count,selection)};}
     finally{this.mutation=false;if(this.generation===abort)this.generation=undefined;}
   }
   cancel(){if(!this.mutation)this.generation?.abort();}
