@@ -19,7 +19,7 @@ A larger request bar inside Spotify’s Queue panel. The small queue icon immedi
 
 ## Download
 
-Get the [Windows x64 installer ZIP](https://github.com/W7RP/spotify-queue-companion/releases/download/v0.2.6/QueueCompanion.Setup.zip) or [installer executable](https://github.com/W7RP/spotify-queue-companion/releases/download/v0.2.6/QueueCompanion.Setup.exe). The [0.2.4 release](https://github.com/W7RP/spotify-queue-companion/releases/tag/v0.2.6) contains checksums and the matching source archive. The [saved release](https://github.com/W7RP/spotify-queue-companion/releases/tag/storage-2026-10-11) retains the original distribution archives.
+Get the [Windows x64 installer ZIP](https://github.com/W7RP/spotify-queue-companion/releases/download/v0.2.6/QueueCompanion.Setup.zip) or [installer executable](https://github.com/W7RP/spotify-queue-companion/releases/download/v0.2.6/QueueCompanion.Setup.exe). The [0.2.6 release](https://github.com/W7RP/spotify-queue-companion/releases/tag/v0.2.6) contains checksums and the matching source archive. The [saved release](https://github.com/W7RP/spotify-queue-companion/releases/tag/storage-2026-10-11) retains the original distribution archives.
 
 This repository's main branch contains the final application source at the root. Earlier files remain available in the initial archive commit and saved release.
 
