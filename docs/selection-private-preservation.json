@@ -1,0 +1,8 @@
+{
+  "allPreserved": true,
+  "checks": {
+    "credentials.dat": true,
+    "settings.json": true,
+    "pairing.json": true
+  }
+}
