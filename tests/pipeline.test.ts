@@ -1,13 +1,13 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {Pipeline} from '../extension/src/pipeline';import type {Track} from '../extension/src/domain';
+import {Pipeline} from '../extension/src/pipeline';import type {Track,Playlist} from '../extension/src/domain';
 const t=(n:number,source='liked'):Track=>({id:String(n).padStart(22,'0'),uri:'spotify:track:'+String(n).padStart(22,'0'),title:`Song ${n}`,artist:'Artist',source});
 const preferences={length:1,cap:50,mode:'append' as const,history:true};
-function fixture(options:{snapshot?:()=>Promise<any>;recent?:()=>Promise<Track[]>;history?:()=>Promise<any>;likes?:()=>Promise<Track[]>;playlist?:(uri:string)=>Promise<Track[]>;search?:(term:string,limit:number)=>Promise<Track[]>;resolve?:(title:string,artist:string)=>Promise<Track|null>;generate?:(data:any,signal?:AbortSignal)=>Promise<any>}={}){
+function fixture(options:{snapshot?:()=>Promise<any>;recent?:()=>Promise<Track[]>;history?:()=>Promise<any>;likes?:()=>Promise<Track[]>;playlist?:(uri:string)=>Promise<Track[]>;playlists?:()=>Promise<Playlist[]>;choose?:(name:string,options:Playlist[],signal:AbortSignal)=>Promise<Playlist>;search?:(term:string,limit:number)=>Promise<Track[]>;resolve?:(title:string,artist:string)=>Promise<Track|null>;generate?:(data:any,signal?:AbortSignal)=>Promise<any>}={}){
   const writes:Track[][]=[];const requests:any[]=[];
-  const spotify:any={snapshot:options.snapshot??(async()=>({account:'a',local:true,current:t(9).uri,revision:'r',entries:[]})),account:async()=>'a',recent:options.recent??(async()=>[t(1),t(2)]),liked:options.likes??(async()=>[t(1),t(2)]),playlists:async()=>[{name:'Road',uri:'spotify:playlist:'+String(1).padStart(22,'0')}],playlist:options.playlist??(async(uri:string)=>[t(1,uri),t(2,uri)]),validate:async(x:Track[])=>x,search:options.search??(async()=>[t(1,'catalogue'),t(2,'catalogue')]),resolve:options.resolve??(async()=>t(99,'catalogue'))};
+  const spotify:any={snapshot:options.snapshot??(async()=>({account:'a',local:true,current:t(9).uri,revision:'r',entries:[]})),account:async()=>'a',recent:options.recent??(async()=>[t(1),t(2)]),liked:options.likes??(async()=>[t(1),t(2)]),playlists:options.playlists??(async()=>[{name:'Road',uri:'spotify:playlist:'+String(1).padStart(22,'0')}]),playlist:options.playlist??(async(uri:string)=>[t(1,uri),t(2,uri)]),validate:async(x:Track[])=>x,search:options.search??(async()=>[t(1,'catalogue'),t(2,'catalogue')]),resolve:options.resolve??(async()=>t(99,'catalogue'))};
   const helper:any={request:async(type:string,data:any,signal?:AbortSignal)=>{if(type==='history')return options.history?options.history():{tracks:[t(1),t(2)],coverage:'Local counts'};assert.equal(type,'generate');requests.push(data);return options.generate?options.generate(data,signal):{ids:[data.candidates[0].id],suggestions:[],generationMs:1};}};
   const writer:any={commit:async(tracks:Track[])=>{writes.push(tracks);return{count:tracks.length,insertionMs:1};}};
-  return {pipeline:new Pipeline(spotify,helper,writer,async()=>{throw Error('Unexpected chooser');},()=>{}),writes,requests};
+  return {pipeline:new Pipeline(spotify,helper,writer,options.choose??(async()=>{throw Error('Unexpected chooser');}),()=>{}),writes,requests};
 }
 test('pipeline intersects playlist and liked restrictions before selecting',async()=>{const f=fixture({likes:async()=>[t(1)]});await f.pipeline.run('Add 1 metal songs only from my liked songs and "Road" playlist',preferences);assert.deepEqual(f.requests[0].candidates.map((x:Track)=>x.uri),[t(1).uri]);assert.equal(f.requests[0].restricted,true);assert.equal(f.writes[0][0].uri,t(1).uri);});
 test('a liked-song removed during generation stops the native write',async()=>{let reads=0;const f=fixture({likes:async()=>++reads===1?[t(1)]:[]});await assert.rejects(f.pipeline.run('Add 1 metal songs only from my liked songs',preferences),/source/);assert.equal(f.writes.length,0);});
@@ -145,4 +145,47 @@ test('empty or missing reference playlists never silently fall back to catalogue
 test('follow-up to playlist discovery stays unrestricted and excludes the previous selection',async()=>{
   let call=0;const f=fixture({search:async()=>++call===1?[t(20)]:[t(1),t(20),t(21)]});await f.pipeline.run('songs like "Road" playlist',preferences);await f.pipeline.run('add another song like these',preferences);
   assert.equal(f.requests[1].restricted,false);assert.deepEqual(f.requests[1].previous,[{title:'Song 20',artist:'Artist'}]);assert.deepEqual(f.writes[1].map(t=>t.uri),[t(21).uri]);
+});
+
+
+const blendPrompt='songs similar to my "Road" playlist, but include a few songs from the playlist too';
+test('a blend fills both portions in one inference and interleaves familiar songs',async()=>{
+ const f=fixture({playlist:async uri=>Array.from({length:5},(_,i)=>t(i+1,uri)),search:async()=>Array.from({length:45},(_,i)=>t(i+20)),generate:async data=>({ids:data.candidates.slice(0,data.count+data.reserve).map((t:Track)=>t.id),suggestions:[],generationMs:1})});
+ const result=await f.pipeline.run(blendPrompt,{...preferences,length:25});const originals=f.writes[0].filter(t=>Number(t.id)<10);
+ assert.equal(f.requests.length,1);assert.equal(f.requests[0].restricted,false);assert.equal(f.requests[0].playlistCount,3);assert.equal(f.requests[0].playlistIds.length,5);assert.equal(result.count,25);assert.equal(originals.length,3);assert.deepEqual(result.blend,{requested:3,included:3,discovered:22});
+ assert(Number(f.writes[0][0].id)>=20);assert(f.writes[0].slice(0,12).some(t=>Number(t.id)<10));assert.equal(new Set(f.writes[0].map(t=>t.uri)).size,25);
+});
+test('the client preserves the split when a model omits originals instead of padding with discoveries',async()=>{
+ const f=fixture({search:async()=>Array.from({length:40},(_,i)=>t(i+20)),generate:async data=>({ids:data.candidates.filter((t:Track)=>!data.playlistIds.includes(t.id)).slice(0,data.count+data.reserve).map((t:Track)=>t.id),suggestions:[],generationMs:1})});
+ const result=await f.pipeline.run(blendPrompt,{...preferences,length:25});assert.equal(result.count,22);assert.deepEqual(result.blend,{requested:3,included:0,discovered:22});assert.match(result.shortfall,/0 of 3 requested playlist songs/);
+});
+test('too few available originals produce an explained partial blend',async()=>{
+ const f=fixture({search:async()=>Array.from({length:40},(_,i)=>t(i+20)),generate:async data=>({ids:data.candidates.slice(0,data.count+data.reserve).map((t:Track)=>t.id),suggestions:[],generationMs:1})});
+ const result=await f.pipeline.run(blendPrompt,{...preferences,length:25});assert.equal(result.count,24);assert.deepEqual(result.blend,{requested:3,included:2,discovered:22});assert.match(result.shortfall,/2 of 3 requested playlist songs/);
+});
+test('original-only model output cannot consume discovery slots',async()=>{
+ const f=fixture({playlist:async uri=>Array.from({length:8},(_,i)=>t(i+1,uri)),search:async()=>[t(20)],generate:async data=>({ids:data.playlistIds,suggestions:[],generationMs:1})});
+ await assert.rejects(f.pipeline.run(blendPrompt,{...preferences,length:25}),/No matching discoveries/);assert.equal(f.writes.length,0);
+});
+test('blend discovery excludes reference remasters and suggestions cannot fake playlist membership',async()=>{
+ let lookups=0;const f=fixture({search:async()=>[{...t(10),title:'Song 1 - 2011 Remaster'},t(20),t(21)],generate:async data=>{assert(!data.candidates.some((candidate:Track)=>candidate.uri===t(10).uri));return {ids:[data.playlistIds[0],...data.candidates.filter((t:Track)=>!data.playlistIds.includes(t.id)).map((t:Track)=>t.id)],suggestions:[{title:'Song 1',artist:'Artist'},{title:'New',artist:'Other'}],generationMs:1};},resolve:async(title,artist)=>{lookups++;return {...t(22),title,artist};}});
+ const result=await f.pipeline.run('songs like "Road", include one song from it',{...preferences,length:4});assert.deepEqual(result.blend,{requested:1,included:1,discovered:3});assert.equal(lookups,1);
+});
+test('a playlist original removed during generation prevents the entire blend write',async()=>{
+ let reads=0;const f=fixture({playlist:async uri=>++reads===1?[t(1,uri),t(2,uri)]:[],search:async()=>[t(20)],generate:async data=>({ids:[data.playlistIds[0],data.candidates.find((t:Track)=>!data.playlistIds.includes(t.id)).id],suggestions:[],generationMs:1})});
+ await assert.rejects(f.pipeline.run('songs like "Road", include one song from it',{...preferences,length:2}),/source/);assert.equal(f.writes.length,0);
+});
+test('blends respect liked membership for originals and discoveries and recheck both',async()=>{
+ let reads=0;const f=fixture({likes:async()=>++reads===1?[t(1),t(20),t(21)]:[t(20),t(21)],generate:async data=>({ids:data.candidates.map((t:Track)=>t.id),suggestions:[],generationMs:1})});
+ await assert.rejects(f.pipeline.run('songs like "Road", include one song from it, only from my liked songs',{...preferences,length:3}),/source/);assert.equal(f.requests[0].restricted,true);assert.equal(f.requests[0].reserve,0);assert.deepEqual(f.requests[0].candidates.map((t:Track)=>t.uri),[t(1).uri,t(20).uri,t(21).uri]);assert.equal(f.writes.length,0);
+});
+test('already queued originals are excluded while replacement can reuse them',async()=>{
+ const make=(mode:'append'|'replace')=>fixture({snapshot:async()=>({account:'a',local:true,current:t(9).uri,revision:'r',entries:[{uri:t(1).uri,uid:'old',manual:true}]}),search:async()=>[t(20)],generate:async data=>({ids:[data.playlistIds[0],data.candidates.find((t:Track)=>!data.playlistIds.includes(t.id)).id],suggestions:[],generationMs:1})});
+ for(const mode of ['append','replace'] as const){const f=make(mode);await f.pipeline.run('songs like "Road", include one song from it',{...preferences,length:2,mode});assert.equal(f.writes[0].find(t=>Number(t.id)<10)?.uri,t(mode==='append'?2:1).uri);}
+});
+
+
+test('a playlist reused as reference and original source needs only one ambiguity choice',async()=>{
+ let choices=0;const chosen='spotify:playlist:'+String(2).padStart(22,'0');const f=fixture({playlists:async()=>[{name:'Road',uri:'spotify:playlist:'+String(1).padStart(22,'0')},{name:'Road',uri:chosen}],choose:async(_name,options)=>{choices++;return options[1];},playlist:async uri=>{assert.equal(uri,chosen);return [t(1,uri)];},search:async()=>[t(20)],generate:async data=>({ids:[data.playlistIds[0],data.candidates.find((t:Track)=>!data.playlistIds.includes(t.id)).id],suggestions:[],generationMs:1})});
+ const result=await f.pipeline.run('songs like "Road", include one song from it',{...preferences,length:2});assert.equal(result.count,2);assert.equal(choices,1);assert.equal(f.writes[0].find(t=>t.uri===t(1).uri)?.source,chosen);
 });

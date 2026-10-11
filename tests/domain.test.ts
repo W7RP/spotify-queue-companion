@@ -46,3 +46,28 @@ test('playlist references and restricted sources can coexist in either order',()
 test('playlist title words cannot turn a mix into discovery',()=>{
   const intent=parseIntent('Mix my "Songs Like Summer" and "Branch Out" playlists');assert.deepEqual(intent.playlistNames,['Songs Like Summer','Branch Out']);assert.deepEqual(intent.referencePlaylistNames,[]);
 });
+
+
+test('similarity with a few playlist originals creates a bounded blend',()=>{
+ const i=parseIntent('songs similar to my "Road" playlist, but include a few songs from the playlist too',25);
+ assert.equal(i.count,25);assert.equal(i.playlistCount,3);assert.deepEqual(i.referencePlaylistNames,['Road']);assert.deepEqual(i.includedPlaylistNames,['Road']);assert.deepEqual(i.playlistNames,[]);
+ const named=parseIntent('songs like "Road", including a few songs from "Road" too',25);assert.deepEqual(named.playlistNames,[]);assert.deepEqual(named.includedPlaylistNames,['Road']);assert.equal(named.playlistCount,3);
+ const link=parseIntent('songs like spotify:playlist:0000000000000000000001, include two original songs too',10);assert.equal(link.playlistCount,2);assert.deepEqual(link.includedPlaylistUris,['spotify:playlist:0000000000000000000001']);
+});
+test('explicit playlist portions do not replace the total or dropdown count',()=>{
+ const i=parseIntent('songs like "Road", but include four songs from it',25);assert.equal(i.count,25);assert.equal(i.playlistCount,4);
+ const total=parseIntent('10 songs similar to "Road", including 4 songs from that playlist',25);assert.equal(total.count,10);assert.equal(total.playlistCount,4);
+ const couple=parseIntent('songs like "Road", mix in a couple songs from the playlist',15);assert.equal(couple.playlistCount,2);
+ assert.throws(()=>parseIntent('songs like "Road", include a few songs from it',1),/at least two/);
+ assert.throws(()=>parseIntent('5 songs like "Road", include six songs from it'),/smaller than the total/);
+});
+test('blends can name a different included playlist while keeping a separate source restriction',()=>{
+ const i=parseIntent('songs like "Road", include three songs from "Summer", only from "Liked Mix"',25);
+ assert.deepEqual(i.referencePlaylistNames,['Road']);assert.deepEqual(i.includedPlaylistNames,['Summer']);assert.deepEqual(i.playlistNames,['Liked Mix']);assert.equal(i.playlistCount,3);
+ const multiple=parseIntent('songs like "Road", include three songs from "Summer" and "Winter"',25);assert.deepEqual(multiple.includedPlaylistNames,['Summer','Winter']);assert.deepEqual(multiple.playlistNames,[]);
+});
+test('negated inclusion and playlist title words never enable a blend',()=>{
+ for(const prompt of ['songs like "Road", do not include a few songs from it','songs like "Road", without including three songs from it','songs like "Road", never include songs from the playlist'])assert.equal(parseIntent(prompt,25).playlistCount,0);
+ assert.equal(parseIntent('songs similar to "Include Three Original Songs" playlist',25).playlistCount,0);
+ assert.equal(parseIntent('include 3 songs from "Road" playlist').count,3);assert.equal(parseIntent('include 3 songs from "Road" playlist').playlistCount,0);
+});

@@ -52,6 +52,22 @@ static class SelectionTests
             var legacy = JsonSerializer.Deserialize<Generation>("{\"prompt\":\"Hidden gems\",\"count\":1,\"candidates\":[],\"restricted\":false}", Storage.Json)!;
             Assert(legacy.Reserve == 0, "Legacy request changed.");
         });
+        Test("playlist blends preserve separate familiar and discovery portions", () => {
+            var blend = new Generation("Songs like my playlist, including one original", 3, [track], false, Reserve: 2, Seeds: [new SongSuggestion("Seed", "Artist")], PlaylistCount: 1, PlaylistIds: ["c0"]);
+            using var compact = JsonDocument.Parse(SelectionRules.Compact(blend));
+            Assert(compact.RootElement.GetProperty("playlistCount").GetInt32() == 1 && compact.RootElement.GetProperty("playlistIds")[0].GetString() == "c0", "Lost blend allocation.");
+            Assert(!compact.RootElement.ToString().Contains("spotify:track:"), "Playlist URI sent to model.");
+            var selection = SelectionRules.Parse("{\"ids\":[\"c0\"],\"suggestions\":[{\"title\":\"New\",\"artist\":\"Related\"}]}", blend, 1);
+            Assert(selection.Ids.Length == 1 && selection.Suggestions!.Length == 1, "Mixed selection rejected.");
+            Reject(blend with { PlaylistCount = -1 }); Reject(blend with { PlaylistCount = 3 });
+            Reject(blend with { PlaylistIds = ["unknown"] }); Reject(blend with { PlaylistIds = ["c0", "c0"] });
+            Reject(blend with { Seeds = [] }); Reject(blend with { PlaylistCount = 0 });
+        });
+        Test("legacy generation messages retain discovery without a playlist portion", () => {
+            var legacy = JsonSerializer.Deserialize<Generation>("{\"prompt\":\"Hidden gems\",\"count\":1,\"candidates\":[],\"restricted\":false}", Storage.Json)!;
+            Assert(legacy.PlaylistCount == 0 && legacy.PlaylistIds == null, "Legacy discovery changed.");
+            SelectionRules.ValidateRequest(legacy);
+        });
         return passed;
     }
 }

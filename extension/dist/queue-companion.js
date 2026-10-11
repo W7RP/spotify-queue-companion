@@ -305,7 +305,12 @@
     if (!text || text.length > 1e3) throw Error("Use a request between 1 and 1,000 characters.");
     const words = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, hundred: 100 };
     const countText = text.replace(/[“"][^”"]+[”"]/g, "").replace(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)[A-Za-z0-9]{22}[^\s]*/g, "");
-    const number = countText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred)\s+(?:(?!songs?\b|tracks?\b)[\p{L}-]+\s+){0,4}(?:songs?|tracks?)\b/iu)?.[1]?.toLowerCase();
+    const inclusionPattern = /\b(?:include|including|mix in|add in|throw in|keep)\s+(?:(a few|a couple|few|couple|some|\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty)\s+)?(?:of\s+)?(?:the\s+|its\s+)?(?:(original)\s+)?(?:songs?|tracks?)\s*(?:(?:from|off|of)\b|(?=too\b|as well\b|[,.!?]|$))/gi;
+    const positiveInclusions = (value) => [...value.matchAll(inclusionPattern)].filter((m) => !/(?:\b(?:do not|don't|never|not|without)\s+)$/i.test(value.slice(0, m.index)));
+    const hasSimilarity = /\b(?:like|similar|based on|inspired by|in the style of|branch out)\b/i.test(countText);
+    const inclusions = hasSimilarity ? positiveInclusions(countText) : [];
+    const totalText = inclusions.reduceRight((s, m) => s.slice(0, m.index) + s.slice(m.index + m[0].length), countText);
+    const number = totalText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred)\s+(?:(?!songs?\b|tracks?\b)[\p{L}-]+\s+){0,4}(?:songs?|tracks?)\b/iu)?.[1]?.toLowerCase();
     const count = Math.max(1, Math.min(cap, number ? words[number] ?? Number(number) : length));
     const semantic = countText;
     const followup = /\b(add (?:another|more)|more (?:music|songs|tracks)|like (?:these|this))\b/i.test(semantic);
@@ -315,36 +320,66 @@
     const discover = mentionsHistory && /\b(like|similar|based on|inspired by|discover|recommend|suggest|new|different)\b/i.test(semantic) && !/\b(?:replay|play again)\b|\bonly\s+(?:(?:songs?|tracks?)\s+)?from\s+(?:my\s+)?(?:recently played|recent (?:plays|tracks|songs)|listening history|most played|top tracks)\b/i.test(semantic);
     const inspiration = discover ? /\b(most played|top tracks)\b/i.test(semantic) ? "history" : "recent" : null;
     const history = mentionsHistory && !discover;
-    const playlistUris = [], playlistNames = [], referencePlaylistUris = [], referencePlaylistNames = [];
+    const playlistUris = [], playlistNames = [], referencePlaylistUris = [], referencePlaylistNames = [], includedPlaylistUris = [], includedPlaylistNames = [];
     const mentions = [...text.matchAll(/[“"]([^”"]+)[”"]|(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)([A-Za-z0-9]{22})/g)];
     const similarity = /\b(?:like|similar|based on|inspired by|in the style of|branch out)\b/gi;
-    let reference = false, previousEnd = 0;
+    let reference = false, includedRole = false, previousEnd = 0;
     for (const mention of mentions) {
       const prefix = text.slice(previousEnd, mention.index);
       const similar = [...prefix.matchAll(similarity)].at(-1)?.index ?? -1;
       const strict = [...prefix.matchAll(/\b(?:only|exclusively|strictly)\b/gi)].at(-1)?.index ?? -1;
-      if (strict > similar) reference = false;
-      else if (similar >= 0) reference = true;
-      else if (/\b(?:from|within|mix|mashup|combine)\b/i.test(prefix)) reference = false;
+      const included = positiveInclusions(prefix).at(-1);
+      const includeAt = included?.index ?? -1;
+      if (strict > similar && strict > includeAt) {
+        reference = false;
+        includedRole = false;
+      } else if (similar >= 0 && similar > includeAt) {
+        reference = true;
+        includedRole = false;
+      } else if (included && hasSimilarity) {
+        reference = false;
+        includedRole = true;
+      } else if (/\b(?:from|within|mix|mashup|combine)\b/i.test(prefix)) {
+        reference = false;
+        includedRole = false;
+      }
       if (mentions.length === 1) {
         const suffix = text.slice(mention.index + mention[0].length);
         if (/\bbranch out\b/i.test(suffix) && strict < 0) reference = true;
         if (/\bonly\s+from\s+(?:it|that|this)|\b(?:playlist\s+only|only\s+(?:that|this)\s+playlist)\b/i.test(suffix)) reference = false;
       }
-      if (mention[1]) (reference ? referencePlaylistNames : playlistNames).push(mention[1]);
+      if (includedRole) {
+        if (mention[1]) includedPlaylistNames.push(mention[1]);
+        else includedPlaylistUris.push("spotify:playlist:" + mention[2]);
+      } else if (mention[1]) (reference ? referencePlaylistNames : playlistNames).push(mention[1]);
       else (reference ? referencePlaylistUris : playlistUris).push("spotify:playlist:" + mention[2]);
       previousEnd = mention.index + mention[0].length;
     }
     const mash = text.match(/(?:mix|mashup|combine)\s+(?:my\s+)?(.+?)\s+playlists?\b/i)?.[1];
     if (!mentions.length && mash) playlistNames.push(...mash.split(/\s*,\s*|\s+and\s+|\s*&\s*/).map((s) => s.trim()).filter(Boolean));
+    if (inclusions.length && !referencePlaylistNames.length && !referencePlaylistUris.length) {
+      referencePlaylistNames.push(...includedPlaylistNames);
+      referencePlaylistUris.push(...includedPlaylistUris);
+    }
+    let playlistCount = 0;
+    if (inclusions.length && (referencePlaylistNames.length || referencePlaylistUris.length)) {
+      const amount = inclusions.at(-1)[1]?.toLowerCase();
+      playlistCount = amount && words[amount] !== void 0 ? words[amount] : amount && /^\d+$/.test(amount) ? Number(amount) : /couple/.test(amount ?? "") ? 2 : Math.min(3, Math.max(1, Math.round(count / 5)));
+      if (playlistCount && count < 2) throw Error("Choose at least two songs to mix playlist songs with discoveries.");
+      if (playlistCount >= count) throw Error("The playlist portion must be smaller than the total song count.");
+      if (!includedPlaylistNames.length && !includedPlaylistUris.length) {
+        includedPlaylistNames.push(...referencePlaylistNames);
+        includedPlaylistUris.push(...referencePlaylistUris);
+      }
+    }
     const more = followup && !mentionsHistory && !mentions.length && !playlistNames.length;
     if (/\bplaylist(?:s)?\b|\bmy library\b/i.test(text) && !liked && !mentions.length && !playlistNames.length) throw Error("Put playlist names in quotes, mix named playlists, or paste their Spotify links.");
     let remaining = text;
-    for (const name of [...playlistNames, ...referencePlaylistNames]) remaining = remaining.replace(name, "");
+    for (const name of [...playlistNames, ...referencePlaylistNames, ...includedPlaylistNames]) remaining = remaining.replace(name, "");
     remaining = remaining.replace(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)[A-Za-z0-9]{22}[^\s]*/g, "");
     remaining = remaining.replace(/\b(mix|mashup|combine|add|another|more|songs?|tracks?|only|from|my|these|the|and|playlists?|liked|likes|favorites|favourites|please|repeat|duplicates|twice|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred)\b|\d+|[^\p{L}\p{N}\s]/giu, " ").trim();
     const repeat = !/\b(no|without|avoid|skip|exclude)\s+(?:any\s+)?(?:repeats?|duplicates?)\b|\b(?:do not|don't|never)\s+(?:(?:allow|include|add|use)\s+)?(?:repeat|duplicates)\b/i.test(semantic) && /\b(repeat|allow duplicates|include duplicates|twice)\b/i.test(semantic);
-    return { prompt: text, count, mode: replace ? "replace" : followup ? "append" : preference, liked, history, inspiration, more, repeat, playlistNames, playlistUris, referencePlaylistNames, referencePlaylistUris, filtered: remaining.length > 0 };
+    return { prompt: text, count, mode: replace ? "replace" : followup ? "append" : preference, liked, history, inspiration, more, repeat, playlistNames, playlistUris, referencePlaylistNames, referencePlaylistUris, includedPlaylistNames, includedPlaylistUris, playlistCount, filtered: remaining.length > 0 };
   }
   function playlistMatches(name, playlists) {
     const normalize2 = (s) => s.normalize("NFKC").trim().toLocaleLowerCase();
@@ -588,23 +623,31 @@
         seeds = tasteSeeds(references);
         if (!seeds.length) throw Error("No listening references are available yet. Play a few songs or describe a genre or mood.");
       }
-      const sourcePlaylists = [], referencePlaylists = [];
+      const sourcePlaylists = [], referencePlaylists = [], includedPlaylists = [];
       const playlistTracks = /* @__PURE__ */ new Map();
       if (intent.playlistNames.length || intent.playlistUris.length || intent.referencePlaylistNames.length || intent.referencePlaylistUris.length) {
         this.activity("Reading your playlists\u2026");
         const playlists = await this.spotify.playlists();
+        const resolvedNames = /* @__PURE__ */ new Map();
         const resolve = async (names, uris, target) => {
           for (const name of names) {
             check();
-            const matches = playlistMatches(name, playlists);
-            if (!matches.length) throw Error(`No playlist named \u201C${name}\u201D was found.`);
-            target.push(matches.length === 1 ? matches[0] : await this.choose(name, matches, signal));
+            const key = name.normalize("NFKC").trim().toLocaleLowerCase();
+            let resolved2 = resolvedNames.get(key);
+            if (!resolved2) {
+              const matches = playlistMatches(name, playlists);
+              if (!matches.length) throw Error(`No playlist named \u201C${name}\u201D was found.`);
+              resolved2 = matches.length === 1 ? matches[0] : await this.choose(name, matches, signal);
+              resolvedNames.set(key, resolved2);
+            }
+            target.push(resolved2);
           }
           for (const uri of uris) target.push(playlists.find((p) => p.uri === uri) ?? { uri, name: uri });
         };
         await resolve(intent.playlistNames, intent.playlistUris, sourcePlaylists);
         await resolve(intent.referencePlaylistNames, intent.referencePlaylistUris, referencePlaylists);
-        const resolved = [...new Map([...sourcePlaylists, ...referencePlaylists].map((p) => [p.uri, p])).values()];
+        if (intent.playlistCount) await resolve(intent.includedPlaylistNames, intent.includedPlaylistUris, includedPlaylists);
+        const resolved = [...new Map([...sourcePlaylists, ...referencePlaylists, ...includedPlaylists].map((p) => [p.uri, p])).values()];
         if (resolved.length > 6) throw Error("Use up to six playlists per request.");
         for (const p of resolved) {
           check();
@@ -621,21 +664,33 @@
           coverage += (coverage ? " \xB7 " : "") + "Inspired by the available playlist songs; reference songs are excluded.";
         }
       }
+      const includedGroups = includedPlaylists.map((p) => playlistTracks.get(p.uri));
+      if (intent.playlistCount) references = uniqueMusic([...references, ...includedGroups.flat()], 1400);
       if (intent.more) {
         seeds = tasteSeeds(this.previous);
         references = uniqueMusic([...references, ...this.previousReferences], 1400);
       }
-      const excludedUris = /* @__PURE__ */ new Set(), excludedSongs = /* @__PURE__ */ new Set();
+      const excludedUris = /* @__PURE__ */ new Set(), excludedSongs = /* @__PURE__ */ new Set(), hardUris = /* @__PURE__ */ new Set(), hardSongs = /* @__PURE__ */ new Set();
       if (!intent.repeat && !intent.history) {
         const previous = intent.more || !intent.liked && !intent.playlistNames.length && !intent.playlistUris.length ? this.previous : [];
-        for (const t of [...references, ...previous]) {
+        for (const t of previous) {
+          hardUris.add(t.uri);
+          hardSongs.add(songKey(t));
+        }
+        hardUris.add(initial.current);
+        if (intent.mode === "append") for (const entry of initial.entries) hardUris.add(entry.uri);
+        for (const t of references) {
           excludedUris.add(t.uri);
           excludedSongs.add(songKey(t));
         }
-        excludedUris.add(initial.current);
-        if (intent.mode === "append") for (const entry of initial.entries) excludedUris.add(entry.uri);
+        for (const uri of hardUris) excludedUris.add(uri);
+        for (const key of hardSongs) excludedSongs.add(key);
       }
       const excluded = (track) => excludedUris.has(track.uri) || excludedSongs.has(songKey(track));
+      const hardExcluded = (track) => hardUris.has(track.uri) || hardSongs.has(songKey(track));
+      const referenceSongs = new Set(references.map(songKey));
+      const originalUris = /* @__PURE__ */ new Set();
+      let originalSelected = 0;
       if (intent.history) {
         if (/most played|top tracks/i.test(prompt)) {
           const result = await this.helper.request("history", { account, count: intent.count, days: 30 }, signal);
@@ -661,7 +716,8 @@
             groups.push(intent.liked ? songs.filter((t) => likedSet.has(t.uri)) : songs);
           }
         }
-        if (!intent.repeat) groups = groups.map((g) => g.filter((t) => !excluded(t)));
+        const allowedSources = groups.length ? new Set(groups.flat().map((t) => t.uri)) : null;
+        if (!intent.repeat || intent.playlistCount) groups = groups.map((g) => g.filter((t) => !excluded(t) && (!intent.playlistCount || !referenceSongs.has(songKey(t)))));
         if (groups.length) {
           candidates = intent.repeat ? balancedMix(groups, 200) : uniqueMusic(balancedMix(groups, 200));
           sourceSet = new Set(candidates.map((t) => t.uri));
@@ -678,17 +734,24 @@
           const term = prompt.replace(/\b(something|songs?|tracks?|for|working|listening|add|another|start over|please|my|only)\b/gi, " ").replace(/\d+/g, " ").trim();
           candidates = await this.spotify.search(term || "mellow", Math.max(40, intent.count * 2));
         }
-        if (!intent.repeat) candidates = uniqueMusic(candidates.filter((t) => !excluded(t)));
+        if (!intent.repeat || intent.playlistCount) candidates = uniqueMusic(candidates.filter((t) => !excluded(t) && (!intent.playlistCount || !referenceSongs.has(songKey(t)))));
+        if (intent.playlistCount) {
+          const originals = uniqueMusic(balancedMix(includedGroups, 1200).filter((t) => !hardExcluded(t) && (!allowedSources || allowedSources.has(t.uri))));
+          const pool = spread(originals, Math.min(75, Math.max(12, intent.playlistCount * 2)));
+          for (const t of pool) originalUris.add(t.uri);
+          candidates = [...pool, ...candidates.slice(0, 200 - pool.length)];
+          if (sourceSet) sourceSet = new Set(candidates.map((t) => t.uri));
+        }
         check();
         selection.candidates = candidates.length;
         retrievalMs = Math.round(performance.now() - start2);
-        if (groups.length && !intent.filtered) {
+        if (groups.length && !intent.filtered && !intent.playlistCount) {
           tracks = intent.repeat ? balancedMix(groups, intent.count, true) : uniqueMusic(balancedMix(groups, 200), intent.count);
         } else {
           const compact = candidates.map((t, i) => ({ ...t, id: "c" + i }));
           const reserve = sourceSet ? 0 : Math.min(25, Math.ceil(intent.count / 2));
           this.activity("Choosing matching songs\u2026");
-          const response = await this.helper.request("generate", { prompt: intent.prompt, count: intent.count, reserve, candidates: compact, restricted: !!sourceSet, previous: intent.more ? this.previous.slice(-10).map((t) => ({ title: t.title, artist: t.artist })) : [], seeds: seeds.map((t) => ({ title: t.title, artist: primaryArtist(t) })) }, signal);
+          const response = await this.helper.request("generate", { prompt: intent.prompt, count: intent.count, reserve, candidates: compact, restricted: !!sourceSet, previous: intent.more ? this.previous.slice(-10).map((t) => ({ title: t.title, artist: t.artist })) : [], seeds: seeds.map((t) => ({ title: t.title, artist: primaryArtist(t) })), playlistCount: intent.playlistCount, playlistIds: compact.filter((t) => originalUris.has(t.uri)).map((t) => t.id) }, signal);
           generationMs = response.generationMs;
           const resolvingAt = performance.now();
           const suggestions = response.suggestions ?? [];
@@ -704,29 +767,35 @@
           });
           if (proposed.length) validateSelection(proposed, sourceSet, intent.count + reserve, true);
           const acceptedUris = /* @__PURE__ */ new Set(), acceptedSongs = /* @__PURE__ */ new Set();
-          const accept = (t) => {
+          const accept = (t, fromId = false) => {
             if (!t) {
               selection.unmatched++;
               return;
             }
             const key = songKey(t);
+            const original = intent.playlistCount > 0 && originalUris.has(t.uri);
+            if (intent.playlistCount) {
+              if (original && (!fromId || originalSelected >= intent.playlistCount)) return;
+              if (!original && (referenceSongs.has(key) || tracks.length - originalSelected >= intent.count - intent.playlistCount)) return;
+            }
             if (!intent.repeat && (acceptedUris.has(t.uri) || acceptedSongs.has(key))) {
               selection.duplicates++;
               return;
             }
-            if (!intent.repeat && excluded(t)) {
+            if (!intent.repeat && (original ? hardExcluded(t) : excluded(t))) {
               selection.previous++;
               return;
             }
             if (tracks.length < intent.count) {
               tracks.push(t);
+              if (original) originalSelected++;
               acceptedUris.add(t.uri);
               acceptedSongs.add(key);
             }
           };
           for (const t of proposed) {
             if (tracks.length === intent.count) break;
-            accept(t);
+            accept(t, true);
           }
           const suggestedKeys = /* @__PURE__ */ new Set();
           const pending = [];
@@ -736,14 +805,14 @@
               selection.duplicates++;
               continue;
             }
-            if (!intent.repeat && excludedSongs.has(key)) {
+            if (intent.playlistCount && referenceSongs.has(key) || !intent.repeat && excludedSongs.has(key)) {
               selection.previous++;
               continue;
             }
             suggestedKeys.add(key);
             pending.push(song);
           }
-          for (let i = 0; i < pending.length && tracks.length < intent.count; i += 10) {
+          for (let i = 0; i < pending.length && tracks.length < intent.count && (!intent.playlistCount || tracks.length - originalSelected < intent.count - intent.playlistCount); i += 10) {
             check();
             const resolved = await Promise.all(pending.slice(i, i + 10).map((song) => this.spotify.resolve(song.title, song.artist)));
             check();
@@ -770,6 +839,17 @@
         }
         tracks = balancedMix([...artists.values()], intent.count, intent.repeat);
       }
+      if (intent.playlistCount) {
+        const originals = tracks.filter((t) => originalUris.has(t.uri)), discoveries = tracks.filter((t) => !originalUris.has(t.uri));
+        const mixed = [];
+        let at = 0;
+        if (!discoveries.length) throw Error("No matching discoveries were found for the mix. Nothing was queued. Try a broader request.");
+        for (let i = 0; i < discoveries.length; i++) {
+          mixed.push(discoveries[i]);
+          while (at < originals.length && Math.floor((i + 1) * originals.length / discoveries.length) > at) mixed.push(originals[at++]);
+        }
+        tracks = [...mixed, ...originals.slice(at)];
+      }
       check();
       validateSelection(tracks, sourceSet, intent.count, intent.repeat);
       if (intent.history) retrievalMs = Math.round(performance.now() - start2);
@@ -780,7 +860,7 @@
       if (await this.spotify.account() !== account) throw Error("Spotify account changed during selection. Try again.");
       if (sourceSet) {
         let fresh = /* @__PURE__ */ new Set();
-        const playlists = [...new Set(tracks.map((t) => t.source).filter((s) => s.startsWith("spotify:playlist:")))];
+        const playlists = usedSources.playlists;
         for (const source of playlists) {
           for (const t of await this.spotify.playlist(source, 200)) fresh.add(t.uri);
         }
@@ -790,6 +870,18 @@
         }
         validateSelection(tracks, fresh, intent.count, intent.repeat);
       }
+      if (intent.playlistCount) {
+        const originals = tracks.filter((t) => originalUris.has(t.uri));
+        const fresh = /* @__PURE__ */ new Set();
+        for (const p of includedPlaylists) {
+          check();
+          for (const t of await this.spotify.playlist(p.uri, 200)) fresh.add(t.uri);
+        }
+        if (originals.length) validateSelection(originals, fresh, intent.playlistCount, intent.repeat);
+        originalSelected = originals.length;
+        coverage = `Mixed ${originalSelected} playlist ${originalSelected === 1 ? "song" : "songs"} with ${tracks.length - originalSelected} similar discoveries. Reference retrieval is limited to the first 200 songs per playlist.`;
+      }
+      if (await this.spotify.account() !== account) throw Error("Spotify account changed during selection. Try again.");
       const validationMs = Math.round(performance.now() - validatingAt);
       check();
       this.mutation = true;
@@ -799,7 +891,10 @@
         this.previous = tracks;
         this.previousReferences = sourceSet ? [] : references;
         this.previousSources = usedSources;
-        return { ...result, requested: intent.count, generationMs, totalMs: Math.round(performance.now() - start2), timings: { retrievalMs, resolutionMs, validationMs }, coverage, mode: intent.mode, selection, shortfall: shortfallReason(result.count, intent.count, selection) };
+        const blend = intent.playlistCount ? { requested: intent.playlistCount, included: originalSelected, discovered: tracks.length - originalSelected } : null;
+        let shortfall = shortfallReason(result.count, intent.count, selection);
+        if (blend && originalSelected < intent.playlistCount) shortfall += ` Only ${originalSelected} of ${intent.playlistCount} requested playlist songs were selected.`;
+        return { ...result, requested: intent.count, generationMs, totalMs: Math.round(performance.now() - start2), timings: { retrievalMs, resolutionMs, validationMs }, coverage, mode: intent.mode, selection, blend, shortfall: shortfall.trim() };
       } finally {
         this.mutation = false;
         if (this.generation === abort) this.generation = void 0;
