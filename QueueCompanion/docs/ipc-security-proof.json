@@ -1,8 +1,0 @@
-{
-  "externalHttpStatus": 403,
-  "wrongHostStatus": 403,
-  "unsolicitedCallbackStatus": 400,
-  "externalWebSocketPeerDenied": true,
-  "validOriginOtherProcessDenied": true,
-  "credentialsPrinted": false
-}
