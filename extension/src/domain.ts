@@ -1,6 +1,6 @@
 export type Mode = 'append'|'replace';
 export interface Track {id:string;uri:string;title:string;artist:string;source:string;artistNames?:string[]}
-export interface Intent {prompt:string;count:number;mode:Mode;liked:boolean;history:boolean;more:boolean;repeat:boolean;playlistNames:string[];playlistUris:string[];filtered:boolean}
+export interface Intent {prompt:string;count:number;mode:Mode;liked:boolean;history:boolean;inspiration:'recent'|'history'|null;more:boolean;repeat:boolean;playlistNames:string[];playlistUris:string[];filtered:boolean}
 export interface Playlist {uri:string;name:string;owner?:string}
 export function parseIntent(prompt:string, length=15, cap=50, preference:Mode='append'):Intent {
   const text=prompt.trim(); if(!text||text.length>1000) throw Error('Use a request between 1 and 1,000 characters.');
@@ -10,10 +10,15 @@ export function parseIntent(prompt:string, length=15, cap=50, preference:Mode='a
   const countText=text.replace(/[“"][^”"]+[”"]/g,'').replace(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)[A-Za-z0-9]{22}[^\s]*/g,'');
   const number=countText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred)\s+(?:(?!songs?\b|tracks?\b)[\p{L}-]+\s+){0,4}(?:songs?|tracks?)\b/iu)?.[1]?.toLowerCase();
   const count=Math.max(1,Math.min(cap,number?(words[number]??Number(number)):length));
-  const more=/\b(add (?:another|more)|more songs|like these)\b/i.test(text);
-  const replace=/\b(replace (?:the |my )?queue|start over|make a new queue)\b/i.test(text);
-  const liked=/\b(liked songs|my likes|favorites|favourites)\b/i.test(text);
-  const history=/\b(most played|top tracks|listening history|recently played)\b/i.test(text);
+  const semantic=countText;
+  const followup=/\b(add (?:another|more)|more (?:music|songs|tracks)|like (?:these|this))\b/i.test(semantic);
+  const replace=/\b(replace (?:the |my )?queue|start over|make a new queue)\b/i.test(semantic);
+  const liked=/\b(liked songs|my likes|favorites|favourites)\b/i.test(semantic);
+  const mentionsHistory=/\b(most played|top tracks|listening history|recently played|recent (?:plays|tracks|songs))\b/i.test(semantic);
+  const discover=mentionsHistory&&/\b(like|similar|based on|inspired by|discover|recommend|suggest|new|different)\b/i.test(semantic)&&!/\b(?:replay|play again)\b|\bonly\s+(?:(?:songs?|tracks?)\s+)?from\s+(?:my\s+)?(?:recently played|recent (?:plays|tracks|songs)|listening history|most played|top tracks)\b/i.test(semantic);
+  const inspiration=discover?(/\b(most played|top tracks)\b/i.test(semantic)?'history':'recent'):null;
+  const history=mentionsHistory&&!discover;
+  const more=followup&&!mentionsHistory;
   const playlistUris=[...text.matchAll(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)([A-Za-z0-9]{22})/g)].map(m=>'spotify:playlist:'+m[1]);
   const quoted=[...text.matchAll(/[“"]([^”"]+)[”"]/g)].map(m=>m[1]);
   const mash=text.match(/(?:mix|mashup|combine)\s+(?:my\s+)?(.+?)\s+playlists?\b/i)?.[1];
@@ -22,7 +27,8 @@ export function parseIntent(prompt:string, length=15, cap=50, preference:Mode='a
   if (/\bplaylist(?:s)?\b|\bmy library\b/i.test(text)&&!liked&&!playlistNames.length&&!playlistUris.length) throw Error('Put playlist names in quotes, mix named playlists, or paste their Spotify links.');
   let remaining=text;for(const name of playlistNames)remaining=remaining.replace(name,'');remaining=remaining.replace(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)[A-Za-z0-9]{22}[^\s]*/g,'');
   remaining=remaining.replace(/\b(mix|mashup|combine|add|another|more|songs?|tracks?|only|from|my|these|the|and|playlists?|liked|likes|favorites|favourites|please|repeat|duplicates|twice|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred)\b|\d+|[^\p{L}\p{N}\s]/giu,' ').trim();
-  return {prompt:text,count,mode:replace?'replace':more?'append':preference,liked,history,more,repeat:/\b(repeat|duplicates|twice)\b/i.test(text),playlistNames,playlistUris,filtered:remaining.length>0};
+  const repeat=!/\b(no|without|avoid|skip|exclude)\s+(?:any\s+)?(?:repeats?|duplicates?)\b|\b(?:do not|don't|never)\s+(?:(?:allow|include|add|use)\s+)?(?:repeat|duplicates)\b/i.test(semantic)&&/\b(repeat|allow duplicates|include duplicates|twice)\b/i.test(semantic);
+  return {prompt:text,count,mode:replace?'replace':followup?'append':preference,liked,history,inspiration,more,repeat,playlistNames,playlistUris,filtered:remaining.length>0};
 }
 export function playlistMatches(name:string, playlists:Playlist[]):Playlist[] {
   const normalize=(s:string)=>s.normalize('NFKC').trim().toLocaleLowerCase(); const target=normalize(name);

@@ -150,7 +150,7 @@ sealed class SetupForm : Form
         OwnerOnly(Path.Combine(apps,"xpui","modules","queue-companion"));
         using(var run=Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run"))run.SetValue("Queue Companion","\""+HelperExe+"\"");
         using(var key=Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\QueueCompanion"))
-        {key.SetValue("DisplayName","Queue Companion");key.SetValue("DisplayVersion","0.2.3");key.SetValue("Publisher","Queue Companion contributors");key.SetValue("InstallLocation",Program.InstallRoot);key.SetValue("UninstallString","\""+setup+"\" --uninstall");key.SetValue("NoModify",1);key.SetValue("NoRepair",0);}
+        {key.SetValue("DisplayName","Queue Companion");key.SetValue("DisplayVersion","0.2.4");key.SetValue("Publisher","Queue Companion contributors");key.SetValue("InstallLocation",Program.InstallRoot);key.SetValue("UninstallString","\""+setup+"\" --uninstall");key.SetValue("NoModify",1);key.SetValue("NoRepair",0);}
         using(var protocol=Registry.CurrentUser.CreateSubKey("Software\\Classes\\queue-companion")) {protocol.SetValue("", "URL:Queue Companion");protocol.SetValue("URL Protocol","");}
         using(var command=Registry.CurrentUser.CreateSubKey("Software\\Classes\\queue-companion\\shell\\open\\command"))command.SetValue("","\""+HelperExe+"\" \"%1\"");
         Shortcut("Queue Companion",HelperExe,null);Shortcut("Queue Companion Setup",setup,null);Shortcut("Uninstall Queue Companion",setup,"--uninstall");

@@ -34,5 +34,21 @@ test('a changed Spotify account cannot cache paginated results for the old accou
   (globalThis as any).Spicetify.Platform.UserAPI.getUser=async()=>({username:++reads===1?'a':'b'});
   await assert.rejects(f.spotify.search('rock',50),/account changed/);assert.equal(f.cached.length,0);
 });
+
+test('availability checks use ten bounded parallel requests and preserve selection order',async()=>{
+  let active=0,maximum=0,calls=0;
+  (globalThis as any).Spicetify={GraphQL:{Definitions:{getTrack:{}},Request:async()=>{calls++;maximum=Math.max(maximum,++active);await new Promise(r=>setTimeout(r,2));active--;return {data:{trackUnion:{__typename:'Track',playability:{playable:true}}}};}}};
+  const tracks=Array.from({length:25},(_,i)=>({...track,id:String(i).padStart(22,'0'),uri:raw(i).uri}));
+  assert.deepEqual(await new Spotify({} as any).validate(tracks),tracks);assert.equal(maximum,10);assert.equal(calls,25);
+});
+
+test('recent history is bounded and rejects an account change before it can seed inference',async()=>{
+  let reads=0;
+  (globalThis as any).Spicetify={Platform:{UserAPI:{getUser:async()=>({username:++reads===1?'a':'b'})},PlayHistoryAPI:{getContents:async()=>({items:[raw(1)]})}}};
+  await assert.rejects(new Spotify({} as any).recent(),/account changed/);
+  (globalThis as any).Spicetify.Platform.UserAPI.getUser=async()=>({username:'a'});
+  (globalThis as any).Spicetify.Platform.PlayHistoryAPI.getContents=async()=>({items:Array.from({length:250},(_,i)=>raw(i))});
+  assert.equal((await new Spotify({} as any).recent()).length,200);
+});
 test('native track availability must be explicit before queueing',async()=>{let response:any={data:{trackUnion:{__typename:'Track',playability:{playable:true}}}};(globalThis as any).Spicetify={GraphQL:{Definitions:{getTrack:{}},Request:async()=>response}};const spotify=new Spotify({} as any);assert.deepEqual(await spotify.validate([track]),[track]);response={data:{trackUnion:{__typename:'Track'}}};await assert.rejects(spotify.validate([track]),/unavailable/);response={data:{trackUnion:{__typename:'Track',playability:{playable:false}}}};await assert.rejects(spotify.validate([track]),/unavailable/);});
 test('catalogue resolution accepts exact artists and editions, rejecting other artists and partial titles',async()=>{const spotify=new Spotify({} as any);const edition={...track,title:'A Song',artist:'José González, Collaborator',artistNames:['José González','Collaborator']};(spotify as any).search=async()=>[edition,{...edition,id:'0000000000000000000002',uri:'spotify:track:0000000000000000000002'}];assert.equal((await spotify.resolve('A Song','Jose Gonzalez'))?.uri,track.uri);assert.equal(await spotify.resolve('A Song','Jose'),null);assert.equal(await spotify.resolve('Song','Jose Gonzalez'),null);});

@@ -85,9 +85,9 @@ export class Spotify implements QueueAdapter {
     const walk=(items:any[])=>{for(const x of items){if(x.type==='playlist')out.push({uri:x.uri,name:x.name,owner:x.owner?.displayName});else if(x.type==='folder'&&Array.isArray(x.items))walk(x.items);}};
     walk(result.items);if(account!==await this.account())throw Error('Spotify account changed.');return [...new Map(out.map(p=>[p.uri,p])).values()];
   }
-  async recent():Promise<Track[]> {const data=await Spicetify.Platform.PlayHistoryAPI.getContents();return (data.items??[]).map((x:any)=>normalize(x,'recently played')).filter(Boolean);}
+  async recent():Promise<Track[]> {const account=await this.account();const data=await Spicetify.Platform.PlayHistoryAPI.getContents();if(account!==await this.account())throw Error('Spotify account changed during history retrieval.');return (data.items??[]).slice(0,200).map((x:any)=>normalize(x,'recently played')).filter(Boolean);}
   async validate(tracks:Track[]):Promise<Track[]> {
-    const validated:Track[]=[];for(let at=0;at<tracks.length;at+=5){const batch=await Promise.all(tracks.slice(at,at+5).map(async t=>{
+    const validated:Track[]=[];for(let at=0;at<tracks.length;at+=10){const batch=await Promise.all(tracks.slice(at,at+10).map(async t=>{
       const response=await Spicetify.GraphQL.Request(Spicetify.GraphQL.Definitions.getTrack,{uri:t.uri});
       const raw=response.data?.trackUnion??response.data?.track;if(response.errors?.length||!raw||raw.__typename!=='Track'||raw.playability?.playable!==true)throw Error('A selected song is unavailable. Nothing was queued.');
       return t;

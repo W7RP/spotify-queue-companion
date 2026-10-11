@@ -85,10 +85,10 @@ static class ClaudeTests
                 Assert(posts == 1 && JsonSerializer.SerializeToElement(provider.Status(), Storage.Json).GetProperty("lastUsage").ValueKind == JsonValueKind.Null, "Retry or misleading usage.");
             }
         });
-        await Test("shared source, duplicate and JSON validation rejects unsafe selections", async () => {
+        await Test("shared source and JSON validation rejects unsafe selections", async () => {
             foreach (var (text, expected) in new[] { ("{\"ids\":[\"unknown\"]}", "invalid candidate"),
                 ("{\"ids\":[],\"suggestions\":[{\"title\":\"Outside\",\"artist\":\"Artist\"}]}", "requested library"),
-                ("not JSON", "invalid JSON"), ("{\"ids\":[\""+track.Id+"\",\""+track.Id+"\"]}", "duplicates") })
+                ("not JSON", "invalid JSON") })
             {
                 Credentials(); using var client = new HttpClient(new FakeHandler(request => Task.FromResult(Response(request.Method == HttpMethod.Get ? Catalogue : Stream(text)))));
                 await Reject(() => new ClaudeProvider(store,client).Select(generation with {Count=2}, null, default), expected);

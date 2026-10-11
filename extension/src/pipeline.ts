@@ -1,6 +1,7 @@
 import {balancedMix,parseIntent,playlistMatches,validateSelection,type Playlist,type Track,type Intent,type Mode} from './domain';
 import {Spotify} from './spotify';import {Helper} from './ipc';import {QueueWriter} from './queue';
 import {shortfallReason,type SelectionDiagnostics} from './selection';
+import {primaryArtist,songKey,tasteSeeds,uniqueMusic} from './music';
 export interface Preferences {length:number;cap:number;mode:Mode;model?:string;history:boolean;provider?:'claude'|'chatgpt';claudeModel?:string}
 export class Pipeline {
   private generation?:AbortController;private mutation=false;private previous:Track[]=[];private previousAccount='';private previousSources:{liked:boolean;playlists:string[]}={liked:false,playlists:[]};
@@ -14,14 +15,35 @@ export class Pipeline {
     const account=initial.account;if(this.previousAccount!==account){this.previous=[];this.previousSources={liked:false,playlists:[]};this.previousAccount=account;}
     if(intent.more&&!this.previous.length)throw Error('Make a selection first, then ask for more like it.');
     if(intent.more&&!intent.liked&&!intent.playlistNames.length&&!intent.playlistUris.length){intent.liked=this.previousSources.liked;intent.playlistUris=this.previousSources.playlists.slice();}
-    const usedSources:{liked:boolean;playlists:string[]}={liked:intent.liked,playlists:[]};let tracks:Track[]=[];let coverage='';let generationMs=0;let sourceSet:Set<string>|null=null;
+    const usedSources:{liked:boolean;playlists:string[]}={liked:intent.liked,playlists:[]};let tracks:Track[]=[];let coverage='';let generationMs=0,retrievalMs=0,resolutionMs=0;let sourceSet:Set<string>|null=null;
     const selection:SelectionDiagnostics={kind:intent.history?'history':'discovery',candidates:0,proposed:0,unmatched:0,duplicates:0,previous:0};
+    let references:Track[]=[],seeds:Track[]=[];
+    if(intent.inspiration){
+      this.activity('Reading your listening references…');
+      if(intent.inspiration==='history'){
+        const result=await this.helper.request('history',{account,count:50,days:30},signal);
+        references=result.tracks.map((t:any)=>({id:t.uri.split(':')[2],uri:t.uri,title:t.title,artist:t.artist,source:'observed history'}));
+        coverage=result.coverage+' · Used as taste references; the selected songs are different.';
+      }else {references=await this.spotify.recent();coverage='Inspired by Spotify’s available recent plays; seed songs are excluded.';}
+      check();if(await this.spotify.account()!==account)throw Error('Spotify account changed while reading your listening references.');
+      references=uniqueMusic(references);seeds=tasteSeeds(references);
+      if(!seeds.length)throw Error('No listening references are available yet. Play a few songs or describe a genre or mood.');
+    }
+    if(intent.more)seeds=tasteSeeds(this.previous);
+    const excludedUris=new Set<string>(),excludedSongs=new Set<string>();
+    if(!intent.repeat&&!intent.history){
+      const previous=intent.more||!intent.liked&&!intent.playlistNames.length&&!intent.playlistUris.length?this.previous:[];
+      for(const t of [...references,...previous]){excludedUris.add(t.uri);excludedSongs.add(songKey(t));}
+      excludedUris.add(initial.current);if(intent.mode==='append')for(const entry of initial.entries)excludedUris.add(entry.uri);
+    }
+    const excluded=(track:Track)=>excludedUris.has(track.uri)||excludedSongs.has(songKey(track));
     if(intent.history) {
       if(/most played|top tracks/i.test(prompt)){
         const result=await this.helper.request('history',{account,count:intent.count,days:30},signal);coverage=result.coverage;
         if(!result.tracks.length)throw Error('No local listening counts yet. Meaningful plays will be counted from now on; Spotify does not provide complete past counts here.');
         tracks=result.tracks.map((t:any)=>({id:t.uri.split(':')[2],uri:t.uri,title:t.title,artist:t.artist,source:'observed history'}));
-      }else{tracks=(await this.spotify.recent()).slice(0,intent.count);coverage='Spotify’s available recent songs; no play counts or complete historical coverage.';}
+      }else{const recent=await this.spotify.recent();tracks=(intent.repeat?recent:uniqueMusic(recent)).slice(0,intent.count);coverage='Spotify’s available recent songs; no play counts or complete historical coverage.';}
+      if(!intent.repeat)tracks=uniqueMusic(tracks,intent.count);
       if(intent.liked||intent.playlistNames.length||intent.playlistUris.length)throw Error('Combine history with a library restriction in a separate request for now.');
     } else {
       let candidates:Track[]=[];let groups:Track[][]=[];
@@ -36,49 +58,68 @@ export class Pipeline {
         const likedSet=new Set(likedTracks.map(t=>t.uri));
         for(const p of [...new Map(resolved.map(p=>[p.uri,p])).values()]){check();const songs=await this.spotify.playlist(p.uri,200);groups.push(intent.liked?songs.filter(t=>likedSet.has(t.uri)):songs);}
       }
-      if(intent.more&&!intent.repeat)groups=groups.map(g=>g.filter(t=>!this.previous.some(p=>p.uri===t.uri)));
-      if(groups.length){candidates=balancedMix(groups,200);sourceSet=new Set(candidates.map(t=>t.uri));selection.kind='sources';}
-      else if(intent.more&&this.previous.length){const artists=[...new Set(this.previous.slice(0,3).map(t=>t.artist))];const perArtist=Math.max(20,Math.ceil(intent.count*2/artists.length));const found=await Promise.all(artists.map(artist=>this.spotify.search(artist,perArtist)));candidates=[...new Map(found.flat().map(t=>[t.uri,t])).values()].filter(t=>!this.previous.some(p=>p.uri===t.uri)).slice(0,200);}
+      if(!intent.repeat)groups=groups.map(g=>g.filter(t=>!excluded(t)));
+      if(groups.length){candidates=intent.repeat?balancedMix(groups,200):uniqueMusic(balancedMix(groups,200));sourceSet=new Set(candidates.map(t=>t.uri));selection.kind='sources';}
+      else if(seeds.length||intent.more&&this.previous.length){
+        const references=seeds.length?seeds:tasteSeeds(this.previous);
+        const artists=[...new Set(references.map(primaryArtist))].slice(0,4);
+        const perArtist=Math.max(20,Math.ceil(intent.count*2/artists.length));
+        this.activity('Searching for similar music…');
+        const found=await Promise.all(artists.map(artist=>this.spotify.search(artist,perArtist)));check();
+        candidates=uniqueMusic(balancedMix(found,200).filter(t=>!excluded(t)));
+      }
       else {
         const term=prompt.replace(/\b(something|songs?|tracks?|for|working|listening|add|another|start over|please|my|only)\b/gi,' ').replace(/\d+/g,' ').trim();
         candidates=await this.spotify.search(term||'mellow',Math.max(40,intent.count*2));
       }
+      if(!intent.repeat)candidates=uniqueMusic(candidates.filter(t=>!excluded(t)));
       check();
       selection.candidates=candidates.length;
+      retrievalMs=Math.round(performance.now()-start);
       if(groups.length&&!intent.filtered) {
         // A simple mashup is deterministic and evenly interleaved; no inference needed.
-        tracks=balancedMix(groups,intent.count,intent.repeat);
+        tracks=intent.repeat?balancedMix(groups,intent.count,true):uniqueMusic(balancedMix(groups,200),intent.count);
       } else {
         const compact=candidates.map((t,i)=>({...t,id:'c'+i}));
         const reserve=sourceSet?0:Math.min(25,Math.ceil(intent.count/2));
-        const response=await this.helper.request('generate',{prompt:intent.prompt,count:intent.count,reserve,candidates:compact,restricted:!!sourceSet,previous:intent.more?this.previous.slice(-10).map(t=>({title:t.title,artist:t.artist})):[]},signal);generationMs=response.generationMs;
+        this.activity('Choosing matching songs…');
+        const response=await this.helper.request('generate',{prompt:intent.prompt,count:intent.count,reserve,candidates:compact,restricted:!!sourceSet,previous:intent.more?this.previous.slice(-10).map(t=>({title:t.title,artist:t.artist})):[],seeds:seeds.map(t=>({title:t.title,artist:primaryArtist(t)}))},signal);generationMs=response.generationMs;
+        const resolvingAt=performance.now();
         const suggestions=response.suggestions??[];selection.proposed=response.ids.length+suggestions.length;
         if(selection.proposed>intent.count+reserve)throw Error('Selection exceeded the bounded selection limit.');
         if(sourceSet&&suggestions.length)throw Error('Selection left the requested source. Nothing was queued.');
-        tracks=response.ids.map((id:string)=>{const index=compact.findIndex(c=>c.id===id);if(index<0)throw Error('Invalid model track selection.');return candidates[index];});
+        const proposed:Track[]=response.ids.map((id:string)=>{const index=compact.findIndex(c=>c.id===id);if(index<0)throw Error('Invalid model track selection.');return candidates[index];});
         // Validate all model IDs, including unused reserves, before taking the queue target.
-        if(tracks.length)validateSelection(tracks,sourceSet,intent.count+reserve,intent.repeat);
-        tracks=tracks.slice(0,intent.count);
-        for(let i=0;i<suggestions.length&&tracks.length<intent.count;i+=5){
-          check();const resolved=await Promise.all(suggestions.slice(i,i+5).map((song:any)=>this.spotify.resolve(song.title,song.artist)));check();
-          for(const t of resolved){
-            if(tracks.length===intent.count)break;
-            if(!t){selection.unmatched++;continue;}
-            if(!intent.repeat&&tracks.some(x=>x.uri===t.uri)){selection.duplicates++;continue;}
-            if(intent.more&&!intent.repeat&&this.previous.some(p=>p.uri===t.uri)){selection.previous++;continue;}
-            tracks.push(t);
-          }
+        if(proposed.length)validateSelection(proposed,sourceSet,intent.count+reserve,true);
+        const acceptedUris=new Set<string>(),acceptedSongs=new Set<string>();
+        const accept=(t:Track|null)=>{
+          if(!t){selection.unmatched++;return;}
+          const key=songKey(t);
+          if(!intent.repeat&&(acceptedUris.has(t.uri)||acceptedSongs.has(key))){selection.duplicates++;return;}
+          if(!intent.repeat&&excluded(t)){selection.previous++;return;}
+          if(tracks.length<intent.count){tracks.push(t);acceptedUris.add(t.uri);acceptedSongs.add(key);}
+        };
+        for(const t of proposed){if(tracks.length===intent.count)break;accept(t);}
+        const suggestedKeys=new Set<string>();const pending:any[]=[];
+        for(const song of suggestions){const key=songKey(song);if(!intent.repeat&&(suggestedKeys.has(key)||acceptedSongs.has(key))){selection.duplicates++;continue;}if(!intent.repeat&&excludedSongs.has(key)){selection.previous++;continue;}suggestedKeys.add(key);pending.push(song);}
+        for(let i=0;i<pending.length&&tracks.length<intent.count;i+=10){
+          check();const resolved=await Promise.all(pending.slice(i,i+10).map(song=>this.spotify.resolve(song.title,song.artist)));check();
+          for(const t of resolved){if(tracks.length===intent.count)break;accept(t);}
         }
-        if(groups.length>1){const selected=new Set(tracks.map(t=>t.uri));tracks=balancedMix(groups.map(g=>g.filter(t=>selected.has(t.uri))),intent.count,intent.repeat);}
+        if(groups.length>1){const selected=new Set(tracks.map(t=>t.uri));const mixed=balancedMix(groups.map(g=>g.filter(t=>selected.has(t.uri))),200,intent.repeat);tracks=intent.repeat?mixed.slice(0,intent.count):uniqueMusic(mixed,intent.count);}
+        resolutionMs=Math.round(performance.now()-resolvingAt);
       }
     }
     check();validateSelection(tracks,sourceSet,intent.count,intent.repeat);
+    if(intent.history)retrievalMs=Math.round(performance.now()-start);
+    const validatingAt=performance.now();
     this.activity('Checking songs…');tracks=await this.spotify.validate(tracks);check();
     if(await this.spotify.account()!==account)throw Error('Spotify account changed during selection. Try again.');
     // Source membership is re-read immediately before commit to honor playlist changes during generation.
     if(sourceSet){let fresh=new Set<string>();const playlists=[...new Set(tracks.map(t=>t.source).filter(s=>s.startsWith('spotify:playlist:')))];for(const source of playlists){for(const t of await this.spotify.playlist(source,200))fresh.add(t.uri);}if(intent.liked){const likes=new Set((await this.spotify.liked(200)).map(t=>t.uri));fresh=playlists.length?new Set([...fresh].filter(uri=>likes.has(uri))):likes;}validateSelection(tracks,fresh,intent.count,intent.repeat);}
+    const validationMs=Math.round(performance.now()-validatingAt);
     check();this.mutation=true;this.activity('Updating Spotify’s queue…',true);
-    try{const result=await this.writer.commit(tracks,intent.mode,initial);this.previous=tracks;this.previousSources=usedSources;return {...result,requested:intent.count,generationMs,totalMs:Math.round(performance.now()-start),coverage,mode:intent.mode,selection,shortfall:shortfallReason(result.count,intent.count,selection)};}
+    try{const result=await this.writer.commit(tracks,intent.mode,initial);this.previous=tracks;this.previousSources=usedSources;return {...result,requested:intent.count,generationMs,totalMs:Math.round(performance.now()-start),timings:{retrievalMs,resolutionMs,validationMs},coverage,mode:intent.mode,selection,shortfall:shortfallReason(result.count,intent.count,selection)};}
     finally{this.mutation=false;if(this.generation===abort)this.generation=undefined;}
   }
   cancel(){if(!this.mutation)this.generation?.abort();}

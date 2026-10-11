@@ -7,3 +7,16 @@ test('ambiguous names are retained, exact names outrank partial matches',()=>{co
 test('source constraints and accidental duplicates fail closed',()=>{assert.throws(()=>validateSelection([t(2)],new Set([t(1).uri]),15),/source/);assert.throws(()=>validateSelection([t(1),t(1)],null,15),/duplicates/);assert.equal(validateSelection([t(1),t(1)],null,15,true).length,2);assert.throws(()=>parseIntent('only these playlists'),/playlist names/);assert.throws(()=>parseIntent('only from my chill playlist'),/playlist names/);});
 test('unlisted genres still require classification; simple named mashups do not',()=>{assert.equal(parseIntent('Add 3 blues songs only from my liked songs').filtered,true);assert.equal(parseIntent('Mix my Road Trip, Summer and Indie playlists').filtered,false);assert.equal(parseIntent('Mix 3 songs from my "THE NEW DYNASTY FALL/WINTER 2026", "jim" and "divorced father" playlists').filtered,false);});
 test('append confirmation requires fresh identities and ordered multiplicity',()=>{const before:QueueSnapshot={revision:'r',current:t(9).uri,account:'a',local:true,entries:[{uri:t(1).uri,uid:'old',manual:true,raw:null}]};const after={...before,revision:'s',entries:[...before.entries,{uri:t(1).uri,uid:'new1',manual:true,raw:null},{uri:t(1).uri,uid:'new2',manual:true,raw:null}]};assert.equal(inserted(before,after,[t(1).uri,t(1).uri]),true);assert.equal(inserted(before,before,[t(1).uri]),false);assert.equal(inserted(before,{...after,local:false},[t(1).uri]),false);});
+
+test('history discovery and direct replay are distinct intents',()=>{
+  for(const prompt of ['more music just like my recently played tracks','recommend songs based on my listening history','new music similar to my recent plays']){const intent=parseIntent(prompt);assert.equal(intent.history,false);assert.equal(intent.inspiration,'recent');assert.equal(intent.more,false);}
+  assert.equal(parseIntent('discover songs like my most played tracks').inspiration,'history');
+  for(const prompt of ['Play my recently played tracks','My most played songs recently','Replay songs from my listening history','Only from recently played tracks']){const intent=parseIntent(prompt);assert.equal(intent.history,true);assert.equal(intent.inspiration,null);}
+  assert.equal(parseIntent('Mix my "Recently Played" playlist').history,false);
+});
+
+test('negated repetition never enables intentional duplicates',()=>{
+  for(const prompt of ['rock without duplicates','rock, no repeats','do not repeat songs','avoid any duplicates','do not include duplicates'])assert.equal(parseIntent(prompt).repeat,false);
+  assert.equal(parseIntent('repeat these songs twice').repeat,true);assert.equal(parseIntent('allow duplicates').repeat,true);
+  assert.equal(parseIntent('more music like these').more,true);
+});
