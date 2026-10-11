@@ -1,0 +1,12 @@
+{
+  "tool": {
+    "exitCode": 0,
+    "error": null,
+    "step": "Stock Spotify restored. Use Repair to reinstall the bar.",
+    "at": "2026-10-10T16:19:44.2256864-04:00"
+  },
+  "stockArchivePresent": true,
+  "extensionTreeRemoved": true,
+  "stockMatchesBackup": true,
+  "protectedConnectionRetained": true
+}

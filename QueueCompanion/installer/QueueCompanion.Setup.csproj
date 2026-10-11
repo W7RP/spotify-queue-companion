@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0-windows</TargetFramework><OutputType>WinExe</OutputType><UseWindowsForms>true</UseWindowsForms><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><RuntimeIdentifier>win-x64</RuntimeIdentifier><SelfContained>true</SelfContained><PublishSingleFile>true</PublishSingleFile><IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract><EnableCompressionInSingleFile>true</EnableCompressionInSingleFile><AssemblyName>QueueCompanion.Setup</AssemblyName><Version>0.1.1</Version></PropertyGroup>
+  <ItemGroup><EmbeddedResource Include="payload.zip" Condition="Exists('payload.zip')" /></ItemGroup>
+  <ItemGroup><Compile Include="../shared/SpotifyInstallation.cs" Link="SpotifyInstallation.cs" /></ItemGroup>
+  <PropertyGroup><RuntimeFrameworkVersion>10.0.8</RuntimeFrameworkVersion><RestorePackagesWithLockFile>true</RestorePackagesWithLockFile></PropertyGroup>
+</Project>
+

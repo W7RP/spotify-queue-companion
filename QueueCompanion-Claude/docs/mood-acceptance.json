@@ -1,0 +1,26 @@
+{
+  "result": {
+    "count": 3,
+    "insertionMs": 200,
+    "generationMs": 2328,
+    "totalMs": 4273,
+    "coverage": "",
+    "mode": "append"
+  },
+  "feedback": "Added 3 songs",
+  "queue": [
+    {
+      "uri": "spotify:track:0EDmxBeZM4gudzfZL3GJg9",
+      "uid": "q2"
+    },
+    {
+      "uri": "spotify:track:5PntSbMHC1ud6Vvl8x56qd",
+      "uid": "q3"
+    },
+    {
+      "uri": "spotify:track:4cix9zymmhisLuM56RDcB7",
+      "uid": "q4"
+    }
+  ],
+  "barCount": 1
+}

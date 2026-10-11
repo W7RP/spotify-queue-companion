@@ -1,0 +1,18 @@
+{
+  "name": "queue-companion-extension",
+  "version": "0.2.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit && esbuild src/index.ts --bundle --format=iife --target=chrome120 --outfile=dist/queue-companion.js",
+    "test": "tsx --test ../tests/*.test.ts",
+    "test:ui": "node ../tests/ui/queue-panel.cjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.10",
+    "esbuild": "0.25.11",
+    "playwright": "1.62.1",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  }
+}

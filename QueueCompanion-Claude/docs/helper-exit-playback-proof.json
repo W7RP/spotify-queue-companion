@@ -1,0 +1,16 @@
+{
+  "helperExitedBeforeTest": true,
+  "pending": [
+    "spotify:track:0EDmxBeZM4gudzfZL3GJg9",
+    "spotify:track:5PntSbMHC1ud6Vvl8x56qd",
+    "spotify:track:4cix9zymmhisLuM56RDcB7"
+  ],
+  "before": "spotify:track:2G1xOn9PhRgi63XWp2ToZx",
+  "first": "spotify:track:0EDmxBeZM4gudzfZL3GJg9",
+  "second": "spotify:track:5PntSbMHC1ud6Vvl8x56qd",
+  "firstMatched": true,
+  "secondMatched": true,
+  "playing": true,
+  "progress": 1838,
+  "pausedAtEnd": false
+}

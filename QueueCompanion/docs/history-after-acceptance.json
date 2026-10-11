@@ -1,0 +1,25 @@
+{
+  "result": {
+    "count": 1,
+    "insertionMs": 138,
+    "generationMs": 0,
+    "totalMs": 478,
+    "coverage": "Locally observed plays since 2026-10-10 16:56 UTC",
+    "mode": "append"
+  },
+  "feedback": "Added 1 songs · Locally observed plays since 2026-10-10 16:56 UTC",
+  "history": {
+    "tracks": [
+      {
+        "uri": "spotify:track:0lTWjclO8uUXE2FQQOLavS",
+        "title": "Dissipate",
+        "artist": "Polaris",
+        "plays": 1
+      }
+    ],
+    "since": "2026-10-10T16:56:14.4269122+00:00",
+    "coverage": "Locally observed plays since 2026-10-10 16:56 UTC",
+    "historicalSpotifyCountsAvailable": false
+  },
+  "queueUnchanged": false
+}

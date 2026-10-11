@@ -1,0 +1,298 @@
+{
+  "passed": true,
+  "checks": 21,
+  "names": [
+    "composer absent with Queue closed",
+    "Enter opens Queue and focuses input",
+    "repeat activation keeps Queue open",
+    "Space reopens and preserves draft",
+    "Recently played hides composer",
+    "shortcut switches history to Queue",
+    "settings populated",
+    "closing panel clears masked key and closes settings",
+    "no overlap or clipping at 1355",
+    "no overlap or clipping at 1024",
+    "no overlap or clipping at 780",
+    "no overlap or clipping at 600",
+    "typing search preserves clear and Browse space",
+    "native Browse still works",
+    "search remount has one shortcut",
+    "Queue remount keeps draft",
+    "shortcut never submits native Search",
+    "layout tests never generate or write music",
+    "no browser errors",
+    "dispose removes both UI elements and style",
+    "dispose restores native search padding"
+  ],
+  "views": [
+    {
+      "viewport": {
+        "width": 1355,
+        "height": 791,
+        "panelWidth": 420
+      },
+      "geometry": {
+        "form": {
+          "x": 943,
+          "y": 128,
+          "width": 388,
+          "height": 44,
+          "right": 1331,
+          "bottom": 172
+        },
+        "settings": {
+          "x": 943,
+          "y": 180,
+          "width": 388,
+          "height": 316.390625,
+          "right": 1331,
+          "bottom": 496.390625
+        },
+        "input": {
+          "x": 978,
+          "y": 129,
+          "width": 270,
+          "height": 42,
+          "right": 1248,
+          "bottom": 171
+        },
+        "scroll": {
+          "x": 927,
+          "y": 508.390625,
+          "width": 420,
+          "height": 194.609375,
+          "right": 1347,
+          "bottom": 703
+        },
+        "aside": {
+          "x": 927,
+          "y": 64,
+          "width": 420,
+          "height": 639,
+          "right": 1347,
+          "bottom": 703
+        },
+        "icon": {
+          "x": 829.5,
+          "y": 16,
+          "width": 32,
+          "height": 32,
+          "right": 861.5,
+          "bottom": 48
+        },
+        "browse": {
+          "x": 874.5,
+          "y": 20,
+          "width": 24,
+          "height": 24,
+          "right": 898.5,
+          "bottom": 44
+        },
+        "font": "16px",
+        "overflow": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 1024,
+        "height": 740,
+        "panelWidth": 320
+      },
+      "geometry": {
+        "form": {
+          "x": 712,
+          "y": 128,
+          "width": 288,
+          "height": 44,
+          "right": 1000,
+          "bottom": 172
+        },
+        "settings": {
+          "x": 712,
+          "y": 180,
+          "width": 288,
+          "height": 296,
+          "right": 1000,
+          "bottom": 476
+        },
+        "input": {
+          "x": 747,
+          "y": 129,
+          "width": 170,
+          "height": 42,
+          "right": 917,
+          "bottom": 171
+        },
+        "scroll": {
+          "x": 696,
+          "y": 488,
+          "width": 320,
+          "height": 164,
+          "right": 1016,
+          "bottom": 652
+        },
+        "aside": {
+          "x": 696,
+          "y": 64,
+          "width": 320,
+          "height": 588,
+          "right": 1016,
+          "bottom": 652
+        },
+        "icon": {
+          "x": 664,
+          "y": 16,
+          "width": 32,
+          "height": 32,
+          "right": 696,
+          "bottom": 48
+        },
+        "browse": {
+          "x": 709,
+          "y": 20,
+          "width": 24,
+          "height": 24,
+          "right": 733,
+          "bottom": 44
+        },
+        "font": "16px",
+        "overflow": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 780,
+        "height": 620,
+        "panelWidth": 280
+      },
+      "geometry": {
+        "form": {
+          "x": 508,
+          "y": 128,
+          "width": 248,
+          "height": 44,
+          "right": 756,
+          "bottom": 172
+        },
+        "settings": {
+          "x": 508,
+          "y": 180,
+          "width": 248,
+          "height": 240,
+          "right": 756,
+          "bottom": 420
+        },
+        "input": {
+          "x": 543,
+          "y": 129,
+          "width": 130,
+          "height": 42,
+          "right": 673,
+          "bottom": 171
+        },
+        "scroll": {
+          "x": 492,
+          "y": 432,
+          "width": 280,
+          "height": 100,
+          "right": 772,
+          "bottom": 532
+        },
+        "aside": {
+          "x": 492,
+          "y": 64,
+          "width": 280,
+          "height": 468,
+          "right": 772,
+          "bottom": 532
+        },
+        "icon": {
+          "x": 542,
+          "y": 16,
+          "width": 32,
+          "height": 32,
+          "right": 574,
+          "bottom": 48
+        },
+        "browse": {
+          "x": 587,
+          "y": 20,
+          "width": 24,
+          "height": 24,
+          "right": 611,
+          "bottom": 44
+        },
+        "font": "16px",
+        "overflow": false
+      }
+    },
+    {
+      "viewport": {
+        "width": 600,
+        "height": 440,
+        "panelWidth": 240
+      },
+      "geometry": {
+        "form": {
+          "x": 368,
+          "y": 128,
+          "width": 208,
+          "height": 44,
+          "right": 576,
+          "bottom": 172
+        },
+        "settings": {
+          "x": 368,
+          "y": 180,
+          "width": 208,
+          "height": 80,
+          "right": 576,
+          "bottom": 260
+        },
+        "input": {
+          "x": 403,
+          "y": 129,
+          "width": 90,
+          "height": 42,
+          "right": 493,
+          "bottom": 171
+        },
+        "scroll": {
+          "x": 352,
+          "y": 272,
+          "width": 240,
+          "height": 80,
+          "right": 592,
+          "bottom": 352
+        },
+        "aside": {
+          "x": 352,
+          "y": 64,
+          "width": 240,
+          "height": 288,
+          "right": 592,
+          "bottom": 352
+        },
+        "icon": {
+          "x": 452,
+          "y": 16,
+          "width": 32,
+          "height": 32,
+          "right": 484,
+          "bottom": 48
+        },
+        "browse": {
+          "x": 497,
+          "y": 20,
+          "width": 24,
+          "height": 24,
+          "right": 521,
+          "bottom": 44
+        },
+        "font": "16px",
+        "overflow": false
+      }
+    }
+  ],
+  "browserErrors": []
+}

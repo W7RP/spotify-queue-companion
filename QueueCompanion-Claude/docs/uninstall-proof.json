@@ -1,0 +1,18 @@
+{
+  "tool": {
+    "exitCode": 0,
+    "error": null,
+    "step": "Queue Companion was removed.",
+    "at": "2026-10-10T16:22:20.5191188-04:00"
+  },
+  "installDirectoryRemoved": true,
+  "productDataRemoved": true,
+  "ownedSpicetifyRemoved": true,
+  "startupRemoved": true,
+  "uninstallEntryRemoved": true,
+  "uriHandlerRemoved": true,
+  "startMenuRemoved": true,
+  "stockSpotifyPresent": true,
+  "remoteRevocationTested": false,
+  "testNote": "Own DPAPI-protected connection held aside during lifecycle test; no claim of live remote revocation or a second Windows account."
+}

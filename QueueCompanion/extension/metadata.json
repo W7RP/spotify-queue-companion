@@ -1,0 +1,1 @@
+{"name":"Queue Companion","kind":"extension","version":"0.1.0","authors":["Queue Companion contributors"],"description":"A compact natural-language bar for Spotify's native queue.","entries":{"js":"index.js"},"hasMixins":false,"dependencies":{}}

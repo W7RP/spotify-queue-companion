@@ -1,0 +1,32 @@
+{
+  "result": {
+    "count": 3,
+    "insertionMs": 227,
+    "generationMs": 2768,
+    "totalMs": 3361,
+    "coverage": "",
+    "mode": "append"
+  },
+  "feedback": "Added 3 songs",
+  "inserted": [
+    {
+      "uri": "spotify:track:5vPGkNZynqNRfLtgYDw8fG",
+      "uid": "q12",
+      "title": "Over And Over"
+    },
+    {
+      "uri": "spotify:track:0Ip46hm5I2g29iHzbyEMHv",
+      "uid": "q13",
+      "title": "Rise & Fall"
+    },
+    {
+      "uri": "spotify:track:2Ek217wt5hZG1Qg8epHtCw",
+      "uid": "q14",
+      "title": "Relapse"
+    }
+  ],
+  "likedRestrictionInherited": true,
+  "noRepeatOfPrevious": true,
+  "modeAppended": true,
+  "currentUnchanged": true
+}

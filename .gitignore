@@ -1,0 +1,16 @@
+**/extension/node_modules/
+**/bin/
+**/obj/
+**/release/
+**/installer/payload.zip
+*.user
+*.log
+*.dat
+.env
+.env.*
+pairing.json
+pending-registration.dat
+host.json
+daemon-token
+queue-companion-pairing.js
+spotify-installation.json

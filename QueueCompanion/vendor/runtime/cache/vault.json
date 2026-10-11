@@ -1,0 +1,4820 @@
+{
+	"modules": {
+		"adblock": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.0/adblock@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ae2ffddb0d8345958f4c3a7f89d026aa3112fa6907ad1d8d33c89adc8ced07de",
+					"updatedAt": "2026-08-06"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.1/adblock@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3907f076dfcbb0309ae3e2cdbb100d017ac6c392e342e0bf948b2f13bfdd33e0",
+					"updatedAt": "2026-08-06"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.2/adblock@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:580a0abebbb88515b4eb86b4de3659cf6e37e45c76bcc02b81bfb9540d061c06",
+					"updatedAt": "2026-08-06"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.3/adblock@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:eda5f7a68f5007f6c6035dff5f83b2629dda6fee6069d535fae66ac7693cff14",
+					"updatedAt": "2026-08-06"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.4/adblock@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:922609ec10ca12173cb1f235978718c97b896782dcf65200b2ba45120aaa4e97",
+					"updatedAt": "2026-08-07"
+				},
+				"0.1.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.5/adblock@0.1.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:d3b7f69853bb9d00a811e542d43eb1091ca1d5979f8c1caf076ae2311b69b38d",
+					"updatedAt": "2026-08-12"
+				},
+				"0.1.6": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.6/adblock@0.1.6.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8885b014b5ed8d0746691755d7486b4fd210c40516949928f217030ed59b03c1",
+					"updatedAt": "2026-08-13"
+				},
+				"0.1.7": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.7/adblock@0.1.7.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c31909eebcf716d65fd52ec59a4acb88acfbd4891ced30e315aa88ce99fd6341",
+					"updatedAt": "2026-08-13"
+				},
+				"0.1.8": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.8/adblock@0.1.8.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:25a00988f094c0bc0d9dc75b1d4df6c9331ee87a996daa12e8ffd49569235a44",
+					"updatedAt": "2026-08-20"
+				},
+				"0.1.9": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.9/adblock@0.1.9.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:b5a63724dfe2cbe202c8b4132810acbce2c220cd64844a991c573f2b16354e74",
+					"updatedAt": "2026-08-20"
+				},
+				"0.1.10": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/adblock@0.1.10/adblock@0.1.10.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:024e0fd4b04bee3b891c4fdd61317fe1c4235c2e462256ee9f997a6175bb7109",
+					"updatedAt": "2026-09-14"
+				}
+			},
+			"metadata": {
+				"name": "adblock",
+				"description": "Blocks audio ads and hides ad and upsell surfaces. Toggle in Settings.",
+				"authors": [
+					{
+						"name": "spicetify"
+					},
+					{
+						"name": "rxri"
+					},
+					{
+						"name": "veryboringhwl"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/adblock.svg",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"auto-skip-explicit": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-explicit@0.1.0/auto-skip-explicit@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e40154bd5ce2bc867a5925c9dd7ce5b4ac905c80ff6ecd6ae5852409ebc2fff3",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-explicit@0.1.1/auto-skip-explicit@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e3d84c98c2f99db57f2eb694a50f606941215fca25e78be51f7d542b2bd8244b",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-explicit@0.1.2/auto-skip-explicit@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:f2aa5aa58248ff474936122871ef1d6defa6a0fc200a3cad06f6fa5608782d4f",
+					"updatedAt": "2026-08-06"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-explicit@0.1.3/auto-skip-explicit@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8e078bdfdbdcae0285720775c8d302021f3d99351b9f0262e74eadb67248027b",
+					"updatedAt": "2026-08-12"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-explicit@0.1.4/auto-skip-explicit@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:de3c89d3fb220823251c3bf4e0bb510400168e0f4a9de55e6edd5e7a722e8abf",
+					"updatedAt": "2026-09-14"
+				},
+				"0.1.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-explicit@0.1.5/auto-skip-explicit@0.1.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:4d77b41738ea456bf83763ae9ac2cac90b9c03c50ccaaa55c2bad35c4a8d2f03",
+					"updatedAt": "2026-09-16"
+				}
+			},
+			"metadata": {
+				"name": "auto-skip-explicit",
+				"description": "Auto-skip explicit tracks. Toggle in Settings.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/auto-skip-explicit.svg",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"auto-skip-video": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-video@0.1.0/auto-skip-video@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8c6fdfc84145dfdb424d6b069482e7676cda04cadd7b68f76ed5ae8ff02d8bc9",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-video@0.1.1/auto-skip-video@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:6d6808281b437b649c5988b9c33ccf20ba36260c9c7615e10f895eb28cd6fa7b",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-video@0.1.2/auto-skip-video@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2a3c9cfaa656d2d0be5e5c84879a0c09d78dd4f31d1b82519fdbb6e0c949e645",
+					"updatedAt": "2026-08-06"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-video@0.1.3/auto-skip-video@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:dec0575d5ab3a27f754847c335a5893fc0fa4fd5ffa463505ad81a43c6f4f198",
+					"updatedAt": "2026-08-12"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/auto-skip-video@0.1.4/auto-skip-video@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:545183b06d2a37ccce8d6f873df6a9bd66e7675624b5f14e4d11fa23c3e0222a",
+					"updatedAt": "2026-09-14"
+				}
+			},
+			"metadata": {
+				"name": "auto-skip-video",
+				"description": "Auto-skip music videos. Toggle in Settings.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/auto-skip-video.svg",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"blossom": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/blossom@0.1.0/blossom@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:0764457d466430b2e6aef8a04adcf0cd9e5634a4205bc578488490afe2810dae",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/blossom@0.1.1/blossom@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:6fa42ed73fdd22a10fb48bfd41ae66ae5bf5edeb97f12bf37c0029c8732904c3",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/blossom@0.1.2/blossom@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:aace5dfe00e1ec7e32996e7f799d8491597372503ec6d2eb34863feadffa10c2",
+					"updatedAt": "2026-08-09"
+				}
+			},
+			"metadata": {
+				"name": "blossom",
+				"description": "A little pink-accented theme for your Spotify client",
+				"authors": [
+					{
+						"name": "Robatortas"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/blossom.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"bookmark": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.1.0/bookmark@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:a864f9aecff11cdfd2f1aff672e70996716b11fcbea6a52b0667decee1a27fed",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.1.1/bookmark@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:d22ec0b74028549ace3fe6e160f7b53dba00d387013ab453b249091a5b482583",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.1.2/bookmark@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:f743831cb8dbe79b9862330213d5c120a91b5258baf5694edbc0bd924f5ce279",
+					"updatedAt": "2026-08-03"
+				},
+				"0.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.2.0/bookmark@0.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:b4b52c46187b3352f6afc38f0f3161287232c9b92bf68e78e9b0ce0df5510025",
+					"updatedAt": "2026-08-04"
+				},
+				"0.3.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.3.0/bookmark@0.3.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3e3f3a66b2eb5f90d5c4a03ce102a3b3991c49239c91d4b2735da460b2d0a9c2",
+					"updatedAt": "2026-08-04"
+				},
+				"0.3.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.3.1/bookmark@0.3.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c0b0970d01edd4d2840776c1367034e13db1feabf53cdde040d74ea49e74788e",
+					"updatedAt": "2026-08-04"
+				},
+				"0.3.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.3.2/bookmark@0.3.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:f5c712e6181b38ce2f0b1dccf5d9164e83efb6e221be34b5cedb449183801ace",
+					"updatedAt": "2026-08-06"
+				},
+				"0.3.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.3.3/bookmark@0.3.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:6dd0001c64e16e4b8742a9d5ac0dc7aac6edacca0a3f112d804cfd0397e17d96",
+					"updatedAt": "2026-08-12"
+				},
+				"0.4.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.4.0/bookmark@0.4.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:5974dec251ba9dad1eff24a53232340f681dac2bd9dd2bfefa91736d36e6673d",
+					"updatedAt": "2026-08-14"
+				},
+				"0.4.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.4.1/bookmark@0.4.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:523da23ffa0f0f15d33b1f0b07e574ba972fbb1288ba21067b6919e37e91d59e",
+					"updatedAt": "2026-08-17"
+				},
+				"0.4.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.4.2/bookmark@0.4.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:cabfa2bad66d1ad14c7e537dfd2ea75b7d24fff5ab9dd1043daa32236e442151",
+					"updatedAt": "2026-09-14"
+				},
+				"0.4.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/bookmark@0.4.3/bookmark@0.4.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8d97efc2e4421716d7d08b245c242e21f7535b6ff6bfdae1f054fe89d25a6c3f",
+					"updatedAt": "2026-09-16"
+				}
+			},
+			"metadata": {
+				"name": "bookmark",
+				"description": "Bookmark pages, tracks, and playback timestamps to revisit from a persistent sidebar panel.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/bookmark.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"burnt-sienna": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/burnt-sienna@0.1.0/burnt-sienna@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:b9c26d6b4251c06c9f16d30020e974d5a8d61f515e5a49f71885908049913b7f",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/burnt-sienna@0.1.1/burnt-sienna@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:fb04aba3f1b2926b2a7ef8476669b2ca5e09d2d66fa1da0f23e404f61077783e",
+					"updatedAt": "2026-08-04"
+				}
+			},
+			"metadata": {
+				"name": "burnt-sienna",
+				"description": "BurntSienna theme, migrated from the classic format",
+				"authors": [
+					{
+						"name": "Paweł Jaśpiński"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/burnt-sienna.png"
+			}
+		},
+		"dreary": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/dreary@0.1.0/dreary@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:9727e8d1803f142aa830e0a407ba4b6a2d723e29bb12f12a187b2a32b34fd0a3",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/dreary@0.1.1/dreary@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e05fda624b5b4c630db21b78c2b3bb930591722c54abb242b5f98865dc90c979",
+					"updatedAt": "2026-08-13"
+				}
+			},
+			"metadata": {
+				"name": "dreary",
+				"description": "Muted, moody palettes with six schemes",
+				"authors": [
+					{
+						"name": "SaltNuggets"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/dreary.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"dribbblish": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/dribbblish@0.1.0/dribbblish@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:d88b220007fbc04d1457f7ea8daeb076e675b1acdb63b310721b1ee4c97e3be9",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/dribbblish@0.1.1/dribbblish@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:6dc1ab75cb2f0cf8a3cebad55f1bcfd9b9859b769d0da72579357e7cb690c307",
+					"updatedAt": "2026-08-13"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/dribbblish@0.1.2/dribbblish@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:109bbf0a960483dea3a06ca49606fa62fe9591cd9891950397427b15444ea6a6",
+					"updatedAt": "2026-08-14"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/dribbblish@0.1.3/dribbblish@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:76b4f5668534959077665b4c29cd81e867ad6441eaf36255cb46aad01efd5d97",
+					"updatedAt": "2026-09-14"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/dribbblish@0.1.4/dribbblish@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3f4b05310071e88672d53e2774a55a11f0a8f6be468884a9d79adbddebe764ce",
+					"updatedAt": "2026-10-02"
+				}
+			},
+			"metadata": {
+				"name": "dribbblish",
+				"description": "Compact card-based redesign with rounded art and nineteen schemes",
+				"authors": [
+					{
+						"name": "khanhas"
+					},
+					{
+						"name": "harbassan"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/dribbblish.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"flow": {
+			"v": {
+				"0.1.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/flow@0.1.0/flow@0.1.0.zip"],
+					"providers": [],
+					"checksum": "sha256:967a62e7e3fc74b9db7620ccb5bba99c920ea1f1cf7a184aec9b47338dd19bf8",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/flow@0.1.1/flow@0.1.1.zip"],
+					"providers": [],
+					"checksum": "sha256:22b7c9123ea7f21dd34f32acab65501df24978886b0300faeb79840c4ab17734",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/flow@0.1.2/flow@0.1.2.zip"],
+					"providers": [],
+					"checksum": "sha256:931ca5c9769703bd3938a2f589c8f097b58e522dd01ec3f50f2d22d4133d55bd",
+					"updatedAt": "2026-08-06"
+				}
+			},
+			"metadata": {
+				"name": "flow",
+				"description": "Smooth rounded look with five pastel schemes",
+				"authors": [
+					{
+						"name": "Victoria"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/flow.png"
+			}
+		},
+		"full-app-display": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.1.0/full-app-display@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:11ab2b85e7c8c8e6f216eff9cdb6e981dcaaab15cbaa098652d6ba26e1c8d0e0",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.1.1/full-app-display@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:20be1669fc36c6c995c376607bb3d2056efbe912930df323de5952b9bf59a5d3",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.1.2/full-app-display@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:5778ed5e4eb0702228352b13c39453312ee5ebd7627b025fb746dbbd406dbb00",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.1.3/full-app-display@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c16380aa6397d9c9d6c988377544413a89cc02769488e6ff7fb6c015fde4744f",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.1.4/full-app-display@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:741032712d1958abe7babb9323e570768b21812221d60e3f84fe7388686995ff",
+					"updatedAt": "2026-08-12"
+				},
+				"0.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.2.0/full-app-display@0.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:5f03ce4210d587d3eb888a72c39952c4da8ef3051ef9c5a7f1c7b1ae86dd8402",
+					"updatedAt": "2026-08-13"
+				},
+				"0.2.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.2.1/full-app-display@0.2.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7dd2246beae6220c677e7b005a2c57fd1acae3e8fdec6cb3275c5aca1739fd15",
+					"updatedAt": "2026-08-17"
+				},
+				"0.2.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.2.2/full-app-display@0.2.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7503140d655331d1320291cd9877a8da5ad6b1c7117ceadea515e7a21a578b61",
+					"updatedAt": "2026-09-14"
+				},
+				"0.2.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/full-app-display@0.2.3/full-app-display@0.2.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:22e048a276ffe5f21830ad5f5035ea7cdfabf6082e9783d38cf16eef58a24f37",
+					"updatedAt": "2026-09-16"
+				}
+			},
+			"metadata": {
+				"name": "full-app-display",
+				"description": "Fullscreen now-playing overlay with big artwork, track info, progress and controls.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/full-app-display.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"hide-window-controls": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.0/hide-window-controls@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:939c1f552713e5d565f15e724ab6fb30d61069b1ae8daad92ea1091ae33e8e58",
+					"updatedAt": "2026-08-06"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.1/hide-window-controls@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:59be653b8fdf6b5baa45bd3faef8d11f6f4533f8ae307307faac0792e5b267ee",
+					"updatedAt": "2026-08-10"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.3/hide-window-controls@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:449cc5d65f09efb02b03548e9dba853964f6a4e1cc59affb1460f9e079eebc1d",
+					"updatedAt": "2026-08-12"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.4/hide-window-controls@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:615d26f6b08d8f4071bbf21d117e143fbe18bbff1db80c3744cb614c6d903635",
+					"updatedAt": "2026-08-13"
+				},
+				"0.1.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.5/hide-window-controls@0.1.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:4724e1a967f503dcf9975c44868ae82e3c4d8c140d26ac478bdca894e4f24801",
+					"updatedAt": "2026-08-17"
+				},
+				"0.1.6": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.6/hide-window-controls@0.1.6.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8eef0e0d661b6d6ef40ea8b12577f1bb8a9d57a77275670e023ed8536bdf9aa0",
+					"updatedAt": "2026-09-05"
+				},
+				"0.1.7": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.7/hide-window-controls@0.1.7.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7be843de361b84791acb12f84f6ffa9bb64bf63044c855348c9306a3500a13a6",
+					"updatedAt": "2026-09-05"
+				},
+				"0.1.8": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.8/hide-window-controls@0.1.8.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e1255684f748d7c2967c6b766580976d32d80bceafcdf2e5edb01d4396aec4b1",
+					"updatedAt": "2026-09-14"
+				},
+				"0.1.9": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/hide-window-controls@0.1.9/hide-window-controls@0.1.9.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:55cb207b614d8ae5b5bf212521759ada1ec675aa1c026bcf37db25bc4b803787",
+					"updatedAt": "2026-09-29"
+				}
+			},
+			"metadata": {
+				"name": "hide-window-controls",
+				"description": "Hide Windows window buttons and macOS traffic lights, including their reserved space. Toggle in Settings.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/hide-window-controls.svg",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"keyboard-shortcut": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/keyboard-shortcut@0.1.0/keyboard-shortcut@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:851a62180a18cea06142efa1a0189dab415214866683f7dcf2d2acf7492ca902",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/keyboard-shortcut@0.1.1/keyboard-shortcut@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2b467341221a9d13d541c87c873a90d30dc9650cfce87ed024ce5306cd1a8298",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/keyboard-shortcut@0.1.2/keyboard-shortcut@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:d44fdffef177d681b0d482fc204c1658aa29852fcaeaeb3a8323098b48b65e3a",
+					"updatedAt": "2026-08-12"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/keyboard-shortcut@0.1.3/keyboard-shortcut@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ff20de268b907f8881133925a27f3579ab49d327214fa27416b7f73bcc02d5fb",
+					"updatedAt": "2026-09-14"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/keyboard-shortcut@0.1.4/keyboard-shortcut@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2a1f550a492c04da8631df10d0dc03b774be2b3bbdef258d241a8a840eb7181b",
+					"updatedAt": "2026-09-16"
+				}
+			},
+			"metadata": {
+				"name": "keyboard-shortcut",
+				"description": "Vim-like keyboard navigation and shortcuts for the Spotify client.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/keyboard-shortcut.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"loopy-loop": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/loopy-loop@0.1.0/loopy-loop@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:9aa37a31c4332c63968b7d1c99cf2bfaf1fcca9b58565633da92e268f8526528",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/loopy-loop@0.1.1/loopy-loop@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:52bf14060953444c32e5fe7f321db0990e00452645cee37a207b97689956cefe",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/loopy-loop@0.1.2/loopy-loop@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:b612ce76cd485c1c2a72594968d71bb2670b69e15389b30e0a609782ccdd9ff1",
+					"updatedAt": "2026-08-12"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/loopy-loop@0.1.3/loopy-loop@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:52bb392e7d9bd47fe58ae875f177661059596098ade3f8596d099971627b9e21",
+					"updatedAt": "2026-08-13"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/loopy-loop@0.1.4/loopy-loop@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:1456ae49ef5b40c36cf19258c65e4b9685555926ac0a97c0e574c8341d98cc26",
+					"updatedAt": "2026-09-14"
+				}
+			},
+			"metadata": {
+				"name": "loopy-loop",
+				"description": "A-B repeat and section-skip markers on the playback bar; loops and skips persist per song.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/loopy-loop.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"lyrics-plus": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.0/lyrics-plus@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:621364c56494beaaf328a4eba52c7da3799c6688e98a1ab80add59a513466f7e",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.1/lyrics-plus@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:25496881d8aff8b914fc0e457d3a4201ed793588a8ba5a35eb23686e2f1eb52e",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.2/lyrics-plus@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:baee2d6fb3a7989d073a4ddbe89a3997a5937007046b6e205c4f0e5d5aa87d3d",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.3/lyrics-plus@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:5f16a4baeeebd591e56c13555ec752ee2b55e18ded18444d4b063c7d226f4215",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.4/lyrics-plus@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:cd101c7b80a80235935539c1a7f40ca9e3d59a3fc895a1a97c6d1873d3e78ca9",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.5/lyrics-plus@0.1.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8a1edc882b65d3486933e84bfee04863108ded51a7c207f1bde71b957d658050",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.6": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.6/lyrics-plus@0.1.6.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:02ea79db5333f0ffeca5d1685e83e2c833727a227f8b24183e5226ccdcfef65c",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.7": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.7/lyrics-plus@0.1.7.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ad0c9c175a0ca4a84bf94ed34f1ea4f65f5856521429c0a5c078e0cba7a7ca6e",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.8": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.1.8/lyrics-plus@0.1.8.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:43f891a49ea52fa81e9e7765a25378c08ef488877803f38a294d6af40b8ea95c",
+					"updatedAt": "2026-08-13"
+				},
+				"0.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.2.0/lyrics-plus@0.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:32b0d503cc42a8b46fb7b04a6ee5b6d898a122ea1e48968268d6425a1d0b2bad",
+					"updatedAt": "2026-08-13"
+				},
+				"0.2.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.2.3/lyrics-plus@0.2.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:750851ff20673eaeb171b9f026e9c2ea11eb0ba9b2606941fcdb0f315155784c",
+					"updatedAt": "2026-08-17"
+				},
+				"0.2.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.2.4/lyrics-plus@0.2.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:0c908ab2b1b85ada09eb536874e294c4f3df987e5569bfca6feaf433e22c2fb6",
+					"updatedAt": "2026-08-24"
+				},
+				"0.2.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.2.5/lyrics-plus@0.2.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:5a26b235c8fb46dcd5a16c0a35ab805d8476728f7d6bde332d5b69322c319c99",
+					"updatedAt": "2026-09-14"
+				},
+				"0.2.6": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.2.6/lyrics-plus@0.2.6.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c22c27896932e0cbb36d03546bb0de4908ff6df2a30464d0dea775967bf87942",
+					"updatedAt": "2026-09-16"
+				},
+				"0.3.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.3.0/lyrics-plus@0.3.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:17a7fecb7e7d0add47ac507fc1d763e4e3fe6b21c88e81dac26b8e5f20501243",
+					"updatedAt": "2026-09-18"
+				},
+				"0.4.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/lyrics-plus@0.4.0/lyrics-plus@0.4.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7c853383c8a5716a95f5df5ce8c90fc2fa8a1c3672d427b78095e679d57000a2",
+					"updatedAt": "2026-10-09"
+				}
+			},
+			"metadata": {
+				"name": "lyrics-plus",
+				"description": "Full-featured lyrics: synced, karaoke, unsynced and translated, from Musixmatch, Spotify, LRCLIB and Netease.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "app",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/lyrics-plus.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"manager": {
+			"v": {
+				"1.0.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.0.0/manager@1.0.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2fc6ed8180a4911be8f9ca6e66631461546f8708f25a7fb7fc83584ef2aa897c",
+					"updatedAt": "2026-08-03",
+					"hidden": true
+				},
+				"1.0.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.0.1/manager@1.0.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:f97476dd13429138240af35e99fa9a5bf69aa1024647cf1ec552e24f67238cee",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.0.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.0.2/manager@1.0.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:76755580089e5400c8d0a9fface4aa6510eeeb5050ce03f585cf20c4efca7af7",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.0.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.0.3/manager@1.0.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:075bfe70c0c67bc642d0178f329056ddab8ece02730a9a8867ffbb9168a4296f",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.1.0/manager@1.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c58b149ccad2eae88f51e6f8dd5c2292726a63a051aa038610e18e7d05002dd4",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.1.1/manager@1.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ac858a0bb2e97396c523a3a2574113496a7d13af92e9a9d0c9c89343de5f6ec7",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.1.2/manager@1.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:283bb97124eab7f876a202bfdfbd38f9aca7a46a5aec1af6b9d1fa1274b9fe01",
+					"updatedAt": "2026-08-10",
+					"hidden": true
+				},
+				"1.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.1.3/manager@1.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:a95b98ce74f8ff2c5d88939acb6e4c8e929e48b08b707a1073eb05e8bf79723f",
+					"updatedAt": "2026-08-13",
+					"hidden": true
+				},
+				"1.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.2.0/manager@1.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:dcac928b0d3e77d65b6e5a6f9dd15891bb1e48b5bf33f83b2189d29571683d45",
+					"updatedAt": "2026-08-13",
+					"hidden": true
+				},
+				"1.2.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.2.1/manager@1.2.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:18bd3160e40bec3fd84b73ea586a32936612dd81601f4f19fdd109a8e575b801",
+					"updatedAt": "2026-08-14",
+					"hidden": true
+				},
+				"1.2.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.2.2/manager@1.2.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:403f4c4d38573ad50f689f6cdb783aede8fedc7cd6971609bc6c8713ddcc2b98",
+					"updatedAt": "2026-08-17",
+					"hidden": true
+				},
+				"1.3.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.3.0/manager@1.3.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:9654a3564f57b0ac9a28975efce1e2788fc6a54b7e3582365832b9742e8aac95",
+					"updatedAt": "2026-09-14",
+					"hidden": true
+				},
+				"1.3.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.3.1/manager@1.3.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:0ca1b47ba256634a71577127b22cf5610f1f40915cd18bbcf9a7e63088cb741f",
+					"updatedAt": "2026-09-15",
+					"hidden": true
+				},
+				"1.3.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.3.2/manager@1.3.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7b344a07556bac0d1592d913d50f595cdb4140c9588c5f9a69c467db010a9cb2",
+					"updatedAt": "2026-09-15",
+					"hidden": true
+				},
+				"1.3.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.3.3/manager@1.3.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:49901af0c4757dd6c21684705ee4959ef6ee7ba89a3f248528546390572393b4",
+					"updatedAt": "2026-09-16",
+					"hidden": true
+				},
+				"1.4.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.4.0/manager@1.4.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:dea86745e5f58c6e9479e4fd184a73aa716a18bd32bcef045a3eacbb74a0e8ac",
+					"updatedAt": "2026-09-17",
+					"hidden": true
+				},
+				"1.5.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.5.0/manager@1.5.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:cd368686ab133f31d8d9c0f32b96d607c9de4ff618c773eeabf92301a986c1c4",
+					"updatedAt": "2026-09-30",
+					"hidden": true
+				},
+				"1.5.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/manager@1.5.1/manager@1.5.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:09fa2ce7d9ad166f2b56e8990285779b97d2a44b073a5422a47fa9cd23375816",
+					"updatedAt": "2026-10-01",
+					"hidden": true
+				}
+			},
+			"metadata": {
+				"name": "manager",
+				"description": "Manage spicetify from inside Spotify",
+				"authors": [
+					{
+						"name": "spicetify"
+					},
+					{
+						"name": "Afonso Jorge Ramos"
+					}
+				],
+				"kind": "app",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"matte": {
+			"v": {
+				"0.1.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/matte@0.1.0/matte@0.1.0.zip"],
+					"providers": [],
+					"checksum": "sha256:212d1ded72db0728f63215e822e8d2e44d73bd2cb933e1b1cf45037b55030223",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/matte@0.1.1/matte@0.1.1.zip"],
+					"providers": [],
+					"checksum": "sha256:3cb800bf2a09719c65719aca2ee6dc46faf80f24960fe58368c8179795446602",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/matte@0.1.2/matte@0.1.2.zip"],
+					"providers": [],
+					"checksum": "sha256:8fa492bdfcd036bfa506b91628c005da321bd1089f95adb33a783a54f6f8610b",
+					"updatedAt": "2026-08-10"
+				}
+			},
+			"metadata": {
+				"name": "matte",
+				"description": "Distinct top bar, quick-to-edit variables, and ten color schemes",
+				"authors": [
+					{
+						"name": "darkthemer"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/matte.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"new-releases": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/new-releases@0.1.0/new-releases@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2d178c50cb3ea490f3231b5eb1cbe88d589a174e0aa8844353b142bf8439bf55",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/new-releases@0.1.1/new-releases@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:45d5e8e2fbf1d1422bee389d36d68c7668c6bda49184ca3372d6550e4fd31571",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/new-releases@0.1.2/new-releases@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3b410098defc7adf56cdf946b9d71e3edcf10efe37e5a3e4eeb1f82b1beeef9a",
+					"updatedAt": "2026-08-06"
+				},
+				"0.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/new-releases@0.2.0/new-releases@0.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:206b12ee3c202997ce5a23f81cef0c5a8653f2ea50730de85cf6698ae79a76ca",
+					"updatedAt": "2026-08-13"
+				},
+				"0.2.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/new-releases@0.2.1/new-releases@0.2.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c5a88ad9ec1ffa3ccb748fad2c0f37f5839b3240904872e9db6710fa6c587bc4",
+					"updatedAt": "2026-08-17"
+				},
+				"0.2.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/new-releases@0.2.2/new-releases@0.2.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2e48959a185f767fb46a2637d6761fad3f8a7d01247637851e75885ae4daacf1",
+					"updatedAt": "2026-09-14"
+				}
+			},
+			"metadata": {
+				"name": "new-releases",
+				"description": "New album releases, with a graceful fallback to what you have recently added.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "app",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/new-releases.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"nightlight": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/nightlight@0.1.0/nightlight@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8e725905ec0126db63949aa3363f2de12d538db89f586d1349106b7c6ad65572",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/nightlight@0.1.1/nightlight@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:52a0d30db99698b9d03f3471311fa6d42ac8083409312210b6073686b83e3a87",
+					"updatedAt": "2026-08-04"
+				}
+			},
+			"metadata": {
+				"name": "nightlight",
+				"description": "Nightlight theme, migrated from the classic format",
+				"authors": [
+					{
+						"name": "iTenerai"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/nightlight.png"
+			}
+		},
+		"onepunch": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/onepunch@0.1.0/onepunch@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:1dc33e064f4ecad44cfbeec6045ef1e61076c74d2e61e5a422806993290a7b06",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/onepunch@0.1.1/onepunch@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:36761b96ba933dd3bb761afa7d4bbd0b1dfb522615d809179580d05d747fe994",
+					"updatedAt": "2026-08-09"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/onepunch@0.1.2/onepunch@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:a7e8bde3d4fb69df2c0dedd46f9f8eb0452cfd9fdf00d3da129cb68c9dab4255",
+					"updatedAt": "2026-08-18"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/onepunch@0.1.3/onepunch@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:0738e0e1ca8d4040979cace8ce4ee35b7ed37e912d239111a76bb8215d0482a7",
+					"updatedAt": "2026-08-19"
+				}
+			},
+			"metadata": {
+				"name": "onepunch",
+				"description": "A simple gruvbox-flavored theme, dark and light",
+				"authors": [
+					{
+						"name": "okarin001"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/onepunch.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"palette-manager": {
+			"metadata": {
+				"name": "palette-manager",
+				"description": "Manager for theme color schemes",
+				"authors": [
+					{
+						"name": "spicetify"
+					},
+					{
+						"name": "harbassan"
+					},
+					{
+						"name": "Delusoire"
+					},
+					{
+						"name": "Afonso Jorge Ramos"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/palette-manager.png",
+				"license": "GPL-3.0-or-later"
+			},
+			"v": {
+				"0.3.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.0/palette-manager@0.3.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:5479257f25751cf1e1b0518da18c6875bdc12c1191c319d3c246c8885792e21e",
+					"updatedAt": "2026-08-03"
+				},
+				"0.3.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.1/palette-manager@0.3.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:5267969b5f9d64c01842493e71e17fee20f8005443407a85d0644b60f2981c7c",
+					"updatedAt": "2026-08-03"
+				},
+				"0.3.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.2/palette-manager@0.3.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3eca8ac979314a122f4f5baeee7d8eede700623de8b988fedef6fe7b2558a75b",
+					"updatedAt": "2026-08-03"
+				},
+				"0.3.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.3/palette-manager@0.3.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ab693900f9fb641dbf0d5b6b5398e74f0e1086d8cbd4984716c23d63a947f93b",
+					"updatedAt": "2026-08-04"
+				},
+				"0.3.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.4/palette-manager@0.3.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:f7280c27440241e641b5cbd8e7bcc22647ac50c1d8f284f71ce99a03e039750a",
+					"updatedAt": "2026-08-06"
+				},
+				"0.3.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.5/palette-manager@0.3.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:fb573d6b22e0c37a7f78efdd9d8ad6716f4a1bb4035b6ee448bc27a5e8fe3c1d",
+					"updatedAt": "2026-08-10"
+				},
+				"0.3.6": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.6/palette-manager@0.3.6.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:86c57e2fe3feeb307a7feb3fc9709b14fb1f53313920b2f39a4ba4291cc4f828",
+					"updatedAt": "2026-08-12"
+				},
+				"0.3.8": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.8/palette-manager@0.3.8.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:0066722dee958b4727d519a58e99d30970b6b4c0ead86669a338bb321c51d577",
+					"updatedAt": "2026-08-17"
+				},
+				"0.3.9": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.9/palette-manager@0.3.9.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3ef3db928196b5ca53992907f0137dd8df374015bed9b81e546390bc1d30a70f",
+					"updatedAt": "2026-09-14"
+				},
+				"0.3.10": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/palette-manager@0.3.10/palette-manager@0.3.10.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:338bd3c16b6f7eb84cb433326b0e2de1a211e76174b110b23c20675a832d768c",
+					"updatedAt": "2026-09-16"
+				}
+			}
+		},
+		"popup-lyrics": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.1.0/popup-lyrics@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:9365f30ff6ba48f28447a68092f9bb99c03b66fd032a4fdb29f1b0ec99b803e4",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.1.1/popup-lyrics@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3334537b2386555d126d7b05a9408df5c0affab30e9b0ce5edc32f76849ff8f0",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.1.2/popup-lyrics@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:f5cb5ed3a41137c44c70bc46553292af2fe7a1274a4312f03d60643aafea293d",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.1.3/popup-lyrics@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e0798bcd9a036f9d44ecbc3954a82899151c6160e0ca2607fb6ca9072fd30120",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.1.4/popup-lyrics@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7a1f2411598169a495b26b338e90298720736a2648165c18d1145017df3bbb1f",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.1.5/popup-lyrics@0.1.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8472a53effd7863c47b52d1688c743293bbe75b0692d74d6ffbce8c8b99f5456",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.6": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.1.6/popup-lyrics@0.1.6.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:4845cbcf469815e2ffc8bdbb36f785038110287ad7e5dbaa1968f2bdac3d4b0e",
+					"updatedAt": "2026-08-12"
+				},
+				"0.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.2.0/popup-lyrics@0.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c707306b5240cdbd87d41475785ab4b4dd59f74eb73950df1ecf42cecc0b178e",
+					"updatedAt": "2026-08-13"
+				},
+				"0.2.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.2.2/popup-lyrics@0.2.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:71d2f379d1c9adf7c7a556723804bbb4a59ce97f8807e697296e422f302352a4",
+					"updatedAt": "2026-08-17"
+				},
+				"0.2.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.2.3/popup-lyrics@0.2.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ec3ecca0ef7239f3e6788928d629719112249e04ea5b244ab328a8601628a76c",
+					"updatedAt": "2026-09-14"
+				},
+				"0.2.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/popup-lyrics@0.2.4/popup-lyrics@0.2.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:bf39a5520305a1a0e2fb92ae6f7dcf8e0bbe67b5764e8c832e1fc80c28579403",
+					"updatedAt": "2026-09-16"
+				}
+			},
+			"metadata": {
+				"name": "popup-lyrics",
+				"description": "Pop synced lyrics up in a picture-in-picture window, sourced from Spotify, Musixmatch, Netease or LRCLIB.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/popup-lyrics.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"reddit": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/reddit@0.1.0/reddit@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ab0cf715006dcab6deb55879d0e15328aeb2479843226efd4432a4c6ebd032e5",
+					"updatedAt": "2026-08-19"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/reddit@0.1.1/reddit@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:72134a91000c7f3298fae84bf0d5734ce17636950eb18b977f0a337a248e42e8",
+					"updatedAt": "2026-09-14"
+				}
+			},
+			"metadata": {
+				"name": "reddit",
+				"description": "Discover Spotify playlists, albums, and songs shared by Reddit music communities.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "app",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/reddit.svg",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"section-marker-rev": {
+			"v": {
+				"2.0.0": {
+					"artifacts": [
+						"https://github.com/Golevka2001/section-marker-rev/releases/download/section-marker-rev@2.0.0/section-marker-rev@2.0.0.zip",
+						"https://github.com/spicetify/modules/releases/download/mirror/section-marker-rev/section-marker-rev@2.0.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:742fd9b8ff6778db3da237055a7e0f381c13f8405c972b13723346a880126c4d",
+					"updatedAt": "2026-10-07"
+				}
+			},
+			"metadata": {
+				"name": "section-marker-rev",
+				"description": "See a song's highlighted sections straight from your playbar.",
+				"authors": [
+					{
+						"name": "Aimarekin"
+					},
+					{
+						"name": "Golevka2001"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/Golevka2001/section-marker-rev/main/README.assets/showcase.gif",
+				"repository": "https://github.com/Golevka2001/section-marker-rev",
+				"license": "CC-BY-NC-4.0"
+			}
+		},
+		"shark-blue": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shark-blue@0.1.0/shark-blue@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:52ab12294f9baf5ddb773a8363190fa508de5a1c5c5c4285b936dc1fe558fd18",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shark-blue@0.1.1/shark-blue@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2ad504d59c6f31ae6d1ccfa6f4052522188922275a47d6600c1e2422800a2010",
+					"updatedAt": "2026-08-04"
+				}
+			},
+			"metadata": {
+				"name": "shark-blue",
+				"description": "Deep blue accents on a clean dark layout",
+				"authors": [
+					{
+						"name": "MrBiscuit921"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/shark-blue.png"
+			}
+		},
+		"shuffle-plus": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shuffle-plus@0.1.0/shuffle-plus@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:23a2dbf69162488b5251ebdf48207b463ff490ddd7a8fd4f3393c41b58f249c0",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shuffle-plus@0.1.1/shuffle-plus@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:0a957322d8887b90d983a67ad6a87d305e5f80e2f50452134d81371d09c3588f",
+					"updatedAt": "2026-08-04"
+				},
+				"0.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shuffle-plus@0.2.0/shuffle-plus@0.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:a78686848f1cc9689029b30c379b46c8326a43e3c1a61148241d6ba8d042cec3",
+					"updatedAt": "2026-08-06"
+				},
+				"0.2.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shuffle-plus@0.2.2/shuffle-plus@0.2.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e10ca96868ebb024c8c4e631523489d232a72dc121960f632d3e59a15c5f8164",
+					"updatedAt": "2026-08-12"
+				},
+				"0.2.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shuffle-plus@0.2.3/shuffle-plus@0.2.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c6ddab09b122385966f3171964c82a0587840843e2090faa539be4a26aa3a242",
+					"updatedAt": "2026-08-13"
+				},
+				"0.2.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shuffle-plus@0.2.4/shuffle-plus@0.2.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:60ce26792647de9076028f9aea28a9741883c490def8eb1254efe356859abe9b",
+					"updatedAt": "2026-09-14"
+				},
+				"0.2.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/shuffle-plus@0.2.5/shuffle-plus@0.2.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2379a3084bc3b418e09a1f7e45b65d9ac3e3aed5f8e3bdcea5064ac2352efa5d",
+					"updatedAt": "2026-09-16"
+				}
+			},
+			"metadata": {
+				"name": "shuffle-plus",
+				"description": "True Fisher-Yates shuffle of any context or queue, with context-menu entries to play playlists, albums, artists and more shuffled without bias.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/shuffle-plus.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"sleek": {
+			"v": {
+				"0.1.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/sleek@0.1.0/sleek@0.1.0.zip"],
+					"providers": [],
+					"checksum": "sha256:3a679941694be6a837b9bc19bdff33ff830e57012733aab69379aa5a1937bb5d",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/sleek@0.1.1/sleek@0.1.1.zip"],
+					"providers": [],
+					"checksum": "sha256:1884b18531a472f84c819a33f105ca786fb00d6d3fbd2035c42080fef7ebac85",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/sleek@0.1.2/sleek@0.1.2.zip"],
+					"providers": [],
+					"checksum": "sha256:18bf8b626846fc7f12e277df14fc9b15f55ae97339944aae5d3e33a4f78081e7",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.3": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/sleek@0.1.3/sleek@0.1.3.zip"],
+					"providers": [],
+					"checksum": "sha256:2780b3f2cad668c60c2974db3ef5d2202227030926d33244cfc4ebad5748f88e",
+					"updatedAt": "2026-08-19"
+				},
+				"0.1.4": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/sleek@0.1.4/sleek@0.1.4.zip"],
+					"providers": [],
+					"checksum": "sha256:cd5ca2a396646c1f390b49fbd0a8b9f34d156262514c7ecfbdba59c82f66534b",
+					"updatedAt": "2026-09-14"
+				}
+			},
+			"metadata": {
+				"name": "sleek",
+				"description": "Sleek theme, migrated from the classic format",
+				"authors": [
+					{
+						"name": "harbassan"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/sleek.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"snippet-always-show-forward-button": {
+			"metadata": {
+				"name": "Always show forward button",
+				"description": "The navigate forward button hides itself when the window width is smaller. This snipppet makes it so that it is always shown.",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/always-show-forward.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-topBar-historyButtons .main-topBar-forward {\n    display: inline-flex !important;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-amogus-dancing": {
+			"metadata": {
+				"name": "Amogus Dancing",
+				"description": "Adds dancing amogus onto your playback bar!",
+				"authors": [
+					{
+						"name": "samuel2793",
+						"github": "samuel2793"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/amogus-dancing.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar::after { content: ''; width: 32px; height: 32px; bottom: calc(100% - 7px); right: 42px;  position: absolute; image-rendering: pixelated; background-size: 32px 32px; background-image: url('https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHI5czk0Z2hvd2Eyd28xbnoxanFubXNvNnA3eHV0Z3R1Zm1sYjJ3ZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l3pvo4H9dg4BX4gueg/giphy.gif'); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-auto-hide-friends": {
+			"metadata": {
+				"name": "Auto-hide Friends",
+				"description": "Collapse the friends activity sidebar on small screens",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/auto-hide-friends.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".Root__right-sidebar {\n  transition: width 0.3s;\n}\n@media screen and (max-width: 1200px) {\n  .Root__right-sidebar {\n    width: 0;\n  }\n  .Root__right-sidebar .LayoutResizer__resize-bar {\n    display: none;\n  }\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-be-square": {
+			"metadata": {
+				"name": "Be Square",
+				"description": "Removes rounded edges on square images and some Spotify UI. Does not affect images with 50% border-radius such as avatars or play buttons.",
+				"authors": [
+					{
+						"name": "PasttaTypo",
+						"github": "PasttaTypo"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/be-square.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-cardImage-image, .main-cardImage-imageWrapper, #fad-art-image, #fad-art:hover, #fad-art-overlay, #fsd-art-image,.main-entityHeader-image, .main-coverSlotCollapsed-navAltContainer,.main-trackList-rowSectionEnd>:not(:last-child), [dir=ltr] .main-trackList-rowSectionVariable>:not(:last-child,.main-trackList-facepile), [dir=ltr] .main-trackList-rowSectionStart>:not(:last-child),.main-nowPlayingView-coverArt, .x-entityImage-xsmall,.fRZRXRIV2YBCFLYgwDAr,.HD9s7U5E1RLSWKpXmrqx,.main-editImageButton-rounded,.x-entityImage,.osuFIR_6Jo9yKsmLL4y2,.Vn9yz8P5MjIvDT8c0U6w,.k270skPbT7JOaSidSA2a,.aaasJtK_0Z_ggHet0u6v,.kwzBRpFigKr1EP2d5qle,.H3mjE6AEBDPRuHNKUpRK ,.GS_6HA9xIobh5dt5VUSY,.GenericModal,.jW4eWdr_LUeOXwPpKhWG, .kh6wYYPvgRPBhA2wj3AS .qp7Sys7hJSZHLzw4K_yF,.ffFwfKcPDbmAPLXzxzKq,.main-nowPlayingView-section,.main-nowPlayingView-aboutArtistV2Image,.huMHH_FySIW5UhSrJfy8>video,.main-topBar-background,.main-nowPlayingView-aboutArtistButton,.RmbxUFLb4j9KmgftJyk1,.main-trackList-rowImage,.main-editImageButton-image, .lkXpBMSmNP9w702sek8V, /*-Canvas-*/.yMQTWVwLJ5bV8VGiaqU3:not(.MxmW8QkHqHWtuhO589PV)/**/,.main-yourLibraryX-entryPoints,.Root__main-view { border-radius: 0px !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-better-lyrics-style": {
+			"metadata": {
+				"name": "Better lyrics style",
+				"description": "Spotify lyrics are focused and beautified",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/better-lyrics-style.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".lyrics-lyrics-contentContainer .lyrics-lyricsContent-lyric.lyrics-lyricsContent-highlight { filter: blur(1.5px); padding: 15px; font-size: 110%; } .lyrics-lyrics-contentContainer .lyrics-lyricsContent-lyric.lyrics-lyricsContent-active { filter: none; padding: 20px; font-size: 130%; } .lyrics-lyrics-contentContainer .lyrics-lyricsContent-lyric { filter: blur(1.5px); padding: 15px; font-size: 110%; } .lyrics-lyrics-contentContainer .lyrics-lyricsContent-lyric.lyrics-lyricsContent-unsynced { filter: none; padding: 10px; font-size: 100%; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-bmo-progressbar": {
+			"metadata": {
+				"name": "BMO Progressbar",
+				"description": "Adds a dancing BMO to the Progress Bar.",
+				"authors": [
+					{
+						"name": "JamieeCG",
+						"github": "JamieeCG"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/bmo-dancing.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar::before { content: ''; width: 45px; height: 45px; bottom: calc(100% - 6px); right: 10px; position: absolute; image-rendering: high-quality; background-size: 45px 45px; background-image: url('https://64.media.tumblr.com/38ff0368992c9f601ee746469f9a19c1/tumblr_mqf4asbozS1qmkil9o1_500.gif'); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-centered-lyrics": {
+			"metadata": {
+				"name": "Centered Lyrics",
+				"description": "Centers the lyrics on the lyrics page",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/centered-lyrics.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".lyrics-lyrics-contentWrapper { text-align: center; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-circular-album-art": {
+			"metadata": {
+				"name": "Circular Album Art",
+				"description": "Makes the now playing album art be circular (like a vinyl)",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/circular-album-art.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".cover-art-image { clip-path: circle(50% at 50% 50%); }.main-nowPlayingBar-left {border-radius: 50%;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-circular-shadow-fix-for-album-art": {
+			"metadata": {
+				"name": "Circular shadow fix for album art",
+				"description": "Fixes the square shadow you get in some setups when you have any sort of circular album art snippet installed.",
+				"authors": [
+					{
+						"name": "sooperfish"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Circular-Shadow-fix-for-album-art.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-nowPlayingView-nowPlayingWidget > div > div:nth-child(1) > div { box-shadow: none !important; } .main-nowPlayingView-coverArt { border-radius: 192px; overflow: hidden; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-dark-lyrics": {
+			"metadata": {
+				"name": "Dark Lyrics",
+				"description": "Replaces the highly saturated lyrics backgrounds with a very subtle dark gradient",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/dark-lyrics.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".lyrics-lyrics-background { background-image: linear-gradient(315deg,var(--lyrics-color-background),black); background-size: 500%; } .lyrics-lyricsContent-lyric.lyrics-lyricsContent-highlight { color: white; } .lyrics-lyricsContent-lyric { color: #424242; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-declutter-now-playing-bar": {
+			"metadata": {
+				"name": "Declutter now playing bar",
+				"description": "Remove all extra elements from now playing bar except song details",
+				"authors": [
+					{
+						"name": "Toon (Anton)"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/declutter-now-playing-bar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-nowPlayingView-section{ display:none; } .main-nowPlayingView-aboutArtistV2{ display:none; } .nw2W4ZMdICuBo08Tzxg9 { justify-content: center; height: 100%; width: 100%; } .Loading{ display:none !important; } .LoadingLyricsCard{ display:none !important; } .f6_Fu_ei4TIJWR0wzvTk{ display:none !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-default-progress-bar": {
+			"metadata": {
+				"name": "Default Progress Bar",
+				"description": "Return progress bar to default size and location on themes that change it",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/default-progress-bar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".playback-bar {position: relative !important; display: block !important; --playback-bar-grid-gap: 8px !important; -webkit-box-orient: horizontal !important; -webkit-box-direction: normal !important; -webkit-box-pack: justify !important; -webkit-box-align: center !important; align-items: center !important; display: -webkit-box !important; display: flex !important; flex-direction: row !important; gap: var(--playback-bar-grid-gap) !important; justify-content: space-between !important; height: 12px !important;} .x-progressBar-progressBarBg {--progress-bar-height: 6px !important; --progress-bar-radius: 10px !important;} :root .Root__now-playing-bar .playback-bar > div {height: 17.59px !important;} .player-controls__buttons--new-icons { margin-bottom: 12px !importan;} .main-nowPlayingBar-nowPlayingBar {padding-bottom: 0px !important;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-disable-homepage-recommendations": {
+			"metadata": {
+				"name": "Disable Homepage Recommendations",
+				"description": "Removes all recommendations from the homepage",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/disable-recommendations.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "[data-testid='home-page'] .contentSpacing > *:not(.view-homeShortcutsGrid-shortcuts, [data-testid='component-shelf']:has([href=\"/genre/recently-played\"], [href=\"/section/0JQ5DAnM3wGh0gz1MXnu3z\"])) {\n  display: none !important;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-duck": {
+			"metadata": {
+				"name": "Duck",
+				"description": "Adds dancing duck onto your playback bar!",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/duck.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar::before { content: ''; width: 32px; height: 32px; bottom: calc(100% - 7px); right: 10px; position: absolute; image-rendering: pixelated; background-size: 32px 32px; background-image: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzdsM2Y2aHh3cTQ2Z3JzbXAzMXJrZjdiM3IwMXhnaTFnc295ZnRkZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cCOVfFwDI3awdse5A3/giphy.gif'); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-duotone-album-art": {
+			"metadata": {
+				"name": "Duotone Album Art",
+				"description": "Changes the album art into a duotone version with two colors of your choice",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/duotone-album-art.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ":root{--gmaa-base:#191414;--gmaa-bg-blend:lighten;--gmaa-blur:0;--gmaa-fg-blend:multiply;--gmaa-foreground:#1cb955;--gmaa-opacity:.74;--gmaa-spacing:0}.cover-art{background-color:var(--gmaa-base);display:flex;flex:1 1 100%;height:100%;overflow:hidden;position:relative}.cover-art img{filter:grayscale(100%) contrast(1) blur(var(--gmaa-blur));flex:1 0 100%;height:100%;max-width:100%;mix-blend-mode:var(--gmaa-bg-blend);object-fit:cover;opacity:var(--gmaa-opacity);position:relative;width:100%}.cover-art::before{background-color:var(--gmaa-foreground);bottom:0;content:'';height:100%;left:0;mix-blend-mode:var(--gmaa-fg-blend);position:absolute;right:0;top:0;width:100%;z-index:1}.cover-art-icon{display:none;visibility:hidden}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-dynamic-left-sidebar": {
+			"metadata": {
+				"name": "Dynamic Left Sidebar",
+				"description": "Make the left sidebar dynamic, so it only shows when you hover over it and pushes the main content to the right.",
+				"authors": [
+					{
+						"name": "Rui Wang",
+						"github": "Ender-Wang"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Dynamic-Left-Sidebar.gif"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "#Desktop_LeftSidebar_Id {\n  width: 0px;\n  transition: width 0.5s ease, padding-left 0.5s ease;\n  z-index: 12;\n}\n#Desktop_LeftSidebar_Id:hover {\n  padding-left: 8px;\n  width: 280px;\n}\n:root {\n  margin-left: -8px;\n}\nsvg[data-encore-id='icon']{\n  overflow: visible;\n}\n#Desktop_LeftSidebar_Id span {\n  white-space: nowrap;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-dynamic-search-bar": {
+			"metadata": {
+				"name": "Dynamic Search Bar",
+				"description": "Make the search bar dynamic, so it only shows when you hover over it.",
+				"authors": [
+					{
+						"name": "Ender-Wang",
+						"github": "Ender-Wang"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/dynamic-search-bar.gif"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ":root {\n  margin-top: -16px;\n}\n#global-nav-bar {\n  position: absolute;\n  width: calc(100% + 16px);\n  background: none;\n  opacity: 0;\n  z-index: 12;\n  top: 16px;\n  transition: opacity 0.3s ease-in-out;\n}\n#global-nav-bar:hover {\n  z-index: 12;\n  opacity: 1;\n}\n.Root__now-playing-bar {\n  transform: translateY(16px);\n}\naside[aria-label=\"Now playing bar\"] {\n  transform: translateY(-8px);\n}\n.Root__globalNav .main-globalNav-navLink {\n  background: none;\n}\n.e_N7UqrrJQ0fAw9IkNAL {\n  padding-top: 56px;\n}\n.marketplace-tabBar, .marketplace-tabBar-nav {\n  padding-top: 48px;\n}\n.marketplace-header {\n  padding-top: 16px;\n}\n.marketplace-header__left {\n  padding-top: 16px;\n}\n.main-topBar-background {\n  background-color: #121212;\n}\n.liw6Y_iPu2DJRwk10x9d .FLyfurPaIDAlwjsF3mLf{\n  display: none;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-dj-icon": {
+			"metadata": {
+				"name": "Fix 'DJ' Icon",
+				"description": "Makes the DJ icon match themes better",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-DJ-icon.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-collectionLinkButton-icon > div { background: var(--spice-text); color: var(--spice-sidebar); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-episodes-icon": {
+			"metadata": {
+				"name": "Fix 'Episodes' Icon",
+				"description": "Makes the 'Your Episodes' button icon monochromatic like the rest of the icons.",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fixed-episodes-icon.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-yourEpisodesButton-yourEpisodesIcon { background: var(--spice-text); color: var(--spice-sidebar); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-liked-button": {
+			"metadata": {
+				"name": "Fix Liked Button",
+				"description": "Fixes Liked Button colors",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-liked-button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "#_R_G *:not([fill=\"none\"]) { fill: var(--spice-button) !important; } #_R_G *:not([stroke=\"none\"]) { stroke: var(--spice-button); } .main-addButton-button[aria-checked=\"false\"] { color: rgba(var(--spice-rgb-selected-row), 0.7); } .control-button-heart[aria-checked=\"true\"], .main-addButton-button, .main-addButton-active:focus, .main-addButton-active:hover { color: var(--spice-button); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-liked-icon": {
+			"metadata": {
+				"name": "Fix 'Liked' Icon",
+				"description": "Fix the colours of the Liked icon in sidebar",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-liked-icon.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-likedSongsButton-likedSongsIcon {\n  color: var(--spice-sidebar);\n  background: var(--spice-text);\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-listen-together-button": {
+			"metadata": {
+				"name": "Fix Listen Together Button",
+				"description": "Changes the button from the Listen Together extension to match the rest of the UI and theme.",
+				"authors": [
+					{
+						"name": "MigPro",
+						"github": "MigProPlayer"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Fix-Listen-Together-Button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "button[aria-label='Listen Together'] svg * { fill: currentColor !important; transform: scale(0.95) !important; transform-origin: center !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-listening-on": {
+			"metadata": {
+				"name": "Fix Listening On",
+				"description": "Fix listening on for some themes that move it up or make the text not visible",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-listening-on.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".Svg-presentation-essentialBase-small-icon-autoMirror {fill: var(--spice-text);} .TypeElement-mesto-textBase-type {color: var(--spice-text) !important;} .main-devicePicker-indicator {display: none !important;} .main-nowPlayingBar-container {height: 72px !important;} .main-connectBar-connectBar {position: absolute !important; align-items: center !important; top: 42px !important; height: 32px !important; align-self: center !important; background-color: transparent !important; width: 30% !important;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-main-view-width": {
+			"metadata": {
+				"name": "Fix main view width",
+				"description": "Makes main view fill up all available space",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-main-view-width.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".contentSpacing {\n  max-width: 100% !important;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-now-playing-icon-color": {
+			"metadata": {
+				"name": "Fix now playing icon color",
+				"description": "Fixes the now playing icon color",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-now-playing-icon.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-trackList-playingIcon { -webkit-mask-image: url(\"data:image/svg+xml,%3Csvg id='playing-icon' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 24'%3E%3Cdefs%3E%3Cstyle%3E %23playing-icon %7B fill: %2320BC54; %7D @keyframes play %7B 0%25 %7Btransform: scaleY(1);%7D 3.3%25 %7Btransform: scaleY(0.9583);%7D 6.6%25 %7Btransform: scaleY(0.9166);%7D 9.9%25 %7Btransform: scaleY(0.8333);%7D 13.3%25 %7Btransform: scaleY(0.7083);%7D 16.6%25 %7Btransform: scaleY(0.5416);%7D 19.9%25 %7Btransform: scaleY(0.4166);%7D 23.3%25 %7Btransform: scaleY(0.25);%7D 26.6%25 %7Btransform: scaleY(0.1666);%7D 29.9%25 %7Btransform: scaleY(0.125);%7D 33.3%25 %7Btransform: scaleY(0.125);%7D 36.6%25 %7Btransform: scaleY(0.1666);%7D 39.9%25 %7Btransform: scaleY(0.1666);%7D 43.3%25 %7Btransform: scaleY(0.2083);%7D 46.6%25 %7Btransform: scaleY(0.2916);%7D 49.9%25 %7Btransform: scaleY(0.375);%7D 53.3%25 %7Btransform: scaleY(0.5);%7D 56.6%25 %7Btransform: scaleY(0.5833);%7D 59.9%25 %7Btransform: scaleY(0.625);%7D 63.3%25 %7Btransform: scaleY(0.6666);%7D 66.6%25 %7Btransform: scaleY(0.6666);%7D 69.9%25 %7Btransform: scaleY(0.6666);%7D 73.3%25 %7Btransform: scaleY(0.6666);%7D 76.6%25 %7Btransform: scaleY(0.7083);%7D 79.9%25 %7Btransform: scaleY(0.75);%7D 83.3%25 %7Btransform: scaleY(0.8333);%7D 86.6%25 %7Btransform: scaleY(0.875);%7D 89.9%25 %7Btransform: scaleY(0.9166);%7D 93.3%25 %7Btransform: scaleY(0.9583);%7D 96.6%25 %7Btransform: scaleY(1);%7D %7D %23bar1 %7B transform-origin: bottom; animation: play 0.9s -0.51s infinite; %7D %23bar2 %7B transform-origin: bottom; animation: play 0.9s infinite; %7D %23bar3 %7B transform-origin: bottom; animation: play 0.9s -0.15s infinite; %7D %23bar4 %7B transform-origin: bottom; animation: play 0.9s -0.75s infinite; %7D %3C/style%3E%3C/defs%3E%3Ctitle%3Eplaying-icon%3C/title%3E%3Crect id='bar1' class='cls-1' width='4' height='24'/%3E%3Crect id='bar2' class='cls-1' x='6' width='4' height='24'/%3E%3Crect id='bar3' class='cls-1' x='12' width='4' height='24'/%3E%3Crect id='bar4' class='cls-1' x='18' width='4' height='24'/%3E%3C/svg%3E\"); background: var(--spice-button); content-visibility: hidden; -webkit-mask-repeat: no-repeat; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-playlist-and-folder-position": {
+			"metadata": {
+				"name": "Fix playlist and folder position",
+				"description": "Replaces the playlists section in the left side bar to align with all the other category icons for the new UI. Screenshot includes 'Playlist icons' snippet",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-playlist-and-folder-position.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".playlist-item__img.folder, .playlist-item__img { margin-right: 16px; } .main-rootlist-rootlist { --left-sidebar-item-height: 32px; --left-sidebar-item-indentation-width: 10px; } div.GlueDropTarget.personal-library > * { height: 32px !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-playlist-hover-effect": {
+			"metadata": {
+				"name": "Fix playlist hover effect",
+				"description": "Fixes the hover effect on the playlist titles in some themes",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-playlist-hover.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-rootlist-rootlistItemOverlay {\n  display: none;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fix-progress-bar-displacement": {
+			"metadata": {
+				"name": "Fix progress bar displacement",
+				"description": "Fixes the progress bar displacement for a few themes. Better version of @CharlieS1103 Snippet",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fix-progress-bar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-connectBar-connectBar {\n  overflow: visible !important;\n  position: absolute !important;\n  display: flex !important;\n  align-items: unset !important;\n  left: 80% !important;\n  height: 20px !important;\n  bottom: 1% !important;\n  padding: 2px !important;\n  background-color: transparent !important;\n  color: var(--spice-text) !important;\n}\n.control-button::after {\n  display: none !important;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fullscreen-hide-next-up": {
+			"metadata": {
+				"name": "Fullscreen hide next up",
+				"description": "Hides the next up card while in fullscreen view (appears shortly before switching to the next song)",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fullscreen-hide-next-up.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".npv-up-next.fade-in-and-out-transition-enter-done {display: none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-fullscreen-hide-playing-from": {
+			"metadata": {
+				"name": "Fullscreen hide playing from",
+				"description": "Hides the playing from card while in fullscreen view",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/fullscreen-hide-playing-from.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".npv-header.npv-header {display: none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-gigantic-now-playing-view-canvas": {
+			"metadata": {
+				"name": "Gigantic Now Playing View & Canvas",
+				"description": "Greatly increases the width of the Now Playing View panel beyond the default limit (feel free to change it to your liking) at the cost of losing the ability to drag-resize it and enhances it with a cleaner look by removing the dark gradient over the canvas loop video and moving a few elements further down.",
+				"authors": [
+					{
+						"name": "Mythicsoul",
+						"github": "Mythicsoul"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/giga_npv_canvas.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".NowPlayingView { border-radius: 8px !important; } [data-right-sidebar-hidden=false] .Root__right-sidebar, .npv-nowPlayingbar-container, .oXO9_yYs6JyOwkBn8E4a { width: 670px !important; } [data-right-sidebar-hidden=true] .Root__right-sidebar, .npv-nowPlayingbar-container { width: 0px !important; } .main-nowPlayingView-nowPlayingGrid:has(.canvasVideoContainerNPV video) { .main-nowPlayingView-contextItemInfo { margin-top: 30vh !important; } [aria-hidden=false] .HIaySI1OwWK1MLojie8y, .fetnShpUoCol51CFSqwn { margin-top: 26vh !important; margin-bottom: -31vh !important; } .canvasVideoContainerNPV { margin-top: -5vh !important; } .Of__Db4QgB9osz_mFxhw:before, .Of__Db4QgB9osz_mFxhw:after { background: transparent !important; } }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hamsters-dancing": {
+			"metadata": {
+				"name": "Hamsters Dancing",
+				"description": "Adds a couple of dancing hamsters on the playback bar",
+				"authors": [
+					{
+						"name": "vincenzomy03",
+						"github": "vincenzomy03"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/dancing-hamster.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar { position: relative; } .player-controls .playback-progressbar::before { content: ''; width: 80px; height: 80px; bottom: calc(100% - 20px); left: 0; position: absolute; background-size: 80px 80px; background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExdXk2NW15cTJrdjF0YjZ5eTBjODE0M2l3ejg3bDlvYWh5NmVub2l0eCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/s7pdNRdwG1zxdwkazY/giphy.gif'); pointer-events: none; z-index: 0; } .player-controls .playback-progressbar::after { content: ''; width: 80px; height: 80px; bottom: calc(100% - 23px); right: 0; position: absolute; background-size: 80px 80px; background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExamN4OWxiOXY4dHZ5Mm90NjU5ZjhwcjV1dDd3dHdveHFkaGYzbGRmaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/VxovskkECK4egQCltk/giphy.gif'); pointer-events: none; z-index: 0; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-audiobooks-button": {
+			"metadata": {
+				"name": "Hide Audiobooks Button",
+				"description": "Hides the Audiobook button on the home page",
+				"authors": [
+					{
+						"name": "ririxi"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Hide-Audiobooks-Button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "button[aria-label='Audiobooks'] {display:none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-download-button": {
+			"metadata": {
+				"name": "Hide download button",
+				"description": "Hide download button in EPs and albums",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-download-button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".x-downloadButton-DownloadButton { display: none; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-friend-activity-button": {
+			"metadata": {
+				"name": "Hide Friend Activity Button",
+				"description": "Hides the Friend Activity button",
+				"authors": [
+					{
+						"name": "Donaldino7712",
+						"github": "Donaldino7712"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-friend-activity-button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "[aria-label='Friend Activity'] {display:none!important;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-full-screen-button": {
+			"metadata": {
+				"name": "Hide Full Screen Button",
+				"description": "Hides the Full Screen button.",
+				"authors": [
+					{
+						"name": "Rui Wang",
+						"github": "Ender-Wang"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Hide-Full-Screen-Button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "[data-testid=\"fullscreen-mode-button\"] {display: none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-liked-songs-card": {
+			"metadata": {
+				"name": "Hide liked songs card",
+				"description": "Hides the sometimes unfitting liked Songs card in the Your Libary tab",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-likedSongs-card.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".collection-collectionEntityHeroCard-likedSongs{ display: none; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-lyrics-button": {
+			"metadata": {
+				"name": "Hide lyrics button",
+				"description": "Hides the lyrics button in the playbar",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-lyrics-button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-nowPlayingBar-lyricsButton { display: none; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-made-for-you": {
+			"metadata": {
+				"name": "Hide Made For YOU",
+				"description": "Hide the 'Made For YOU' section on the home page.",
+				"authors": [
+					{
+						"name": "Rui Wang",
+						"github": "Ender-Wang"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Hide-Made-For-YOU.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "section[aria-label^='Made For'] {\n  display: none;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-mini-player-button": {
+			"metadata": {
+				"name": "Hide Mini Player Button",
+				"description": "Hides the Mini Player button.",
+				"authors": [
+					{
+						"name": "Rui Wang",
+						"github": "Ender-Wang"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Hide-Mini-Player-Button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "button:has(path[d='M16 2.45c0-.8-.65-1.45-1.45-1.45H1.45C.65 1 0 1.65 0 2.45v11.1C0 14.35.65 15 1.45 15h5.557v-1.5H1.5v-11h13V7H16V2.45z']), button:has(path[d='M16 2.45c0-.8-.65-1.45-1.45-1.45H1.45C.65 1 0 1.65 0 2.45v11.1C0 14.35.65 15 1.45 15h5.557v-1.5H1.5v-11h13V7H16z']) {display: none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-now-playing-view-button": {
+			"metadata": {
+				"name": "Hide now playing view button",
+				"description": "Hides the now playing view button from the playbar",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-now-playing-view-button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "button:has(path[d='M11.196 8 6 5v6l5.196-3z']), button:has(path[d='M11.196 8 6 5v6z']) {display: none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-play-count": {
+			"metadata": {
+				"name": "Hide play count",
+				"description": "Hides the play count on songs/albums etc so you can give each songs its chance without thinking about numbers",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-play-count.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-trackList-playsHeader,.main-trackList-rowPlayCount,.main-trackList-trackListRow:not(:has(.main-trackList-rowSectionVariable ~ .main-trackList-rowSectionVariable)) .main-trackList-rowSectionVariable {display: none}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-playing-gif": {
+			"metadata": {
+				"name": "Hide playing gif",
+				"description": "Hides the gif that shows the music playing",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-playing-gif.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-trackList-playingIcon{display: none}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-podcast-button": {
+			"metadata": {
+				"name": "Hide Podcast Button",
+				"description": "Hides the Podcast button on the home page",
+				"authors": [
+					{
+						"name": "ririxi"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Hide-Podcast-Button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "button[aria-label='Podcasts'] {display:none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-profile-username": {
+			"metadata": {
+				"name": "Hide profile username",
+				"description": "Hides your username next to your profile picture",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-profile-username.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-userWidget-displayName {display: none !important;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-recent-searches": {
+			"metadata": {
+				"name": "Hide recent searches",
+				"description": "Hides the recent searches section on the search page",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-recent-searches.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-shelf-shelf:has(.x-searchHistoryEntries-searchHistoryEntry) {display: none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-recently-played-sections": {
+			"metadata": {
+				"name": "Hide Recently Played Sections",
+				"description": "Hides the Recently Played sections on the home page",
+				"authors": [
+					{
+						"name": "ririxi"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Hide-Recently-Played.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".view-homeShortcutsGrid-shortcuts, section[aria-label='Recently played'] {display:none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-scroll-through-previews": {
+			"metadata": {
+				"name": "Hide 'Scroll through previews'",
+				"description": "Hides the 'Scroll through previews of tracks' button from albums/playlists",
+				"authors": [
+					{
+						"name": "Donald",
+						"github": "Donaldino7712"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-scroll-through-previews.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-actionBar-exploreButton { display: none !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-sidebar-scrollbar": {
+			"metadata": {
+				"name": "Hide Sidebar ScrollBar",
+				"description": "Hides Sidebar ScrollBar near playlist section",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hide-sidebar-scrollbar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "#Desktop_LeftSidebar_Id .os-scrollbar-handle, .Root__nav-bar .os-scrollbar-handle, #Desktop_LeftSidebar_Id .os-scrollbar-track, .Root__nav-bar .os-scrollbar-track { visibility: hidden; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hide-what-s-new-button": {
+			"metadata": {
+				"name": "Hide What's New Button",
+				"description": "Hides the What's New button",
+				"authors": [
+					{
+						"name": "ririxi"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Hide-Whats-New-Button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "[aria-label=\"What's New\"] {display:none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-hover-panels": {
+			"metadata": {
+				"name": "Hover Panels",
+				"description": "Have your playlist, right sidebar, and controls bar be hoverable.",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/hover-panels.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".Root__nav-bar {\n  position: absolute;\n  width: 35px;\n  opacity: 0;\n  bottom: 0;\n  left: 0;\n  top: 0;\n  z-index: 12;\n  transition: width 400ms, opacity 250ms ease-out;\n}\n.main-yourLibraryX-entryPoints {\n  background: var(--spice-sidebar);\n}\n.Root__nav-bar:hover {\n  width: 250px;\n  opacity: 1;\n  transition: width 250ms, opacity 400ms ease-in;\n}\n.LayoutResizer__resize-bar {\n  cursor: none;\n}\n.Root__top-bar {\n  opacity: 0;\n  transition: visibility 5s, opacity 1s linear;\n}\n.Root__top-bar:hover {\n  transition-delay: 0.5s;\n  opacity: 1;\n  transition: visibility 5s, opacity 0.5s linear;\n}\n.main-topBar-container {\n  -webkit-padding-end: 32px;\n  padding: 16px 85px;\n  padding-inline-end: 32px;\n  max-width: none;\n}\n.main-buddyFeed-container:hover {\n  width: 350px !important;\n  opacity: 1 !important;\n  transition: width 250ms, opacity 400ms ease-in;\n}\n.main-buddyFeed-container {\n  position: absolute;\n  right: -5px;\n  top: 0;\n  bottom: 84px;\n  width: 50px !important;\n  opacity: 0 !important;\n  transition: width 400ms, opacity 250ms ease-out;\n}\n.main-trackList-trackListHeader {\n  top: 0 !important;\n}\n.main-yourLibraryX-navItem {\n  overflow: hidden;\n}\n.main-coverSlotCollapsed-navAltContainer {\n  overflow: visible;\n}\n.LayoutResizer__resize-bar {\n  display: none;\n}\n:root {\n  --left-sidebar-width: 35px !important;\n  --right-sidebar-width: 50px !important;\n  margin-left:-8px;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-jumping-zerotwo": {
+			"metadata": {
+				"name": "Jumping ZeroTwo",
+				"description": "Adds ZeroTwo onto your progress bar.",
+				"authors": [
+					{
+						"name": "Arteed",
+						"github": "Arteeed"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/jumping-zerotwo.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar::before { content: ''; width: 32px; height: 32px; bottom: calc(100% - 4px); left: 10px; position: absolute; image-rendering: pixelated; background-size: 32px 32px; background-image: url('https://media.tenor.com/vuMDJNZY76sAAAAi/jumping-blushing.gif'); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-kirby-progress-bar": {
+			"metadata": {
+				"name": "Kirby Progress Bar",
+				"description": "Running Kirby on the progress bar",
+				"authors": [
+					{
+						"name": "Ray Vincent DS. Concepcion"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/kirby_progress_bar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar::before { content: ''; width: 60px; height: 50px; bottom: calc(95%); right: -5px; position: absolute; background-size: 60px 50px; background-image: url('https://i.imgur.com/HKEnzIr.gif'); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-left-aligned-heart-icons": {
+			"metadata": {
+				"name": "Left aligned heart icons",
+				"description": "Moves the heart icon to the left side of the track title in track views",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/left-aligned-heart-icons.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-trackList-rowSectionStart {\n  margin-left: 38px !important;\n}\n.main-trackList-rowHeartButton {\n  position: absolute !important;\n  left: 48px !important;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-make-custom-app-icons-thicker": {
+			"metadata": {
+				"name": "Make custom app icons thicker",
+				"description": "Gives icons from the sticky list a thicker border",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/thicker-sticky-list-icons.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "#spicetify-sticky-list>li:nth-child(1n+1)>a>div.icon.collection-icon>svg:not(.lucide-crown) { stroke: currentcolor; stroke-width: 11px; } .collection-icon { color: unset; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-minecraft-progress-bar": {
+			"metadata": {
+				"name": "Minecraft progress bar",
+				"description": "Replaces the default progress bar with the minecraft XP bar",
+				"authors": [
+					{
+						"name": "1-MaX-7"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/XP-bar-pr.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".playback-bar .x-progressBar-progressBarBg { height: 80% !important; background-image: url(https://i.imgur.com/di9J4K0.png) !important; background-size: cover; background-position: center; } .playback-bar .x-progressBar-sliderArea { height: 100% !important; } .playback-bar .x-progressBar-fillColor { height: 100% !Important; background: none; background-image: url(https://i.imgur.com/c7NB133.png)!important; background-size: cover; background-position: center; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-modern-scrollbar": {
+			"metadata": {
+				"name": "Modern ScrollBar",
+				"description": "Thin rounded modern scrollbar",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/modern-scrollbar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".os-scrollbar-handle { width:0.25rem!important;border-radius:10rem !important; transition: width 300ms ease-in-out; } .os-scrollbar-handle:focus,.os-scrollbar-handle:focus-within,.os-scrollbar-handle:hover { width:0.35rem!important }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-more-visible-unplayable-tracks": {
+			"metadata": {
+				"name": "More Visible Unplayable Tracks",
+				"description": "Changes the background of unplayable tracks to make it easier to spot them in large playlists.",
+				"authors": [
+					{
+						"name": "NeoNyaa",
+						"github": "NeoNyaa"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/More-Visible-Unplayable-Tracks.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-trackList-disabled{background:#f004}.main-trackList-disabled:focus-within,.main-trackList-disabled:hover{background:#f005}.main-trackList-disabled.main-trackList-selected,.main-trackList-disabled.main-trackList-selected:hover{background:#f006}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-moving-minecraft-bee": {
+			"metadata": {
+				"name": "Moving Minecraft Bee",
+				"description": "Adds a Minecraft Bee to the Progress Bar which follows throughout the duration of the track.",
+				"authors": [
+					{
+						"name": "JamieeCG",
+						"github": "JamieeCG"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/minecraft-bee-snippet.gif"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar .progress-bar::before { content: ''; width: 55px; height: 55px; bottom: calc(40%); left: var(--progress-bar-transform); position: absolute; transition: left var(--progress-bar-duration); transform: translate(-15px, 0px); image-rendering: auto; background-size: 55px 55px; background-image: url('https://i.imgur.com/1oyD6fu.gif'); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-new-hover-panel": {
+			"metadata": {
+				"name": "New Hover Panel",
+				"description": "A New Hover Panel that servers the same purpose as the legacy 'Hover Panels', but only for the left sidebar and without modifying any other elements.",
+				"authors": [
+					{
+						"name": "Rui Wang",
+						"github": "Ender-Wang"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/new-hover-panel.gif"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "#Desktop_LeftSidebar_Id {\n  position: absolute;\n  left: -280px;\n  width: 288px;\n  height: 100%;\n  background-color: black;\n  opacity: 0;\n  visibility: visible;\n  transition: left 0.5s ease, opacity 0.5s ease;\n  z-index: 12;\n}\n#Desktop_LeftSidebar_Id:hover {\n  left: 0;\n  opacity: 1;\n  visibility: visible;\n}\n:root {\n  margin-left: -8px;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-nyan-cat-progress-bar": {
+			"metadata": {
+				"name": "Nyan Cat Progress Bar",
+				"description": "Changes your playback progress bar to Nyan cat flying through space on a rainbow.",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/nyan-cat-progress-bar.gif"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".playback-bar .x-progressBar-fillColor {\n    background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAMCAIAAAAs6UAAAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QUNCQzIyREQ0QjdEMTFFMzlEMDM4Qzc3MEY0NzdGMDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QUNCQzIyREU0QjdEMTFFMzlEMDM4Qzc3MEY0NzdGMDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpBQ0JDMjJEQjRCN0QxMUUzOUQwMzhDNzcwRjQ3N0YwOCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpBQ0JDMjJEQzRCN0QxMUUzOUQwMzhDNzcwRjQ3N0YwOCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PovDFgYAAAAmSURBVHjaYvjPwMAAxjMZmBhA9H8INv4P4TPM/A+m04zBNECAAQBCWQv9SUQpVgAAAABJRU5ErkJggg==')\n        repeat-x !important;\n    background: linear-gradient(\n        to bottom,\n        #ff0000 0%,\n        #ff0000 16.5%,\n        #ff9900 16.5%,\n        #ff9900 33%,\n        #ffff00 33%,\n        #ffff00 50%,\n        #33ff00 50%,\n        #33ff00 66%,\n        #0099ff 66%,\n        #0099ff 83.5%,\n        #6633ff 83.5%,\n        #6633ff 100%\n    ) !important;\n    width: 100% !important;\n}\n\n.playback-bar .x-progressBar-progressBarBg {\n    background: url('data:image/gif;base64,R0lGODlhMAAMAIAAAAxBd////yH/C05FVFNDQVBFMi4wAwEAAAAh+QQECgAAACwAAAAAMAAMAAACJYSPqcvtD6MKstpLr24Z9A2GYvJ544mhXQmxoesElIyCcB3dRgEAIfkEBAoAAAAsAQACAC0ACgAAAiGEj6nLHG0enNQdWbPefOHYhSLydVhJoSYXPO04qrAmJwUAIfkEBAoAAAAsBQABACkACwAAAiGEj6nLwQ8jcC5ViW3evHt1GaE0flxpphn6BNTEqvI8dQUAIfkEBAoAAAAsAQABACoACwAAAiGEj6nLwQ+jcU5VidPNvPtvad0GfmSJeicUUECbxnK0RgUAIfkEBAoAAAAsAAAAACcADAAAAiCEj6mbwQ+ji5QGd6t+c/v2hZzYiVpXmuoKIikLm6hXAAAh+QQECgAAACwAAAAALQAMAAACI4SPqQvBD6NysloTXL480g4uX0iW1Wg21oem7ismLUy/LFwAACH5BAQKAAAALAkAAAAkAAwAAAIghI8Joe0Po0yBWTaz3g/z7UXhMX7kYmplmo0rC8cyUgAAIfkEBAoAAAAsBQAAACUACgAAAh2Ejwmh7Q+jbIFZNrPeEXPudU74IVa5kSiYqOtRAAAh+QQECgAAACwEAAAAIgAKAAACHISPELfpD6OcqTGKs4bWRp+B36YFi0mGaVmtWQEAIfkEBAoAAAAsAAAAACMACgAAAh2EjxC36Q+jnK8xirOW1kavgd+2BYtJhmnpiGtUAAAh+QQECgAAACwAAAAALgALAAACIYSPqcvtD+MKicqLn82c7e6BIhZQ5jem6oVKbfdqQLzKBQAh+QQECgAAACwCAAIALAAJAAACHQx+hsvtD2OStDplKc68r2CEm0eW5uSN6aqe1lgAADs=') !important;\n}\n\n.playback-bar .progress-bar__slider {\n    background: url('data:image/gif;base64,R0lGODlhIgAVAKIHAL3/9/+Zmf8zmf/MmZmZmf+Z/wAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDpDMkJBNjY5RTU1NEJFMzExOUM4QUM2MDAwNDQzRERBQyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpCREIzOEIzMzRCN0IxMUUzODhEQjgwOTYzMTgyNTE0QiIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpCREIzOEIzMjRCN0IxMUUzODhEQjgwOTYzMTgyNTE0QiIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChXaW5kb3dzKSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkM1QkE2NjlFNTU0QkUzMTE5QzhBQzYwMDA0NDNEREFDIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkMyQkE2NjlFNTU0QkUzMTE5QzhBQzYwMDA0NDNEREFDIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+Af/+/fz7+vn49/b19PPy8fDv7u3s6+rp6Ofm5eTj4uHg397d3Nva2djX1tXU09LR0M/OzczLysnIx8bFxMPCwcC/vr28u7q5uLe2tbSzsrGwr66trKuqqainpqWko6KhoJ+enZybmpmYl5aVlJOSkZCPjo2Mi4qJiIeGhYSDgoGAf359fHt6eXh3dnV0c3JxcG9ubWxramloZ2ZlZGNiYWBfXl1cW1pZWFdWVVRTUlFQT05NTEtKSUhHRkVEQ0JBQD8+PTw7Ojk4NzY1NDMyMTAvLi0sKyopKCcmJSQjIiEgHx4dHBsaGRgXFhUUExIREA8ODQwLCgkIBwYFBAMCAQAAIfkECQcABwAsAAAAACIAFQAAA6J4umv+MDpG6zEj682zsRaWFWRpltoHMuJZCCRseis7xG5eDGp93bqCA7f7TFaYoIFAMMwczB5EkTzJllEUttmIGoG5bfPBjDawD7CsJC67uWcv2CRov929C/q2ZpcBbYBmLGk6W1BRY4MUDnMvJEsBAXdlknk2fCeRk2iJliAijpBlEmigjR0plKSgpKWvEUheF4tUZqZID1RHjEe8PsDBBwkAIfkECQcABwAsAAAAACIAFQAAA6B4umv+MDpG6zEj682zsRaWFWRpltoHMuJZCCRseis7xG5eDGp93TqS40XiKSYgTLBgIBAMqE/zmQSaZEzns+jQ9pC/5dQJ0VIv5KMVWxqb36opxHrNvu9ptPfGbmsBbgSAeRdydCdjXWRPchQPh1hNAQF4TpM9NnwukpRyi5chGjqJEoSOIh0plaYsZBKvsCuNjY5ptElgDyFIuj6+vwcJACH5BAkHAAcALAAAAAAiABUAAAOfeLrc/vCZSaudUY7Nu99GxhhcYZ7oyYXiQQ5pIZgzCrYuLMd8MbAiUu802flYGIhwaCAQDKpQ86nUoWqF6dP00wIby572SXE6vyMrlmhuu9GKifWaddvNQAtszXYCxgR/Zy5jYTFeXmSDiIZGdQEBd06QSBQ5e4cEkE9nnZQaG2J4F4MSLx8rkqUSZBeurhlTUqsLsi60DpZxSWBJugcJACH5BAkHAAcALAAAAAAiABUAAAOgeLrc/vCZSaudUY7Nu99GxhhcYZ7oyYXiQQ5pIZgzCrYuLMd8MbAiUu802flYGIhwaCAQDKpQ86nUoWqF6dP00wIby572SXE6vyMrlmhuu9GuifWaddvNwMkZtmY7AWMEgGcKY2ExXl5khFMVc0Z1AQF3TpJShDl8iASST2efloV5JTyJFpgOch8dgW9KZxexshGNLqgLtbW0SXFwvaJfCQAh+QQJBwAHACwAAAAAIgAVAAADoXi63P7wmUmrnVGOzbvfRsYYXGGe6MmF4kEOaSGYMwq2LizHfDGwIlLPNKGZfi6gZmggEAy2iVPZEKZqzakq+1xUFFYe90lxTsHmim6HGpvf3eR7skYJ3PC5tyystc0AboFnVXQ9XFJTZIQOYUYFTQEBeWaSVF4bbCeRk1meBJYSL3WbaReMIxQfHXh6jaYXsbEQni6oaF21ERR7l0ksvA0JACH5BAkHAAcALAAAAAAiABUAAAOeeLrc/vCZSaudUY7Nu99GxhhcYZ7oyYXiQQ5pIZgzCrYuLMfFlA4hTITEMxkIBMOuADwmhzqeM6mashTCXKw2TVKQyKuTRSx2wegnNkyJ1ozpOFiMLqcEU8BZHx6NYW8nVlZefQ1tZgQBAXJIi1eHUTRwi0lhl48QL0sogxaGDhMlUo2gh14fHhcVmnOrrxNqrU9joX21Q0IUElm7DQkAIfkECQcABwAsAAAAACIAFQAAA6J4umv+MDpG6zEj682zsRaWFWRpltoHMuJZCCRseis7xG5eDGp93bqCA7f7TFaYoIFAMMwczB5EkTzJllEUttmIGoG5bfPBjDawD7CsJC67uWcv2CRov929C/q2ZpcBbYBmLGk6W1BRY4MUDnMvJEsBAXdlknk2fCeRk2iJliAijpBlEmigjR0plKSgpKWvEUheF4tUZqZID1RHjEe8PsDBBwkAIfkECQcABwAsAAAAACIAFQAAA6B4umv+MDpG6zEj682zsRaWFWRpltoHMuJZCCRseis7xG5eDGp93TqS40XiKSYgTLBgIBAMqE/zmQSaZEzns+jQ9pC/5dQJ0VIv5KMVWxqb36opxHrNvu9ptPfGbmsBbgSAeRdydCdjXWRPchQPh1hNAQF4TpM9NnwukpRyi5chGjqJEoSOIh0plaYsZBKvsCuNjY5ptElgDyFIuj6+vwcJACH5BAkHAAcALAAAAAAiABUAAAOfeLrc/vCZSaudUY7Nu99GxhhcYZ7oyYXiQQ5pIZgzCrYuLMd8MbAiUu802flYGIhwaCAQDKpQ86nUoWqF6dP00wIby572SXE6vyMrlmhuu9GKifWaddvNQAtszXYCxgR/Zy5jYTFeXmSDiIZGdQEBd06QSBQ5e4cEkE9nnZQaG2J4F4MSLx8rkqUSZBeurhlTUqsLsi60DpZxSWBJugcJACH5BAkHAAcALAAAAAAiABUAAAOgeLrc/vCZSaudUY7Nu99GxhhcYZ7oyYXiQQ5pIZgzCrYuLMd8MbAiUu802flYGIhwaCAQDKpQ86nUoWqF6dP00wIby572SXE6vyMrlmhuu9GuifWaddvNwMkZtmY7AWMEgGcKY2ExXl5khFMVc0Z1AQF3TpJShDl8iASST2efloV5JTyJFpgOch8dgW9KZxexshGNLqgLtbW0SXFwvaJfCQAh+QQJBwAHACwAAAAAIgAVAAADoXi63P7wmUmrnVGOzbvfRsYYXGGe6MmF4kEOaSGYMwq2LizHfDGwIlLPNKGZfi6gZmggEAy2iVPZEKZqzakq+1xUFFYe90lxTsHmim6HGpvf3eR7skYJ3PC5tyystc0AboFnVXQ9XFJTZIQOYUYFTQEBeWaSVF4bbCeRk1meBJYSL3WbaReMIxQfHXh6jaYXsbEQni6oaF21ERR7l0ksvA0JACH5BAkHAAcALAAAAAAiABUAAAOeeLrc/vCZSaudUY7Nu99GxhhcYZ7oyYXiQQ5pIZgzCrYuLMfFlA4hTITEMxkIBMOuADwmhzqeM6mashTCXKw2TVKQyKuTRSx2wegnNkyJ1ozpOFiMLqcEU8BZHx6NYW8nVlZefQ1tZgQBAXJIi1eHUTRwi0lhl48QL0sogxaGDhMlUo2gh14fHhcVmnOrrxNqrU9joX21Q0IUElm7DQkAOw==') !important;\n    width: 34px !important;\n    height: 21px !important;\n    border: none !important;\n    margin-left: -18px !important;\n    margin-top: 0px !important;\n    visibility: visible !important;\n    display: block !important;\n    transform: translateY(-50%) scale(0.8);\n    border-radius: 0 !important;\n    box-shadow: none !important;\n    transition: transform 0.1s cubic-bezier(0, 0, 0.2, 1) !important;\n}\n\n.playback-bar .progress-bar__slider::after {\n    display: none !important;\n}\n\n.playback-bar .progress-bar {\n    --progress-bar-height: 8px !important;\n}\n\n.playback-bar\n    :is(\n        .playback-progressbar-isInteractive .progress-bar--isDragging,\n        .playback-progressbar-isInteractive .progress-bar:focus,\n        .playback-progressbar-isInteractive .progress-bar:hover,\n        .playback-progressbar-isInteractive:focus-within\n    ) {\n    --progress-bar-height: 12px !important;\n}\n\n.playback-bar\n    :is(\n        .x-progressBar-progressBarBg,\n        .x-progressBar-sliderArea,\n        .x-progressBar-fillColor\n    ) {\n    transition: height 0.1s cubic-bezier(0, 0, 0.2, 1) !important;\n}\n\n.playback-bar\n    :is(\n        .playback-progressbar-isInteractive .progress-bar--isDragging,\n        .playback-progressbar-isInteractive .progress-bar:focus,\n        .playback-progressbar-isInteractive .progress-bar:hover,\n        .playback-progressbar-isInteractive:focus-within\n    )\n    .progress-bar__slider {\n    image-rendering: pixelated !important;\n    transform: translateY(-50%) scale(1) !important;\n}\n\n/* uncomment if you use text theme, for time readability */\n/* .playback-bar__progress-time-elapsed,\n.main-playbackBarRemainingTime-container {\n    mix-blend-mode: normal !important;\n    background: rgba(var(--spice-rgb-main), 0.8) !important;\n    box-shadow: 0 0 16px 8px var(--spice-main) !important;\n} */"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-oneko": {
+			"metadata": {
+				"name": "Oneko",
+				"description": "Adds Oneko onto your playback bar!",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/oneko.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar::before { content: ''; width: 32px; height: 32px; bottom: calc(100% - 7px); right: 10px; position: absolute; image-rendering: pixelated; background-image: url('https://raw.githubusercontent.com/adryd325/oneko.js/14bab15a755d0e35cd4ae19c931d96d306f99f42/oneko.gif'); animation: oneko 1s infinite; } @keyframes oneko { 0%, 50% { background-position: -64px 0; } 50.0001%, 100% { background-position: -64px -32px; } }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-pill-player-and-rounded-ui": {
+			"metadata": {
+				"name": "Pill Player and Rounded UI",
+				"description": "Transforms the player into a pill with glassy effect, and rounded corners for library icons.",
+				"authors": [
+					{
+						"name": "Enno"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Pill-Player-Bar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".Root__right-sidebar .cover-art,.main-nowPlayingView-coverArtContainer .cover-art,.main-nowPlayingView-coverArtContainer div[style*=background]{background:0 0!important;border-radius:50%!important;opacity:1!important}.Root__right-sidebar .cover-art::after,.Root__right-sidebar .cover-art::before,.main-nowPlayingView-coverArtContainer .cover-art::after,.main-nowPlayingView-coverArtContainer .cover-art::before{display:none!important;content:none!important}.Root__right-sidebar img,.main-nowPlayingView-coverArtContainer img{border-radius:50%!important;visibility:visible!important;opacity:1!important;display:block!important}.Root__now-playing-bar,.main-nowPlayingBar-container{border-radius:99px!important;overflow:hidden!important;margin:12px!important;width:calc(100% - 24px)!important;box-shadow:0 10px 30px rgba(0,0,0,.5)!important;z-index:9999!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;background-color:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.1)!important}footer.main-nowPlayingBar-nowPlayingBar{border-radius:99px!important}.main-nowPlayingBar-left *{box-shadow:none!important;-webkit-box-shadow:none!important;filter:none!important;-webkit-filter:none!important}.main-nowPlayingBar-left .main-coverSlot-container,.main-nowPlayingBar-left .main-coverSlot-expanded{box-shadow:none!important;background:0 0!important}.main-nowPlayingBar-left canvas{display:none!important}.main-nowPlayingBar-left canvas[class*=cover],.main-nowPlayingBar-left canvas[style*=transform]{display:block!important}.main-yourLibraryX-listItemImage,.main-yourLibraryX-listItemImage>div,.x-entityImage-imageContainer{border-radius:8px!important;-webkit-mask-image:none!important;mask-image:none!important;background-color:transparent!important;overflow:hidden!important}.main-yourLibraryX-listItemImage img,.x-entityImage-image{border-radius:8px!important;-webkit-mask-image:none!important;mask-image:none!important;border:none!important;width:100%!important;height:100%!important;aspect-ratio:1/1!important;object-fit:cover!important}[class*=rounded-full],[style*=\"border-radius: 50%\"]{border-radius:8px!important}.Root__main-view,.Root__nav-bar,.Root__right-sidebar,.os-host-overflow,.os-padding,div[data-testid=main-view-container]{border-radius:24px!important;overflow:hidden!important}.main-card-card,.main-cardImage-imageWrapper,.view-home-shortcut{border-radius:12px!important;overflow:hidden!important}:root{--spice-card:var(--spice-main-elevated)!important}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-pointers": {
+			"metadata": {
+				"name": "Pointers",
+				"description": "Clickable elements are now a pointer",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/pointer.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "button, .show-followButton-button, .main-dropDown-dropDown, .x-toggle-wrapper, .main-playlistEditDetailsModal-closeBtn, .main-trackList-rowPlayPauseButton, .main-rootlist-rootlistItemLink:link, .main-rootlist-rootlistItemLink:visited, .x-sortBox-sortDropdown, .main-contextMenu-menuItemButton, .main-trackList-column, .main-moreButton-button, .x-downloadButton-button, .main-playButton-PlayButton, .main-coverSlotExpandedCollapseButton-chevron, .main-coverSlotCollapsed-chevron, .control-button:focus, .control-button:hover, .main-repeatButton-button, .main-skipForwardButton-button, .main-playPauseButton-button, .main-skipBackButton-button, .main-shuffleButton-button, .main-addButton-button, .progress-bar__slider, .playback-bar, .main-editImageButton-image, .X1lXSiVj0pzhQCUo_72A, .main-card-card, .main-trackList-trackListRow, .Dropdown-control { cursor: pointer !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-pok-mon-adventure": {
+			"metadata": {
+				"name": "Pokémon Adventure",
+				"description": "Adds Ash and Pikachu to your playback bar!",
+				"authors": [
+					{
+						"name": "Aradhana Nayak"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/pokemon-adventure.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar::before { content: ''; width: 42px ; height: 42px; bottom: calc(100% - 7px); right: 10px; position: absolute; image-rendering: pixelated; background-size: 42px 42px ; background-image: url('https://i.giphy.com/mFYJZxzy2SFqC8YSWd.webp'); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-pretty-lyrics": {
+			"metadata": {
+				"name": "Pretty Lyrics",
+				"description": "Gets rid of the ugly background colour on the lyrics page and makes it consistent with themes. Works best with dark themes.",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/pretty-lyrics.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".lyrics-lyrics-background { display: none; } .lyrics-lyrics-contentWrapper>*:not(.lyrics-lyricsContent-active, .lyrics-lyricsContent-highlight, .lyrics-lyricsContent-provider, .lyrics-lyricsContent-description, .lyrics-lyricsContent-unsynced) { color: #FFFFFF4D !important; } .lyrics-lyrics-contentWrapper>*:not(.lyrics-lyricsContent-active, .lyrics-lyricsContent-highlight, .lyrics-lyricsContent-provider, .lyrics-lyricsContent-description, .lyrics-lyricsContent-unsynced):hover { color: #FFFFFF !important; } .lyrics-lyricsContent-highlight { color: #FFFFFF66; } .lyrics-lyricsContent-unsynced { color: #FFFFFF !important; } .lyrics-lyricsContent-unsynced:hover { color: #FFFFFF !important; } .lyrics-lyricsContent-provider, .lyrics-lyricsContent-description { color: #FFFFFFB6 !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-queue-top-side-panel": {
+			"metadata": {
+				"name": "Queue Top Side Panel",
+				"description": "Moves the \"Next in queue\" section to the top of the Now Playing view",
+				"authors": [
+					{
+						"name": "blok",
+						"github": "Theblockbuster1"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Queue-Top-Side-Panel.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-nowPlayingView-section:not(.main-nowPlayingView-queue) { order: 99; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-connect-bar": {
+			"metadata": {
+				"name": "Remove connect bar",
+				"description": "Remove connect bar that causes progress bar displacement when listening on different devices",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/remove-connect-bar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-connectBar-connectBar {\n  display: none !important;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-duplicated-fullscreen-button": {
+			"metadata": {
+				"name": "Remove Duplicated Fullscreen Button",
+				"description": "Removes the original fullscreen button when the Beautiful Lyrics extension is installed.",
+				"authors": [
+					{
+						"name": "MigPro",
+						"github": "MigProPlayer"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Remove-Duplicated-Fullscreen-Button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "[data-testid=\"fullscreen-mode-button\"]:not(#BeautifulLyricsFullscreenButton) { display: none !important;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-liked-and-episodes-icon": {
+			"metadata": {
+				"name": "Remove liked and Episodes icon",
+				"description": "Removes the liked and episodes icon from the sidebar",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/remove-ep-likes.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-collectionLinkButton-collectionLinkButton[href=\"/collection/tracks\"], .main-collectionLinkButton-collectionLinkButton[href=\"/collection/episodes\"] {display: none;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-playlist-album-cover": {
+			"metadata": {
+				"name": "Remove Playlist Album Cover",
+				"description": "Remove the album cover from the playlist banner",
+				"authors": [
+					{
+						"name": "Duckyz95",
+						"github": "Duckyz95"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Remove-Playlist-Cover.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-entityHeader-imageContainer.main-entityHeader-imageContainerNew { display: none; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-popular-sections-from-homepage": {
+			"metadata": {
+				"name": "Remove Popular sections from homepage",
+				"description": "Thanks Spotify, but I have a music taste",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/remove-popular.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "[data-testid='home-page'] .contentSpacing > [data-testid='component-shelf']:has([href='/section/0JQ5DAuChZYPe9iDhh2mJz'], [href='/section/0JQ5DAnM3wGh0gz1MXnu4h'], [href='/section/0JQ5DAnM3wGh0gz1MXnu3B'], [href='/section/0JQ5DAnM3wGh0gz1MXnu3D']) { display: none !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-recently-played-from-homepage": {
+			"metadata": {
+				"name": "Remove recently played from homepage",
+				"description": "Removes the recently played shelf from the home page",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/remove-recently-played.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-shelf-shelf:has([href='/genre/recently-played']) { display: none !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-the-artists-and-credits-sections-from-the": {
+			"metadata": {
+				"name": "Remove the Artists and Credits sections from the Sidebar",
+				"description": "It will only show the album cover and the next song",
+				"authors": [
+					{
+						"name": "FoxyLoon",
+						"github": "FoxyLoon"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/remove-the-artists-and-credits-sections-from-the-sidebar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".nw2W4ZMdICuBo08Tzxg9 { justify-content: center; height: 100%; width: 100%; } .main-nowPlayingView-section:not(.main-nowPlayingView-queue):not(.lyrics-npv-card) {display: none !important}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-top-gradient": {
+			"metadata": {
+				"name": "Remove Top gradient",
+				"description": "Removes gradient from home page and playlist page",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/remove-gradient.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-entityHeader-backgroundColor { display: none !important; } .main-actionBarBackground-background { display: none !important; } .main-home-homeHeader { display: none !important; } .playlist-playlist-actionBarBackground-background { display: none !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-top-spacing": {
+			"metadata": {
+				"name": "Remove top spacing",
+				"description": "Remove top spacing where should be the Window action buttons. Useful for tiling window managers.",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/remove-top-spacing.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".Root__top-container:has([class*='yourLibraryX']) { padding-top: 8px; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-remove-unused-space-in-topbar": {
+			"metadata": {
+				"name": "Remove Unused Space in Topbar",
+				"description": "Remove the unused space in topbar.",
+				"authors": [
+					{
+						"name": "Climax"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/remove-unused-space.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".Kgjmt7IX5samBYUpbkBu, .OPsY6bKl1_FfA8jFpq1V { display: none !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-right-side-cover-art": {
+			"metadata": {
+				"name": "Right Side Cover Art",
+				"description": "Cover art on right side with animation",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/right-cover-art.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-nowPlayingWidget-nowPlaying > .ellipsis-one-line,\n.main-trackInfo-container {\n margin-left: 74px;\n}\n.main-coverSlotExpanded-container {\n position: fixed;\n top: calc(100% - 305px);\n left: calc(100% - 220px);\n width: 200px;\n height: 200px;\n visibility: hidden;\n transform-origin: center;\n animation: 1s coverExpandedIn;\n animation-fill-mode: forwards;\n}\n.Q4cc5RktWgz2H8_vDrIS {\n display: none;\n}\n.main-coverSlotCollapsed-container {\n position: fixed;\n top: -12px;\n left: 0px;\n width: 56px;\n height: 56px;\n visibility: visible;\n z-index: 1;\n}\n.cover-art .cover-art-image,\n.main-coverSlotCollapsed-container {\n transform-origin: center;\n transition-timing-function: ease-in;\n transition: width 0.5s 0.2s, height 0.5s 0.2s, top 0.3s, left 0.5s,\n box-shadow 0.5s;\n}\n.main-coverSlotCollapsed-container[aria-hidden='true'] {\n left: calc(100vw - 164px);\n top: -240px;\n width: 200px;\n height: 200px;\n visibility: hidden;\n animation: 1s coverExpandedOut;\n}\n.main-coverSlotCollapsed-container[aria-hidden='false'] {\n transition-timing-function: ease-out !important;\n transition: width 0.5s 0.2s, height 0.5s 0.2s, top 0.5s 0.1s, left 0.3s,\n box-shadow 0.5s !important;\n}\n.main-coverSlotCollapsed-container[aria-hidden='true']\n .cover-art\n .cover-art-image,\n.main-nowPlayingWidget-coverExpanded\n .main-coverSlotCollapsed-container\n .cover-art\n .cover-art-image {\n width: 200px;\n height: 200px;\n}\n.main-nowPlayingBar-left {\n z-index: 2;\n}\n.main-nowPlayingBar-center {\n z-index: 1;\n}\n.cover-art.shadow {\n box-shadow: 0 0 10px rgba(var(--spice-rgb-shadow), 1) !important;\n}\n@keyframes coverExpandedIn {\n 99% {\n visibility: hidden;\n }\n 100% {\n visibility: visible;\n }\n}\n@keyframes coverExpandedOut {\n 99% {\n visibility: visible;\n }\n 100% {\n visibility: hidden;\n }\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-rotating-cover-art": {
+			"metadata": {
+				"name": "Rotating Cover Art",
+				"description": "Adds circular mask to cover art and rotation",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/rotating-coverart.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "@keyframes rotating {from {transform: rotate(0deg);}to {transform: rotate(360deg);}}.cover-art, .main-nowPlayingView-coverArtContainer::after, .main-nowPlayingView-coverArtContainer::before {animation: rotating 10s linear infinite;border-radius: 50%;}.cover-art {clip-path: circle(50% at 50% 50%);} .main-nowPlayingBar-left button {background: transparent;} .main-nowPlayingView-coverArt {box-shadow:none; filter: drop-shadow(0 9px 9px rgba(0,0,0,.271));}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-rounded-buttons": {
+			"metadata": {
+				"name": "Rounded Buttons",
+				"description": "Add rounded corners to buttons and search bar",
+				"authors": [
+					{
+						"name": "Climax"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/rounded-buttons.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".x-filterBox-expandButton, .main-avatar-avatar, .main-topBar-buddyFeed, .main-topBar-button, .Button-sc-1dqy6lx-0, .main-coverSlotCollapsed-expandButton, .NqzueDshzvgXEygqOGPG { border-radius: 15% !important; } .XNFZdOLgMlx491fEWdYJ, .ChipClear__ChipClearComponent-sc-zv5btm-0, .Button-sc-1dqy6lx-0, .Button-sc-y0gtbx-0, .main-nowPlayingView-aboutArtistV2FollowButton, .main-playPauseButton-button, .ButtonInner-sc-14ud5tc-0, .search-searchCategory-carouselButton, .ChipInnerComponent-sm, .ChipInnerComponent-sm-selected, .switch, .arrow-btn, .pSxFsY9Fgcj5f8Gf05mh, .qyKJPLjz8o4jnbk92JOn, .reset, .rdp-button, .btn, .TabItem__StyledTabItem-sc-2ani5y-0, .main-embedWidgetGenerator-closeBtn, .main-playlistEditDetailsModal-closeBtn, .profile-userEditDetails-closeButton,  .mKUj4tXOjumlcv0q9Qta, .Chip__ChipComponent-sc-ry3uox-0, .LegacyChipInner__ChipInnerComponent-sc-1qguixk-0, .sHDdcNIw9AQLbLrpdcqO, .view-homeShortcutsGrid-playButton, .ButtonInner-medium-iconOnly,  .button-module__button___hf2qg_marketplace, .link-subtle, .yDdtQxGIyqWU3GNrntPu, .AIlmv6h8bR5NY5R0VceT, .e-9640-baseline, .XlmJIRaVv7a23oYq6lwU, .main-card-PlayButtonContainer, .e-9800-baseline, .e-9812-baseline, .e-9890-baseline, .e-9911-baseline, .e-9921-baseline, .e-9960-baseline, .e-91000-baseline, .BfALkuQy0UjTI70U9QlQ, .ka4wGy_b04LNCthHIH1N, .uKWufPQjLFxGolUWWIqH, .UCyimCp8rEfL5nB8paBu, .cYftSUwUzYrIRbgxijgE, .sdEd4DOwfUAWrygb, .ZeXdFwqzGVcDIHWQ, .e-10180-button-primary__inner { border-radius: 6px !important; } .ButtonInner-large-iconOnly, .tLjX9htIKD_OCmEX01UN { border-radius: 12px !important; } .main-globalNav-searchInputContainer, .SFAoASy0S_LZJmYZ3Fh9, .x-searchInput-searchInputInput,  .toggle-module__toggle-indicator-wrapper___6Lcp0_marketplace, .x-toggle-indicatorWrapper, .main-topBar-searchBar { border-collapse: separate; border-radius: 6px !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-rounded-images": {
+			"metadata": {
+				"name": "Rounded Images",
+				"description": "Adds rounded corners to the cover art, playlist covers, cards and other images",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/rounded-images.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "/* Expanded Cover Art Image (+ position fix) */\n .main-navBar-navBar > :nth-child(3) {\n margin: 0 0 0 1px;\n border-radius: 6px;\n }\n \n /* Collapsed Cover Art Image */\n .cover-art-image,\n .artist-artistOverview-sideBlock > div > section > div:nth-child(3) > section:nth-child(2) > div > img,\n .view-homeShortcutsGrid-image {\n border-radius: 4px;\n }\n \n /*\n Playlist Header\n Search Category Card Image\n List Cards\n Local Files Card\n Placeholder Profile Card\n Artist Overview Side Block\n */\n  .X6NnaANU7oS1TJpc,\n .main-entityHeader-shadow,\n .x-categoryCard-image,\n .x-entityImage-circle, \n .main-image-image, \n .kwzBRpFigKr1EP2d5qle, \n .lKuMkIKSZanMIK6aQWfx, \n .main-cardImage-image,\n .main-cardImage-imageWrapper,\n .main-entityHeader-imagePlaceholder > div,\n .artist-artistOverview-sideBlock > div > section {\n border-radius: 6px;\n }\n \n /* Circled Artist + Profile Cards (force) */\n .main-cardImage-circular,\n .main-entityHeader-imagePlaceholder,\n .main-entityHeader-circle {\n border-radius: 50% !important;\n }\n \n /* Track List Image */\n .main-trackList-rowImage {\n border-radius: 3px;\n }\n \n /* Home Shortcuts Grid (force) */\n .view-homeShortcutsGrid-image,\n .view-homeShortcutsGrid-imageWrapper {\n border-radius: 4px !important;\n }\n \n /* Artist, Liked songs heart (force) */\n .T_JcGdJujSuj014SZfjl {\n border-radius: 20% !important;\n }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-rounded-now-playing-bar": {
+			"metadata": {
+				"name": "Rounded 'Now Playing' Bar",
+				"description": "Adds rounded corners to the 'Now Playing' bar so it matches the rest of the User Interface.",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/rounded-now-playing.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ":root{ --border-radius-1: 8px; } .Root__now-playing-bar, .Root__now-playing-bar footer { border-radius: var(--border-radius-1) !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-rounded-thicker-bars": {
+			"metadata": {
+				"name": "Rounded Thicker Bars",
+				"description": "Makes the progress bar and volume bar thicker and rounded, inspired by Thicker Bars snippet.",
+				"authors": [
+					{
+						"name": "Climax"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Rounded-Thicker-Bars.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".x-progressBar-progressBarBg { height: 100% !important; --progress-bar-radius: 10px !important;} .x-progressBar-sliderArea { height: 100% !important; } .x-progressBar-sliderArea * { height: 100% !important; } .x-progressBar-fillColor { height: 100% !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-small-video-button": {
+			"metadata": {
+				"name": "Small Video Button",
+				"description": "Makes the \"Switch to video\" button smaller and less intrusive, for consistency",
+				"authors": [
+					{
+						"name": "blok",
+						"github": "Theblockbuster1"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Small-Video-Button.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".dcSY8Zom_VXgK71Lbym_ { position: absolute; opacity: 0.4; transition: opacity 0.5s; z-index: 999; } .dcSY8Zom_VXgK71Lbym_:hover { position: absolute; opacity: 1; } .dcSY8Zom_VXgK71Lbym_ .encore-text { display: none; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-smaller-right-sidebar-cover-art": {
+			"metadata": {
+				"name": "Smaller right sidebar cover art",
+				"description": "Makes the right sidebar cover art smaller and move the track info to the right.",
+				"authors": [
+					{
+						"name": "Climax"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/smaller-right-sidebar-cover.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ":root { --right-sidebar-cover-art-size: 85px; } \n.main-nowPlayingView-coverArt { width: var(--right-sidebar-cover-art-size); } \n.main-nowPlayingView-coverArtContainer { min-height: unset !important; width: var(--right-sidebar-cover-art-size) !important; } \n.main-nowPlayingView-nowPlayingGrid { flex-direction: row !important;  align-items: center; } \n.main-nowPlayingView-contextItemInfo { flex: 1; } \n.main-nowPlayingView-contextItemInfo .main-trackInfo-name { font-size: 1.25rem; } \n.main-nowPlayingView-contextItemInfo .main-trackInfo-artists { font-size: 0.85rem; } \n.main-nowPlayingView-contextItemInfo:before { display: none !important; } "
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-smooth-progress-volume-bar": {
+			"metadata": {
+				"name": "Smooth Progress/Volume Bar",
+				"description": "Makes the Progress/Volume bar glide",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/smooth-progress-bar.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "@property --progress-bar-transform { inherits: true; initial-value: 0%; syntax: '<percentage>'; } .progress-bar { transition: --progress-bar-transform 1s linear !important; } .progress-bar--isDragging { transition-duration: 150ms !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-smooth-reveal-playlist-gradient": {
+			"metadata": {
+				"name": "Smooth Reveal Playlist Gradient",
+				"description": "Reveals the playlist gradient header gradient with a fade in effect",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/smooth-playlist-reveal-gradient.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-entityHeader-overlay,\n.main-actionBarBackground-background,\n.main-entityHeader-overlay,\n.main-entityHeader-backgroundColor {\n  -webkit-transition: 3s;\n}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-sonic-dancing": {
+			"metadata": {
+				"name": "Sonic Dancing",
+				"description": "You get sonic dancing on your playback bar!",
+				"authors": [
+					{
+						"name": "uhalexz_",
+						"github": "uhAlexz"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/sonic-dancing.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".player-controls .playback-progressbar::before { content: ''; width: 32px; height: 32px; bottom: calc(100% - 7px); right: 10px; position: absolute; image-rendering: pixelated; background-size: 32px 32px; background-image: url('https://media.tenor.com/pWqGD2PHY3kAAAAj/fortnite-dance-sonic.gif'); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-spinning-cd-cover-art": {
+			"metadata": {
+				"name": "Spinning CD Cover Art",
+				"description": "Converts the cover art of the currently playing song to a slowly spinning CD.",
+				"authors": [
+					{
+						"name": "uboaaaa",
+						"github": "uboaaaa"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/Spinning-CD-Cover-Art.jpg"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": "@keyframes rotating {from {transform: rotate(0deg);}to {transform: rotate(360deg);}}.cover-art {animation: rotating 360s linear infinite;clip-path: circle(50% at 50% 50%);position: relative;}.cover-art::after {content: '';position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);width: 22%;height: 22%;background: radial-gradient( circle at center, rgba(24, 22, 35, 0.9) 0%, rgba(24, 22, 35, 0.9) 38%, rgba(255, 255, 255, 0.1) 38%, rgba(255, 255, 255, 0.1) 40%, rgba(24, 22, 35, 0.9) 40%, rgba(24, 22, 35, 0.9) 100% ), repeating-radial-gradient( circle at center, rgba(255, 255, 255, 0.1) 0, rgba(255, 255, 255, 0.1) 1px, transparent 1px, transparent 4px );border-radius: 50%;pointer-events: none;box-shadow: 0 0 10px rgba(0, 0, 0, 0.3) inset, 0 0 20px rgba(255, 255, 255, 0.1);}.cover-art::before {content: '';position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);width: 6%;height: 6%;background: rgba(24, 22, 35, 1);border-radius: 50%;box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);z-index: 1;} .main-nowPlayingBar-left button {background: transparent;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-switch-sidebars": {
+			"metadata": {
+				"name": "Switch Sidebars",
+				"description": "Move the navigation panel to the right and the information sidebar to the left. Drag to resize works in reverse or pre-switching context (drag off the application window to adjust).",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/switch-sidebars.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".Root__top-container .Root__nav-bar, .WBFaUw_oOfN2m4aTxggt { grid-area: right-sidebar !important;} .Root__top-container .Root__right-sidebar { grid-area: left-sidebar !important;} .Root__top-container .Root__nav-bar .os-scrollbar,.Root__top-container .Root__nav-bar .LayoutResizer__resize-bar, .WBFaUw_oOfN2m4aTxggt .os-scrollbar, .WBFaUw_oOfN2m4aTxggt .LayoutResizer__resize-bar { left: -4px !important; right: auto !important; } .Root__top-container .Root__right-sidebar .os-scrollbar, .Root__top-container .Root__right-sidebar .LayoutResizer__resize-bar {  right: -4px !important; left: auto !important; } .Root__top-container .Root__nav-bar .LayoutResizer__resize-bar, .WBFaUw_oOfN2m4aTxggt .LayoutResizer__resize-bar { transform: scaleX(-1); } .Root__top-container .Root__right-sidebar .LayoutResizer__resize-bar { transform: scaleX(-1); }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-thicker-bars": {
+			"metadata": {
+				"name": "Thicker Bars",
+				"description": "Makes the song progress and volume bar thicker",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/thicker-bars.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".x-progressBar-progressBarBg { height: 100% !important; } .x-progressBar-sliderArea { height: 100% !important; } .x-progressBar-sliderArea * { height: 100% !important; } .x-progressBar-fillColor { height: 100% !important; }"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"snippet-thin-library-sidebar-rows": {
+			"metadata": {
+				"name": "Thin Library Sidebar Rows",
+				"description": "Single-line rows in the library sidebar, like the pre-2023 UI",
+				"authors": [
+					{
+						"name": "Isaac Maier",
+						"github": "itsmeow"
+					}
+				],
+				"kind": "snippet",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/snippets/thin-library-sidebar-rows.png"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [],
+					"files": {
+						"index.css": ".main-yourLibraryX-listItemGroup {grid-template-rows: none !important;} .main-yourLibraryX-listItemGroup * {padding-block: 0;}.main-yourLibraryX-listItem [role=\"group\"] {min-block-size: 0 !important;} .main-yourLibraryX-listItem .HeaderArea .Column {flex-direction: row; gap: 0.5em;} .main-yourLibraryX-listItem .HeaderArea * {padding-top: 0 !important; padding-bottom: 0 !important;} .main-yourLibraryX-listItem .x-entityImage-imageContainer, .main-yourLibraryX-rowCover {width: 1.6em !important; height: 1.6em !important;} .main-yourLibraryX-listRowSubtitle {padding-top: 0px;}"
+					},
+					"updatedAt": "2026-07-24"
+				}
+			}
+		},
+		"spicetify-splash": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/spicetify-splash@0.1.0/spicetify-splash@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:bb0340cced3ac6939b6e612622ab928c5150bd9cda80ca2c43671a3f589bf1d5",
+					"updatedAt": "2026-10-01"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/spicetify-splash@0.1.1/spicetify-splash@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:583375abfef2ac26e0c7f9ea02fee850a645bc673e5e12e711f259b9a9517d66",
+					"updatedAt": "2026-10-01"
+				}
+			},
+			"metadata": {
+				"name": "spicetify-splash",
+				"description": "A splash screen while Spotify, your modules, and your theme start up.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/spicetify-splash.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"starry-night": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/starry-night@0.1.0/starry-night@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:46d7a4e27a60e5aa7f8fc6ad83ca966083f205395cac64a53d351329d2d241f1",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/starry-night@0.1.1/starry-night@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ae070fd82931fcb6d564a95d66ce8ff588aef956d3cc7fe885e8b4fbfa1d1c96",
+					"updatedAt": "2026-08-10"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/starry-night@0.1.2/starry-night@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:4d366bfaf38fb17ef29571677754b40e13742eeebc20b7c6853d5d7305036d83",
+					"updatedAt": "2026-08-10"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/starry-night@0.1.3/starry-night@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:9330015883ed0f6cbd08140a61b29a261ea1a56cdbd2cf33c1fad2e1585d2ad2",
+					"updatedAt": "2026-08-25"
+				},
+				"0.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/starry-night@0.1.4/starry-night@0.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:cf1910fb4b5db19ef78faea3e51186a20311865fa22292edfd19fe2e67e24f39",
+					"updatedAt": "2026-09-16"
+				},
+				"0.1.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/starry-night@0.1.5/starry-night@0.1.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:d010cccf81a7b979e4fc47b5e35b42825b44634fc75bf123687fdcf5c0fde9c5",
+					"updatedAt": "2026-10-02"
+				}
+			},
+			"metadata": {
+				"name": "starry-night",
+				"description": "Night sky backdrop with twinkling stars and shooting stars, in seven skies",
+				"authors": [
+					{
+						"name": "Brandon Chen"
+					},
+					{
+						"name": "Julissa Laignelet"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/starry-night.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"stdlib": {
+			"metadata": {
+				"name": "stdlib",
+				"description": "The standard library",
+				"authors": [
+					{
+						"name": "spicetify"
+					},
+					{
+						"name": "Delusoire"
+					}
+				],
+				"kind": "lib",
+				"license": "GPL-3.0-or-later"
+			},
+			"v": {
+				"1.0.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.0.0/stdlib@1.0.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:fb473d1602876c8f23c3227dfd1b5eb3816eb30cd78180bb5b16dae14b3beef8",
+					"updatedAt": "2026-08-03",
+					"hidden": true
+				},
+				"1.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.1.0/stdlib@1.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:1e33e54337ec6d8ffb2e565d2780f82287d49c3e5920b70ed29b111b2d0ec3b6",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.1.1/stdlib@1.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e28be5655c9a05ea50e113455cb62bad459a6319fd2cc8fd298582d685ec97d3",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.1.2/stdlib@1.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:53e6679fab11b3fe7493586b3e7ed8227677846a8cc5992908dcc8c938cb2c10",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.1.3/stdlib@1.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7022a3789d4f49c6b9b38ca5a45741272b9acda92527df635bdb444ba30dca9c",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.1.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.1.4/stdlib@1.1.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:22b1122ac339cf6d5507ef22a5169570b3b251f18778eb84e0cf28551dc04cc8",
+					"updatedAt": "2026-08-05",
+					"hidden": true
+				},
+				"1.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.2.0/stdlib@1.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7329322e1d250a9711642819ce2523df6351ad708aeed5e93c9f1cc2d71bb558",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.2.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.2.1/stdlib@1.2.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3f7640b42d2ba71237277a98a17c31201e9fa8235e7dc5f36a84689d1aa0efb1",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.3.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.3.0/stdlib@1.3.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:17478343bfa1b9707fc1e1a2ba1ffefca6c7d6df5fa059d862f4976a0e30df29",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.4.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.4.0/stdlib@1.4.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7a750a32135779050ccfb9d62b8983529399263254a51c85e41d80fdf3250daa",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.4.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.4.1/stdlib@1.4.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e537432decc21b794a18b52722c011b6339b3b1d46b8cedcb9fb4f215110a394",
+					"updatedAt": "2026-08-07",
+					"hidden": true
+				},
+				"1.4.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.4.2/stdlib@1.4.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:10c56af0d423dc917d92cadad06abce721948d1bb3b4aabb4e3d08bad8cf8d6f",
+					"updatedAt": "2026-08-07",
+					"hidden": true
+				},
+				"1.4.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.4.3/stdlib@1.4.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:b4b81cbb27b9c8bba49f32e3782e6a16fc831f96238223fafc2887242f722385",
+					"updatedAt": "2026-08-07",
+					"hidden": true
+				},
+				"1.4.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.4.4/stdlib@1.4.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:faae012366975bedd8437c54dab18d9d1b6b1dbdb1726f943bceb1454a4f4521",
+					"updatedAt": "2026-08-09",
+					"hidden": true
+				},
+				"1.4.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.4.5/stdlib@1.4.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:aa21e16664c0c2e17ce7e3877eac459ab494393ae5a3c22af39224c87d71f59b",
+					"updatedAt": "2026-08-10",
+					"hidden": true
+				},
+				"1.5.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.5.0/stdlib@1.5.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e854ea0bcd174f8f82fbaca66910e1372f5cbd64902b0d7e7fb578a07039160f",
+					"updatedAt": "2026-08-12",
+					"hidden": true
+				},
+				"1.5.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.5.1/stdlib@1.5.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:541782ceda2f3e41f0046abf97f68c115b5e069938f6a78d473b85368daa267c",
+					"updatedAt": "2026-08-13",
+					"hidden": true
+				},
+				"1.5.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.5.2/stdlib@1.5.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ce5807a69828d38d640b6efdd633621a84e415820c47bdaa2279c7a7e6e1286a",
+					"updatedAt": "2026-08-13",
+					"hidden": true
+				},
+				"1.5.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.5.3/stdlib@1.5.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ba49f44bc14ec095a4cb810bd52f74ebdc56821342212211176398bc76042008",
+					"updatedAt": "2026-08-13",
+					"hidden": true
+				},
+				"1.6.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.6.0/stdlib@1.6.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:9f1477d7412e3c855103b5f2ac3b12f8dff654bf9b045fe5f7ac176384501a11",
+					"updatedAt": "2026-08-13",
+					"hidden": true
+				},
+				"1.7.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.7.0/stdlib@1.7.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3d986f25c7e662254eb5c453169f14c58ee9e3b32afa0871f8a41678bb22ce3e",
+					"updatedAt": "2026-08-14",
+					"hidden": true
+				},
+				"1.10.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.10.0/stdlib@1.10.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:21afa262c4c3e5c38352f377a2f25c25446581766306b8e95d48183d2691517d",
+					"updatedAt": "2026-08-17",
+					"hidden": true
+				},
+				"1.10.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.10.1/stdlib@1.10.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8535410a41f65cee1c3dbf248c2f4063487e0fedcdc37cd447a574044a0d59c8",
+					"updatedAt": "2026-08-19",
+					"hidden": true
+				},
+				"1.10.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.10.2/stdlib@1.10.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:c76a9d683963be19b8c6503e9ac47d756b8c81049359257298aeacadfd510e0b",
+					"updatedAt": "2026-08-25",
+					"hidden": true
+				},
+				"1.10.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.10.3/stdlib@1.10.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:9a612fd04570e811843578b538b63932a6cea129fb17f86a6a07005237c46111",
+					"updatedAt": "2026-09-02",
+					"hidden": true
+				},
+				"1.10.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.10.4/stdlib@1.10.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:a5c3705da310fdf39e447fce92bd0e212922a9b01668f1fcaf2a4e9cecda0197",
+					"updatedAt": "2026-09-05",
+					"hidden": true
+				},
+				"1.11.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.11.0/stdlib@1.11.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:73fc33e0439bcdc370e8dd0ac174f372e42deec84b01fc18fa216b8086346ade",
+					"updatedAt": "2026-09-14",
+					"hidden": true
+				},
+				"1.11.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.11.1/stdlib@1.11.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:7a10c5e879627f98fbc6f0062d39863e9faf38a501205606eb715bc8e98db049",
+					"updatedAt": "2026-09-14",
+					"hidden": true
+				},
+				"1.11.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.11.2/stdlib@1.11.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:018bff89f68d52c745d30c97b0bdd9a91b4a0767312e4c852f1e85c9f88ef15c",
+					"updatedAt": "2026-09-14",
+					"hidden": true
+				},
+				"1.11.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.11.3/stdlib@1.11.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ab7b0c8bf0efce0363cfb29691ef1e81f8d80d781bca8f87a902743fa4e954f0",
+					"updatedAt": "2026-09-15",
+					"hidden": true
+				},
+				"1.12.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.12.0/stdlib@1.12.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e1a23b9b3bb19bcc5867112d3a95016c3f2522439f0d5cbdbee4c44576032ed6",
+					"updatedAt": "2026-09-16",
+					"hidden": true
+				},
+				"1.13.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.13.0/stdlib@1.13.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:859d0b0b48e3e5b3fed892e1eae7f61917b2f1ec9b050cd2213016cfb753df89",
+					"updatedAt": "2026-09-17",
+					"hidden": true
+				},
+				"1.13.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.13.1/stdlib@1.13.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:e1a0a953d35727eb9cfde7e678ad72ec30a5f4fe3bd4b7c64c03d6624e4e7dc0",
+					"updatedAt": "2026-09-29",
+					"hidden": true
+				},
+				"1.13.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/stdlib@1.13.2/stdlib@1.13.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:615fdb58ef79d81b9c2d26a1643bb0dbc74c02367624fcd74d40649c2a9e5c9f",
+					"updatedAt": "2026-10-01",
+					"hidden": true
+				}
+			}
+		},
+		"store": {
+			"v": {
+				"1.0.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.0.0/store@1.0.0.zip"],
+					"providers": [],
+					"checksum": "sha256:4d6dae7f0b88be502f44157c62383f1554e181787c0368f8f687c2145b10dd5d",
+					"updatedAt": "2026-08-03",
+					"hidden": true
+				},
+				"1.0.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.0.1/store@1.0.1.zip"],
+					"providers": [],
+					"checksum": "sha256:66c422fb526e250cb28ba405ece615fa801bdaba7da5a190c6aacdef7e3c888a",
+					"updatedAt": "2026-08-03",
+					"hidden": true
+				},
+				"1.0.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.0.2/store@1.0.2.zip"],
+					"providers": [],
+					"checksum": "sha256:0a03dcbdf6f4389712b1f24c1c386fb010da16320620267bada2292915503ace",
+					"updatedAt": "2026-08-03",
+					"hidden": true
+				},
+				"1.0.3": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.0.3/store@1.0.3.zip"],
+					"providers": [],
+					"checksum": "sha256:d4480b047d946e5b665a214df5bff3da4717ae53e27a3e43b4c0b3ebe30d020e",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.1.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.1.0/store@1.1.0.zip"],
+					"providers": [],
+					"checksum": "sha256:904dac01a559cb5da337b336c71ccfed386eaf12e9034bf43b4c8c07a8a21a76",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.2.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.2.0/store@1.2.0.zip"],
+					"providers": [],
+					"checksum": "sha256:51fbbec13a672f469d0b0c4b944df6a99d3235459f1fa254c342f4f1a284e21e",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.2.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.2.1/store@1.2.1.zip"],
+					"providers": [],
+					"checksum": "sha256:596d4a8cc5857ab6d794508424c15dc4683ec9d27d8f1ff15b79257fd823d6d4",
+					"updatedAt": "2026-08-04",
+					"hidden": true
+				},
+				"1.2.4": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.2.4/store@1.2.4.zip"],
+					"providers": [],
+					"checksum": "sha256:752751cbd001f691201ed9e1832345a6f70852f42b40bd8b4594cb65f55b9154",
+					"updatedAt": "2026-08-05",
+					"hidden": true
+				},
+				"1.3.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.3.0/store@1.3.0.zip"],
+					"providers": [],
+					"checksum": "sha256:01d52dd76df5230f920534ec8705ffad1a4796ae8470a772e1628bb2e24697c0",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.4.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.4.0/store@1.4.0.zip"],
+					"providers": [],
+					"checksum": "sha256:87d9fb997e8974cd800ee9dfcfef7fa1f428019830e1371eefe5ef5463863fdc",
+					"updatedAt": "2026-08-06",
+					"hidden": true
+				},
+				"1.4.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.4.1/store@1.4.1.zip"],
+					"providers": [],
+					"checksum": "sha256:098cac2b622c95168b2a9a1a4e9b12b00cedef6b5ba6432567e8730a33fcbab8",
+					"updatedAt": "2026-08-09",
+					"hidden": true
+				},
+				"1.4.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.4.2/store@1.4.2.zip"],
+					"providers": [],
+					"checksum": "sha256:dab1b01e411e0122fa3b0f59e20dfd3ee33cb141c6be6915d6b7aa1b5392f6bb",
+					"updatedAt": "2026-08-10",
+					"hidden": true
+				},
+				"1.5.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.5.0/store@1.5.0.zip"],
+					"providers": [],
+					"checksum": "sha256:fd7588b56d62c05ff95167c855a629c13dc8bd65461ef1e78a4f8fe81f673200",
+					"updatedAt": "2026-08-10",
+					"hidden": true
+				},
+				"1.5.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.5.1/store@1.5.1.zip"],
+					"providers": [],
+					"checksum": "sha256:1b5c8c34d2b268dec8e21b03ea15edb062ea155671fd9c19bfb74881ec825ca3",
+					"updatedAt": "2026-08-10",
+					"hidden": true
+				},
+				"1.5.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.5.2/store@1.5.2.zip"],
+					"providers": [],
+					"checksum": "sha256:d52a421c122059f8c8d4ed988cde8989470422753b8b3f167be10fd1ea7841f7",
+					"updatedAt": "2026-08-10",
+					"hidden": true
+				},
+				"1.5.3": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.5.3/store@1.5.3.zip"],
+					"providers": [],
+					"checksum": "sha256:c35a756a1e61175bb8c4386b7e72e157e645e978a307c34734cdb1dcb2c54ac4",
+					"updatedAt": "2026-08-10",
+					"hidden": true
+				},
+				"1.5.4": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.5.4/store@1.5.4.zip"],
+					"providers": [],
+					"checksum": "sha256:ba687a79bfce2071c4158f025c44138dcdc5ce13af67534d784547f503dbfa84",
+					"updatedAt": "2026-08-14",
+					"hidden": true
+				},
+				"1.5.5": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.5.5/store@1.5.5.zip"],
+					"providers": [],
+					"checksum": "sha256:fd3e6d4c36f84eb0584e73b888cb873fdec4ef723ec86f666604cba8ef61ebe1",
+					"updatedAt": "2026-08-17",
+					"hidden": true
+				},
+				"1.6.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.6.0/store@1.6.0.zip"],
+					"providers": [],
+					"checksum": "sha256:056a94e6fb88197b0365da08ec120bc4014b86d5bfc72bcab8837ffa8a5caead",
+					"updatedAt": "2026-08-18",
+					"hidden": true
+				},
+				"1.6.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.6.1/store@1.6.1.zip"],
+					"providers": [],
+					"checksum": "sha256:83a0a51a72ef6b5d71b3b7b06adafaf93a3e0e2d5db686689788270c77b78177",
+					"updatedAt": "2026-08-19",
+					"hidden": true
+				},
+				"1.7.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.0/store@1.7.0.zip"],
+					"providers": [],
+					"checksum": "sha256:1b518e0f3408ed0969924b55c0c11da92227067d04706ff026175857bbf9efeb",
+					"updatedAt": "2026-08-19",
+					"hidden": true
+				},
+				"1.7.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.1/store@1.7.1.zip"],
+					"providers": [],
+					"checksum": "sha256:0ec805d010859f7d90a0571f38f81ea532cd1d748a81e1c70087c0ccca5eadd9",
+					"updatedAt": "2026-08-20",
+					"hidden": true
+				},
+				"1.7.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.2/store@1.7.2.zip"],
+					"providers": [],
+					"checksum": "sha256:7c0f1a13299a750b02f75533b4c15c5afa32aaaf9ac54bdda32976e570c41aa7",
+					"updatedAt": "2026-09-01",
+					"hidden": true
+				},
+				"1.7.3": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.3/store@1.7.3.zip"],
+					"providers": [],
+					"checksum": "sha256:3e398bc56fdf3f60109dc5501abd520f92d853198420de12eb0d1f937d958173",
+					"updatedAt": "2026-09-14",
+					"hidden": true
+				},
+				"1.7.4": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.4/store@1.7.4.zip"],
+					"providers": [],
+					"checksum": "sha256:0fab685760e600374b8d0a52eac66599e0b555d2b1660b81968434ba103c9c0a",
+					"updatedAt": "2026-09-14",
+					"hidden": true
+				},
+				"1.7.5": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.5/store@1.7.5.zip"],
+					"providers": [],
+					"checksum": "sha256:b11d081ba24621cd14ae4393194c03376e09fa802b62891239db11cd6e91770a",
+					"updatedAt": "2026-09-14",
+					"hidden": true
+				},
+				"1.7.6": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.6/store@1.7.6.zip"],
+					"providers": [],
+					"checksum": "sha256:2ffde1b5b601439bb79e70783e3d5ae71bc5f64d5d72d953587d3229225601ed",
+					"updatedAt": "2026-09-14",
+					"hidden": true
+				},
+				"1.7.7": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.7/store@1.7.7.zip"],
+					"providers": [],
+					"checksum": "sha256:97f21b6a5733af8711f0e5d518affbca9a57609bd808b9f3e2cc81c1e8eefa36",
+					"updatedAt": "2026-09-15",
+					"hidden": true
+				},
+				"1.7.8": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.7.8/store@1.7.8.zip"],
+					"providers": [],
+					"checksum": "sha256:cd578a20732c2f2ea0ad6982759912a99cae86b9a095b92f7e1050dc686a2efc",
+					"updatedAt": "2026-09-17",
+					"hidden": true
+				},
+				"1.8.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.8.0/store@1.8.0.zip"],
+					"providers": [],
+					"checksum": "sha256:7a3fb1b27db3c08fc03b458ae9c6a5bfdc0e1840df654768a9291cedfa49882a",
+					"updatedAt": "2026-09-30",
+					"hidden": true
+				},
+				"1.8.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/store@1.8.1/store@1.8.1.zip"],
+					"providers": [],
+					"checksum": "sha256:f38a7771ff16056d5af2e5d9e821a8c9ac099027ce0907b64362a7db46a6be7c",
+					"updatedAt": "2026-10-01",
+					"hidden": true
+				}
+			},
+			"metadata": {
+				"name": "store",
+				"description": "Browse, install, and manage v3 modules from vaults",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "app",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"text": {
+			"v": {
+				"0.1.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/text@0.1.0/text@0.1.0.zip"],
+					"providers": [],
+					"checksum": "sha256:bafaebdd2f3f3c941ffe2ab0ddce5b4e1c2477899dc13bf332622b06fc81320d",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/text@0.1.1/text@0.1.1.zip"],
+					"providers": [],
+					"checksum": "sha256:c27e8db45780d9accd04c0408ee4decfba690014440e50b3414a2ec41894c56a",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/text@0.1.2/text@0.1.2.zip"],
+					"providers": [],
+					"checksum": "sha256:91cb1f268d4ab8873b69215bb22e51f877bab9723cd04506719052d5f01021e1",
+					"updatedAt": "2026-08-05"
+				},
+				"0.1.3": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/text@0.1.3/text@0.1.3.zip"],
+					"providers": [],
+					"checksum": "sha256:37d2f61389c7cd40a6d38bebbb217043780d9a1bc1567f36d249fbeb2a1af159",
+					"updatedAt": "2026-08-06"
+				},
+				"0.1.4": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/text@0.1.4/text@0.1.4.zip"],
+					"providers": [],
+					"checksum": "sha256:a3fbd9748aac3fe10030847cb484828941bb3e9e8a66ec974ce76faac51af162",
+					"updatedAt": "2026-08-13"
+				},
+				"0.1.5": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/text@0.1.5/text@0.1.5.zip"],
+					"providers": [],
+					"checksum": "sha256:0a7a7648359397f54f8cfce561c6819cb6d8dc877c8a911cf1deadbf9380cbf0",
+					"updatedAt": "2026-09-14"
+				},
+				"0.1.6": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/text@0.1.6/text@0.1.6.zip"],
+					"providers": [],
+					"checksum": "sha256:4bcb9348ebee63e5d3949da470a7f46d80ab8bdb55680c3d305e69df4449251e",
+					"updatedAt": "2026-09-16"
+				},
+				"0.1.7": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/text@0.1.7/text@0.1.7.zip"],
+					"providers": [],
+					"checksum": "sha256:9a9ee9fc95df6894ff39ade853b9c2e3adc7d3552dd0e45c2eac09bab540134b",
+					"updatedAt": "2026-10-02"
+				}
+			},
+			"metadata": {
+				"name": "text",
+				"description": "Mimics the terminal look of spotify-tui, with 21 schemes",
+				"authors": [
+					{
+						"name": "darkthemer"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/text.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"track-playlist-preview": {
+			"metadata": {
+				"name": "track-playlist-preview",
+				"description": "Brings back Spotify's removed track preview and extends it to whole playlists, albums, artists and Liked Songs.",
+				"authors": [
+					{
+						"name": "Heyian"
+					}
+				],
+				"preview": "https://raw.githubusercontent.com/Heyian/track-playlist-preview/main/docs/preview.png",
+				"repository": "https://github.com/Heyian/track-playlist-preview",
+				"license": "MIT"
+			},
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/Heyian/track-playlist-preview/releases/download/v0.1.0/track-playlist-preview@0.1.0.zip",
+						"https://github.com/spicetify/modules/releases/download/mirror/track-playlist-preview/track-playlist-preview@0.1.0.zip"
+					],
+					"checksum": "sha256:9ff5fee854dbf76534337330f53c75adc709a2d26cc0291b8474d1727010bc39",
+					"updatedAt": "2026-09-29"
+				}
+			}
+		},
+		"trashbin": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.1.0/trashbin@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:8f1d5b03c854ab799bbab1c246f788b1be75707920787f508c12ff7ff0ec5901",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.1.1/trashbin@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:d72ba79fe88a074b65ba32fc12f64848286a8e654e1365af60f9652bfdffce49",
+					"updatedAt": "2026-08-04"
+				},
+				"0.2.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.2.0/trashbin@0.2.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:9e720f2f1cead18a487c2c96c1fc496b642469daaf3bb38f14e1a4a38b54b056",
+					"updatedAt": "2026-08-06"
+				},
+				"0.2.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.2.2/trashbin@0.2.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:3f2fad4e0269cb2789119ffd9d209a32dc48912c2a691d34aa5c7d4de2b5e8aa",
+					"updatedAt": "2026-08-12"
+				},
+				"0.2.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.2.3/trashbin@0.2.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:811841f0123b7ab1ae903a400b48cac730736a53023732f38f135218ddd2287c",
+					"updatedAt": "2026-08-17"
+				},
+				"0.2.4": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.2.4/trashbin@0.2.4.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2815884bf3d9c34b7183a4733eb1bcabbfd0778d7867b67a2568a87818f78dcc",
+					"updatedAt": "2026-09-14"
+				},
+				"0.2.5": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.2.5/trashbin@0.2.5.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:aad93068efcefd45e837ef2084df5729953950eb1678ee580d31e1f24c0f47b4",
+					"updatedAt": "2026-09-16"
+				},
+				"0.2.6": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.2.6/trashbin@0.2.6.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:f2031bf73e25cc9f111abb80bd8fc7b0bf1d44b56b871614d33520841b0f5ee6",
+					"updatedAt": "2026-10-02"
+				},
+				"0.3.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/trashbin@0.3.0/trashbin@0.3.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2af8d79e9fc94310ae44a2cf272986e6496425185135204e9f995f998759fe18",
+					"updatedAt": "2026-10-10"
+				}
+			},
+			"metadata": {
+				"name": "trashbin",
+				"description": "Throw songs and artists in the trashbin and never hear them again.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/trashbin.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"turntable": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/turntable@0.1.0/turntable@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:5186cc1d38a71d24d499e4d5dd5a597992b5a66f6b52dc8180441ecfdf7b33d1",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/turntable@0.1.1/turntable@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:1fe2e539381943841208d2468c32cd8efc164da489baedeeefdad21cfe8881a1",
+					"updatedAt": "2026-10-02"
+				}
+			},
+			"metadata": {
+				"name": "turntable",
+				"description": "Vinyl deck look whose round cover art spins while a track plays",
+				"authors": [
+					{
+						"name": "Grason Chan"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/turntable.png",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"webnowplaying": {
+			"v": {
+				"0.1.0": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/webnowplaying@0.1.0/webnowplaying@0.1.0.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:2639f78fdb2316a79082868b605944a27aff94fc9e98157d398257e38de6d7c2",
+					"updatedAt": "2026-08-03"
+				},
+				"0.1.1": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/webnowplaying@0.1.1/webnowplaying@0.1.1.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:ec9ae9099bde777035a3c9f96286a3e28c3d80f84a80a8c165dc7168b0ca5991",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/webnowplaying@0.1.2/webnowplaying@0.1.2.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:1255d7ab03df2a54fe37da5728852475e1a30144469231834324912d2cf4b064",
+					"updatedAt": "2026-08-12"
+				},
+				"0.1.3": {
+					"artifacts": [
+						"https://github.com/spicetify/modules/releases/download/webnowplaying@0.1.3/webnowplaying@0.1.3.zip"
+					],
+					"providers": [],
+					"checksum": "sha256:cbdd85b24372ebb96a5c4ec8a5477432db33a1a3e1e6f6b6ac98dea12db90249",
+					"updatedAt": "2026-09-14"
+				}
+			},
+			"metadata": {
+				"name": "webnowplaying",
+				"description": "Bridges now-playing info and controls to WebNowPlaying-Redux (Rainmeter, OBS, etc.) over a local WebSocket. Requires the companion adapter running on ws://localhost:8974.",
+				"authors": [
+					{
+						"name": "spicetify"
+					}
+				],
+				"kind": "extension",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/webnowplaying.svg",
+				"license": "GPL-3.0-or-later"
+			}
+		},
+		"ziro": {
+			"v": {
+				"0.1.0": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/ziro@0.1.0/ziro@0.1.0.zip"],
+					"providers": [],
+					"checksum": "sha256:691605c3927efb4f07cb8976acc7bae677b1de21e2555928ba12319fe1671852",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.1": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/ziro@0.1.1/ziro@0.1.1.zip"],
+					"providers": [],
+					"checksum": "sha256:b57640f859494e7ecfed4ae826541d04238b83d97670497523b9e490ed63b4f0",
+					"updatedAt": "2026-08-04"
+				},
+				"0.1.2": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/ziro@0.1.2/ziro@0.1.2.zip"],
+					"providers": [],
+					"checksum": "sha256:f1228c7dee39d864c4033abf27c52fc953c2e78aca99b9ed799107abf4b21a9a",
+					"updatedAt": "2026-08-13"
+				},
+				"0.1.3": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/ziro@0.1.3/ziro@0.1.3.zip"],
+					"providers": [],
+					"checksum": "sha256:fef0e6abbccb0be423e51f77a716d8f60be979be9feb2ad0988c4d8aea7512b1",
+					"updatedAt": "2026-08-19"
+				},
+				"0.1.4": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/ziro@0.1.4/ziro@0.1.4.zip"],
+					"providers": [],
+					"checksum": "sha256:f18cff48ca5eed2aada5622cd344e5daf86438a07a128ff54ff5ad6d5ddb9cfa",
+					"updatedAt": "2026-09-17"
+				},
+				"0.1.5": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/ziro@0.1.5/ziro@0.1.5.zip"],
+					"providers": [],
+					"checksum": "sha256:4a912c169c3e738e204cfb1f84f111eea9fb3bad10013b67d01c69fabcd712b4",
+					"updatedAt": "2026-09-29"
+				},
+				"0.1.6": {
+					"artifacts": ["https://github.com/spicetify/modules/releases/download/ziro@0.1.6/ziro@0.1.6.zip"],
+					"providers": [],
+					"checksum": "sha256:b7d4dee16ee4b18144148a6455cc66d07fe380cad8cda9f59a1b8c1d80375f9e",
+					"updatedAt": "2026-09-29"
+				}
+			},
+			"metadata": {
+				"name": "ziro",
+				"description": "Soft rounded design inspired by the Zorin GTK themes",
+				"authors": [
+					{
+						"name": "schnensch0"
+					}
+				],
+				"kind": "theme",
+				"preview": "https://raw.githubusercontent.com/spicetify/modules/main/previews/ziro.jpg",
+				"license": "GPL-3.0-or-later"
+			}
+		}
+	}
+}

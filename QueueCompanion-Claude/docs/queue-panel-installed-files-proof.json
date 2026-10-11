@@ -1,0 +1,12 @@
+{
+  "installedVersion": "0.2.1",
+  "setupVersion": "0.2.1",
+  "helperVersion": "0.2.1",
+  "productionHash": "79FF952B7C9D212268523B8ABF4917B7B72A5A8779A3961BD77516E20E1DA6F8",
+  "installedMatches": true,
+  "stagedMatches": true,
+  "moduleMatches": true,
+  "temporaryProbeAbsent": true,
+  "helperRunning": true,
+  "spotifyRunning": true
+}

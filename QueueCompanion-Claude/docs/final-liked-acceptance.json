@@ -1,0 +1,33 @@
+{
+  "result": {
+    "count": 3,
+    "insertionMs": 233,
+    "generationMs": 2680,
+    "totalMs": 3943,
+    "coverage": "",
+    "mode": "append"
+  },
+  "feedback": "Added 3 songs",
+  "inserted": [
+    {
+      "uri": "spotify:track:6NASvejlolGiw6hlpvAehR",
+      "uid": "q9",
+      "title": "A Prophecy",
+      "artist": "Asking Alexandria"
+    },
+    {
+      "uri": "spotify:track:46VdAAtIim1n7CxdSoGf1g",
+      "uid": "q10",
+      "title": "If I Fall",
+      "artist": "As I Lay Dying"
+    },
+    {
+      "uri": "spotify:track:0TB3g8StOcm9UacldRD2Rj",
+      "uid": "q11",
+      "title": "Unleashed",
+      "artist": "Killswitch Engage"
+    }
+  ],
+  "allInLikedSongs": true,
+  "currentUnchanged": true
+}

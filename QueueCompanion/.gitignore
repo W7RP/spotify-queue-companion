@@ -1,0 +1,11 @@
+/extension/node_modules/
+bin/
+obj/
+release/
+*.user
+*.log
+pairing.json
+credentials.dat
+pending-registration.dat
+queue-companion-pairing.js
+/installer/payload.zip

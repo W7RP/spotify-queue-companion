@@ -1,0 +1,16 @@
+{
+  "name": "Queue Companion",
+  "kind": "extension",
+  "version": "0.2.2",
+  "authors": [
+    "Queue Companion contributors"
+  ],
+  "description": "A natural-language request bar inside Spotify's native Queue panel.",
+  "entries": {
+    "js": "index.js"
+  },
+  "hasMixins": false,
+  "dependencies": {
+    "stdlib": "^1.13.2"
+  }
+}

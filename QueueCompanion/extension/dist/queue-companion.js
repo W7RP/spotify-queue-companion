@@ -1,0 +1,1019 @@
+"use strict";
+(() => {
+  // src/ipc.ts
+  var Helper = class {
+    socket;
+    ready;
+    pending = /* @__PURE__ */ new Map();
+    closed = false;
+    async connect() {
+      if (this.ready) return this.ready;
+      const config = window.__queueCompanionPairing;
+      if (!config) throw Error("Queue Companion needs repair. Open Queue Companion Setup from Start.");
+      this.closed = false;
+      this.ready = new Promise((resolve, reject) => {
+        const ws = new WebSocket(`ws://127.0.0.1:${config.port}/v1`);
+        this.socket = ws;
+        const deadline = window.setTimeout(() => {
+          ws.close();
+          reject(Error("Local helper is unavailable. Open Queue Companion from Start."));
+        }, 5e3);
+        ws.onopen = () => ws.send(JSON.stringify({ v: 1, type: "pair", token: config.token }));
+        ws.onmessage = (e) => {
+          let m;
+          try {
+            m = JSON.parse(e.data);
+          } catch {
+            return;
+          }
+          if (m.v !== 1) return;
+          if (m.type === "paired") {
+            clearTimeout(deadline);
+            resolve();
+            return;
+          }
+          const p = this.pending.get(m.id);
+          if (!p) return;
+          this.pending.delete(m.id);
+          clearTimeout(p.timer);
+          m.ok ? p.resolve(m.data) : p.reject(Error(m.error));
+        };
+        ws.onerror = () => reject(Error("Cannot connect to the local helper. Open Queue Companion from Start."));
+        ws.onclose = () => {
+          clearTimeout(deadline);
+          this.ready = void 0;
+          for (const p of this.pending.values()) {
+            clearTimeout(p.timer);
+            p.reject(Error("Helper disconnected. No queue write has been retried."));
+          }
+          this.pending.clear();
+          if (!this.closed) reject(Error("Local pairing failed. Repair Queue Companion from Start."));
+        };
+      });
+      return this.ready;
+    }
+    async request(type, data = {}, signal) {
+      await this.connect();
+      if (signal?.aborted) throw new DOMException("Cancelled", "AbortError");
+      const id = crypto.randomUUID();
+      return new Promise((resolve, reject) => {
+        const abort = () => {
+          this.socket?.send(JSON.stringify({ v: 1, type: "cancel", id }));
+          const p = this.pending.get(id);
+          if (p) {
+            clearTimeout(p.timer);
+            this.pending.delete(id);
+            p.reject(new DOMException("Cancelled", "AbortError"));
+          }
+        };
+        const timer = window.setTimeout(() => {
+          this.pending.delete(id);
+          signal?.removeEventListener("abort", abort);
+          reject(Error("Helper timed out. Nothing was queued."));
+        }, 55e3);
+        this.pending.set(id, { resolve: (x) => {
+          signal?.removeEventListener("abort", abort);
+          resolve(x);
+        }, reject: (e) => {
+          signal?.removeEventListener("abort", abort);
+          reject(e);
+        }, timer });
+        signal?.addEventListener("abort", abort, { once: true });
+        this.socket.send(JSON.stringify({ v: 1, type, id, data }));
+      });
+    }
+    dispose() {
+      this.closed = true;
+      this.socket?.close();
+      this.ready = void 0;
+    }
+  };
+
+  // src/spotify.ts
+  var TRACK = /^spotify:track:[A-Za-z0-9]{22}$/;
+  var SEARCH = { name: "searchTracks", operation: "query", sha256Hash: "b02683192a98dde7966b5e6655a79eeb62713eab703eda9902c932818dd52751", value: null };
+  function normalize(raw, source = "catalogue") {
+    const item = raw?.item?.data ?? raw?.data ?? raw?.track ?? raw;
+    if (!TRACK.test(item?.uri ?? "")) return null;
+    if (item.isPlayable === false || item.playability?.playable === false || item.isLocal || item.isBanned) return null;
+    const artists = Array.isArray(item.artists) ? item.artists : item.artists?.items ?? [];
+    const title = item.name ?? item.title ?? item.metadata?.title;
+    const artist = artists.map((a) => a.name ?? a.profile?.name).filter(Boolean).join(", ") || (item.artist ?? item.metadata?.artist_name);
+    if (typeof title !== "string" || typeof artist !== "string") return null;
+    return { id: item.uri.split(":")[2], uri: item.uri, title: title.slice(0, 200), artist: artist.slice(0, 200), source, artistNames: artists.map((a) => a.name ?? a.profile?.name).filter((s) => typeof s === "string").map((s) => s.slice(0, 200)) };
+  }
+  var Spotify = class {
+    constructor(helper2) {
+      this.helper = helper2;
+    }
+    async account() {
+      const u = await Spicetify.Platform.UserAPI.getUser();
+      if (!u.username) throw Error("Spotify sign-in is unavailable.");
+      return u.username;
+    }
+    async snapshot() {
+      const account = await this.account();
+      const q = Spicetify.Queue;
+      const device = Spicetify.Platform.ConnectAPI.getState().activeDevice;
+      if (!q?.track?.contextTrack || !Array.isArray(q.nextTracks)) throw Error("Start a song on this computer before adding to the queue.");
+      return { account, local: device?.isLocal === true && device?.isActive === true, revision: String(q.queueRevision), current: q.track.contextTrack.uri, entries: q.nextTracks.map((e) => ({ uri: e.contextTrack.uri, uid: e.contextTrack.uid ?? "", manual: e.provider === "queue" && e.contextTrack.metadata?.is_queued === "true", raw: { uri: e.contextTrack.uri, uid: e.contextTrack.uid } })) };
+    }
+    replaceSupported() {
+      return Spicetify.Platform.version === "1.3.4.258" && typeof Spicetify.removeFromQueue === "function" && typeof Spicetify.Player.origin?._queue?.removeFromQueue === "function";
+    }
+    async append(uris) {
+      if (typeof Spicetify.Player.origin?._queue?.addToQueue !== "function") throw Error("Native queue integration is unavailable. Repair Spicetify.");
+      await Spicetify.addToQueue(uris.map((uri) => ({ uri })));
+    }
+    async remove(before) {
+      const q = Spicetify.Queue;
+      if (String(q.queueRevision) !== before.revision || q.track.contextTrack.uri !== before.current || Spicetify.Platform.ConnectAPI.getState().activeDevice?.isLocal !== true) throw Error("The queue changed immediately before replacement. Nothing was removed.");
+      const manual = before.entries.filter((e) => e.manual);
+      if (manual.some((e) => !e.uid)) throw Error("Queue entry identity is unavailable. Replacement stopped.");
+      const all = Spicetify.Player.origin._queue.getQueue().queued;
+      if (Array.isArray(all) && all.length !== manual.length) throw Error("The full manual queue is not visible. Replacement stopped.");
+      await Spicetify.removeFromQueue(manual.map((e) => ({ uri: e.uri, uid: e.uid })));
+      for (let i = 0; i < 20; i++) {
+        if (!Spicetify.Queue.nextTracks.some((e) => manual.some((m) => m.uid === e.contextTrack.uid))) return;
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      throw Error("Native queue removal could not be confirmed.");
+    }
+    async cached(key, ttl, load, fresh = false) {
+      const account = await this.account();
+      if (!fresh) {
+        const item = await this.helper.request("cache.get", { account, key });
+        if (item != null) return item;
+      }
+      const data = await load();
+      if (account !== await this.account()) throw Error("Spotify account changed during retrieval.");
+      await this.helper.request("cache.put", { account, key, ttl, value: data });
+      return data;
+    }
+    async search(term, limit = 30) {
+      return this.cached("search:v2:" + term + ":" + limit, 300, async () => {
+        const result = await Spicetify.GraphQL.Request(SEARCH, { searchTerm: term, offset: 0, limit, numberOfTopResults: Math.min(limit, 30), includeAudiobooks: true, includeAuthors: true, includePreReleases: false, includeArtistHasConcertsField: false, includeEpisodeContentRatingsV2: false });
+        if (result.errors?.length) throw Error("Spotify catalogue search is unavailable on this build. Repair and retry.");
+        const items = result.data?.searchV2?.tracksV2?.items;
+        if (!Array.isArray(items)) throw Error("Spotify search returned an unsupported response.");
+        return items.map((x) => normalize(x)).filter((x) => !!x);
+      });
+    }
+    async resolve(title, artist) {
+      const found = await this.search(title + " " + artist, 5);
+      const clean = (s) => s.normalize("NFKD").toLowerCase().replace(new RegExp("\\p{M}", "gu"), "").replace(/[^\p{L}\p{N}]/gu, "");
+      const sameArtist = (t) => clean(t.artist) === clean(artist) || (t.artistNames ?? t.artist.split(", ")).some((name) => clean(name) === clean(artist));
+      return found.find((t) => clean(t.title) === clean(title) && sameArtist(t)) ?? null;
+    }
+    async liked(limit = 200) {
+      return this.pageTracks("liked", (o) => Spicetify.Platform.LibraryAPI.getTracks(o), limit, "liked");
+    }
+    async playlist(uri, limit = 200) {
+      return this.pageTracks("playlist:" + uri, (o) => Spicetify.Platform.PlaylistAPI.getContents(uri, o), limit, uri);
+    }
+    async pageTracks(key, loader, maximum, source) {
+      const items = [];
+      let offset = 0;
+      let total = Infinity;
+      const account = await this.account();
+      while (offset < total && offset < maximum) {
+        const page = await loader({ offset, limit: Math.min(100, maximum - offset) });
+        if (!Array.isArray(page.items)) throw Error("Spotify library response changed. Repair Queue Companion.");
+        total = page.totalLength ?? page.unfilteredTotalLength ?? page.items.length;
+        for (const raw of page.items) {
+          const t = normalize(raw, source);
+          if (t) items.push(t);
+        }
+        if (!page.items.length) break;
+        offset += page.items.length;
+      }
+      if (account !== await this.account()) throw Error("Spotify account changed during library retrieval.");
+      await this.helper.request("cache.put", { account, key, ttl: 60, value: items });
+      return items;
+    }
+    async playlists() {
+      const out = [];
+      const account = await this.account();
+      const result = await Spicetify.Platform.RootlistAPI.getContents();
+      if (!Array.isArray(result.items)) throw Error("Spotify playlist listing changed. Repair Queue Companion.");
+      const walk = (items) => {
+        for (const x of items) {
+          if (x.type === "playlist") out.push({ uri: x.uri, name: x.name, owner: x.owner?.displayName });
+          else if (x.type === "folder" && Array.isArray(x.items)) walk(x.items);
+        }
+      };
+      walk(result.items);
+      if (account !== await this.account()) throw Error("Spotify account changed.");
+      return [...new Map(out.map((p) => [p.uri, p])).values()];
+    }
+    async recent() {
+      const data = await Spicetify.Platform.PlayHistoryAPI.getContents();
+      return (data.items ?? []).map((x) => normalize(x, "recently played")).filter(Boolean);
+    }
+    async validate(tracks) {
+      const validated = [];
+      for (let at = 0; at < tracks.length; at += 5) {
+        const batch = await Promise.all(tracks.slice(at, at + 5).map(async (t) => {
+          const response = await Spicetify.GraphQL.Request(Spicetify.GraphQL.Definitions.getTrack, { uri: t.uri });
+          const raw = response.data?.trackUnion ?? response.data?.track;
+          if (response.errors?.length || !raw || raw.__typename !== "Track" || raw.playability?.playable !== true) throw Error("A selected song is unavailable. Nothing was queued.");
+          return t;
+        }));
+        validated.push(...batch);
+      }
+      return validated;
+    }
+    startHistory(onError) {
+      let session = crypto.randomUUID(), uri = "", position2 = 0, at = performance.now(), listened = 0, sent = false, account = "";
+      let checking = false;
+      const tick = async () => {
+        const state = Spicetify.Platform.PlayerAPI.getState();
+        const now = performance.now();
+        const progress = Spicetify.Player.getProgress();
+        const item = state.item;
+        const local = Spicetify.Platform.ConnectAPI.getState().activeDevice?.isLocal === true;
+        if (!item?.uri || !local) {
+          at = now;
+          position2 = progress;
+          return;
+        }
+        if (item.uri !== uri || progress < position2 - 1e3) {
+          uri = item.uri;
+          session = crypto.randomUUID();
+          listened = 0;
+          sent = false;
+          position2 = progress;
+          at = now;
+        }
+        const delta = progress - position2;
+        const elapsed = now - at;
+        if (!state.isPaused && !state.isBuffering && delta > 0 && delta < 2e3 && elapsed < 2e3) listened += Math.min(delta, elapsed + 100);
+        position2 = progress;
+        at = now;
+        if (sent || checking || listened < Math.min(3e4, state.duration / 2)) return;
+        checking = true;
+        try {
+          const current = await this.account();
+          if (account && account !== current) {
+            listened = 0;
+            session = crypto.randomUUID();
+            sent = false;
+          } else {
+            await this.helper.request("observe", { account: current, duration: state.duration, listen: { uri, title: item.metadata.title, artist: item.metadata.artist_name, session, milliseconds: Math.round(listened), at: (/* @__PURE__ */ new Date()).toISOString() } });
+            sent = true;
+          }
+          account = current;
+        } catch (e) {
+          onError?.(e instanceof Error ? e.message : "History recording unavailable.");
+        } finally {
+          checking = false;
+        }
+      };
+      const reset = () => {
+        at = performance.now();
+        position2 = Spicetify.Player.getProgress();
+      };
+      Spicetify.Player.addEventListener("onprogress", tick);
+      Spicetify.Player.addEventListener("onplaypause", reset);
+      return () => {
+        Spicetify.Player.removeEventListener("onprogress", tick);
+        Spicetify.Player.removeEventListener("onplaypause", reset);
+      };
+    }
+  };
+
+  // src/domain.ts
+  function parseIntent(prompt, length = 15, cap = 50, preference = "append") {
+    const text = prompt.trim();
+    if (!text || text.length > 1e3) throw Error("Use a request between 1 and 1,000 characters.");
+    const words = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, hundred: 100 };
+    const countText = text.replace(/[“"][^”"]+[”"]/g, "").replace(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)[A-Za-z0-9]{22}[^\s]*/g, "");
+    const number = countText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred)\s+(?:(?!songs?\b|tracks?\b)[\p{L}-]+\s+){0,4}(?:songs?|tracks?)\b/iu)?.[1]?.toLowerCase();
+    const count = Math.max(1, Math.min(cap, number ? words[number] ?? Number(number) : length));
+    const more = /\b(add (?:another|more)|more songs|like these)\b/i.test(text);
+    const replace = /\b(replace (?:the |my )?queue|start over|make a new queue)\b/i.test(text);
+    const liked = /\b(liked songs|my likes|favorites|favourites)\b/i.test(text);
+    const history = /\b(most played|top tracks|listening history|recently played)\b/i.test(text);
+    const playlistUris = [...text.matchAll(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)([A-Za-z0-9]{22})/g)].map((m) => "spotify:playlist:" + m[1]);
+    const quoted = [...text.matchAll(/[“"]([^”"]+)[”"]/g)].map((m) => m[1]);
+    const mash = text.match(/(?:mix|mashup|combine)\s+(?:my\s+)?(.+?)\s+playlists?\b/i)?.[1];
+    const playlistNames = quoted.length ? quoted : mash ? mash.split(/\s*,\s*|\s+and\s+|\s*&\s*/).map((s) => s.trim()).filter(Boolean) : [];
+    if (/\bplaylist(?:s)?\b|\bmy library\b/i.test(text) && !liked && !playlistNames.length && !playlistUris.length) throw Error("Put playlist names in quotes, mix named playlists, or paste their Spotify links.");
+    let remaining = text;
+    for (const name of playlistNames) remaining = remaining.replace(name, "");
+    remaining = remaining.replace(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)[A-Za-z0-9]{22}[^\s]*/g, "");
+    remaining = remaining.replace(/\b(mix|mashup|combine|add|another|more|songs?|tracks?|only|from|my|these|the|and|playlists?|liked|likes|favorites|favourites|please|repeat|duplicates|twice|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred)\b|\d+|[^\p{L}\p{N}\s]/giu, " ").trim();
+    return { prompt: text, count, mode: replace ? "replace" : more ? "append" : preference, liked, history, more, repeat: /\b(repeat|duplicates|twice)\b/i.test(text), playlistNames, playlistUris, filtered: remaining.length > 0 };
+  }
+  function playlistMatches(name, playlists) {
+    const normalize2 = (s) => s.normalize("NFKC").trim().toLocaleLowerCase();
+    const target = normalize2(name);
+    const exact = playlists.filter((p) => normalize2(p.name) === target);
+    return exact.length ? exact : playlists.filter((p) => normalize2(p.name).includes(target));
+  }
+  function balancedMix(groups, count, repeat = false) {
+    const out = [];
+    const seen = /* @__PURE__ */ new Set();
+    const positions = groups.map(() => 0);
+    while (out.length < count) {
+      let progressed = false;
+      for (let i = 0; i < groups.length && out.length < count; i++) {
+        let t;
+        while (positions[i] < groups[i].length) {
+          const c = groups[i][positions[i]++];
+          if (repeat || !seen.has(c.uri)) {
+            t = c;
+            break;
+          }
+        }
+        if (t) {
+          out.push(t);
+          seen.add(t.uri);
+          progressed = true;
+        }
+      }
+      if (!progressed) break;
+    }
+    return out;
+  }
+  function validateSelection(tracks, sources, count, repeat = false) {
+    if (!tracks.length) throw Error("No matching playable songs were found. Try a broader request.");
+    if (tracks.length > count) throw Error("Selection exceeded the requested count.");
+    if (tracks.some((t) => !/^spotify:track:[A-Za-z0-9]{22}$/.test(t.uri))) throw Error("Selection contains an invalid track.");
+    if (sources && tracks.some((t) => !sources.has(t.uri))) throw Error("Selection left the requested source. Nothing was queued.");
+    if (!repeat && new Set(tracks.map((t) => t.uri)).size !== tracks.length) throw Error("Selection contains accidental duplicates.");
+    return tracks;
+  }
+  function sameQueue(a, b) {
+    return a.account === b.account && a.local && b.local && a.current === b.current && a.revision === b.revision && JSON.stringify(a.entries.map((e) => [e.uid, e.uri, e.manual])) === JSON.stringify(b.entries.map((e) => [e.uid, e.uri, e.manual]));
+  }
+  function inserted(before, after, uris) {
+    if (before.account !== after.account || !after.local) return false;
+    const old = new Set(before.entries.map((e) => e.uid));
+    const fresh = after.entries.filter((e) => e.manual && e.uid && !old.has(e.uid));
+    const wanted = uris.slice();
+    let at = 0;
+    for (const e of fresh) if (e.uri === wanted[at]) at++;
+    return at === wanted.length;
+  }
+
+  // src/queue.ts
+  var QueueWriter = class {
+    constructor(adapter, journal) {
+      this.adapter = adapter;
+      this.journal = journal;
+    }
+    chain = Promise.resolve();
+    uncertain = false;
+    get blocked() {
+      return this.uncertain;
+    }
+    acknowledge() {
+      this.uncertain = false;
+    }
+    commit(tracks, mode, expected) {
+      const run2 = () => this.mutate(tracks, mode, expected);
+      const task = this.chain.then(run2, run2);
+      this.chain = task.catch(() => {
+      });
+      return task;
+    }
+    async mutate(tracks, mode, expected) {
+      if (this.uncertain) throw Error("A previous write is uncertain. Inspect Spotify\u2019s Queue, then restart Spotify to reconcile.");
+      validateSelection(tracks, null, 50, true);
+      const before = await this.adapter.snapshot();
+      if (before.account !== expected.account) throw Error("Spotify account changed. Submit your request again.");
+      if (!before.local) throw Error("Playback moved to another device. Select this computer in Spotify before queueing.");
+      if (mode === "replace" && !sameQueue(expected, before)) throw Error("The queue changed while selecting songs. Review it and retry.");
+      if (mode === "replace" && !this.adapter.replaceSupported()) throw Error("Queue replacement is unavailable on this Spotify build. Use append.");
+      const uris = tracks.map((t) => t.uri);
+      const start2 = performance.now();
+      this.journal({ state: "writing", mode, before, uris, at: Date.now() });
+      let writeError;
+      try {
+        if (mode === "replace" && before.entries.some((e) => e.manual)) {
+          await this.adapter.remove(before);
+          const afterRemove = await this.adapter.snapshot();
+          if (afterRemove.entries.some((e) => e.manual) || afterRemove.current !== before.current || afterRemove.account !== before.account || !afterRemove.local) throw Error("Queue removal was partial or playback changed. Replacement stopped.");
+        }
+        await this.adapter.append(uris);
+      } catch (e) {
+        writeError = e;
+      }
+      for (let attempt = 0; attempt < 20; attempt++) {
+        let after;
+        try {
+          after = await this.adapter.snapshot();
+        } catch {
+          await new Promise((r) => setTimeout(r, 150));
+          continue;
+        }
+        if (inserted(before, after, uris)) {
+          this.journal({ state: "confirmed", mode, uris, revision: after.revision, at: Date.now() });
+          return { count: uris.length, insertionMs: Math.round(performance.now() - start2) };
+        }
+        await new Promise((r) => setTimeout(r, 150));
+      }
+      this.uncertain = true;
+      this.journal({ state: "uncertain", mode, before, uris, at: Date.now() });
+      throw Error("Queue write could not be confirmed. Some songs may have been added. Inspect Spotify\u2019s Queue; do not repeat append." + (writeError instanceof Error ? " " + writeError.message : ""));
+    }
+  };
+
+  // src/pipeline.ts
+  var Pipeline = class {
+    constructor(spotify2, helper2, writer2, choose2, activity) {
+      this.spotify = spotify2;
+      this.helper = helper2;
+      this.writer = writer2;
+      this.choose = choose2;
+      this.activity = activity;
+    }
+    generation;
+    mutation = false;
+    previous = [];
+    previousAccount = "";
+    previousSources = { liked: false, playlists: [] };
+    async run(prompt, settings) {
+      if (this.mutation) throw Error("Finishing the current queue change. Please wait.");
+      this.generation?.abort();
+      const abort = new AbortController();
+      this.generation = abort;
+      const signal = abort.signal;
+      const check = () => {
+        if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
+      };
+      const intent = parseIntent(prompt, settings.length, settings.cap, settings.mode);
+      const start2 = performance.now();
+      this.activity("Selecting songs\u2026");
+      const initial = await this.spotify.snapshot();
+      if (!initial.local) throw Error("Choose this computer in Spotify\u2019s device menu before queueing.");
+      const account = initial.account;
+      if (this.previousAccount !== account) {
+        this.previous = [];
+        this.previousSources = { liked: false, playlists: [] };
+        this.previousAccount = account;
+      }
+      if (intent.more && !this.previous.length) throw Error("Make a selection first, then ask for more like it.");
+      if (intent.more && !intent.liked && !intent.playlistNames.length && !intent.playlistUris.length) {
+        intent.liked = this.previousSources.liked;
+        intent.playlistUris = this.previousSources.playlists.slice();
+      }
+      const usedSources = { liked: intent.liked, playlists: [] };
+      let tracks = [];
+      let coverage = "";
+      let generationMs = 0;
+      let sourceSet = null;
+      if (intent.history) {
+        if (/most played|top tracks/i.test(prompt)) {
+          const result = await this.helper.request("history", { account, count: intent.count, days: 30 }, signal);
+          coverage = result.coverage;
+          if (!result.tracks.length) throw Error("No local listening counts yet. Meaningful plays will be counted from now on; Spotify does not provide complete past counts here.");
+          tracks = result.tracks.map((t) => ({ id: t.uri.split(":")[2], uri: t.uri, title: t.title, artist: t.artist, source: "observed history" }));
+        } else {
+          tracks = (await this.spotify.recent()).slice(0, intent.count);
+          coverage = "Spotify\u2019s available recent songs; no play counts or complete historical coverage.";
+        }
+        if (intent.liked || intent.playlistNames.length || intent.playlistUris.length) throw Error("Combine history with a library restriction in a separate request for now.");
+      } else {
+        let candidates = [];
+        let groups = [];
+        const likedTracks = intent.liked ? await this.spotify.liked(200) : [];
+        if (intent.liked && !intent.playlistNames.length && !intent.playlistUris.length) groups.push(likedTracks);
+        if (intent.playlistNames.length || intent.playlistUris.length) {
+          const playlists = await this.spotify.playlists();
+          const resolved = [];
+          for (const name of intent.playlistNames) {
+            check();
+            const matches = playlistMatches(name, playlists);
+            if (!matches.length) throw Error(`No playlist named \u201C${name}\u201D was found.`);
+            resolved.push(matches.length === 1 ? matches[0] : await this.choose(name, matches, signal));
+          }
+          for (const uri of intent.playlistUris) resolved.push(playlists.find((p) => p.uri === uri) ?? { uri, name: uri });
+          if (resolved.length > 6) throw Error("Mix up to six playlists per request.");
+          usedSources.playlists = [...new Set(resolved.map((p) => p.uri))];
+          const likedSet = new Set(likedTracks.map((t) => t.uri));
+          for (const p of [...new Map(resolved.map((p2) => [p2.uri, p2])).values()]) {
+            check();
+            const songs = await this.spotify.playlist(p.uri, 200);
+            groups.push(intent.liked ? songs.filter((t) => likedSet.has(t.uri)) : songs);
+          }
+        }
+        if (intent.more && !intent.repeat) groups = groups.map((g) => g.filter((t) => !this.previous.some((p) => p.uri === t.uri)));
+        if (groups.length) {
+          candidates = balancedMix(groups, 200);
+          sourceSet = new Set(candidates.map((t) => t.uri));
+        } else if (intent.more && this.previous.length) {
+          const found = await Promise.all([...new Set(this.previous.slice(0, 3).map((t) => t.artist))].map((artist) => this.spotify.search(artist, 20)));
+          candidates = [...new Map(found.flat().map((t) => [t.uri, t])).values()].filter((t) => !this.previous.some((p) => p.uri === t.uri)).slice(0, 60);
+        } else {
+          const term = prompt.replace(/\b(something|songs?|tracks?|for|working|listening|add|another|start over|please|my|only)\b/gi, " ").replace(/\d+/g, " ").trim();
+          candidates = await this.spotify.search(term || "mellow", 40);
+        }
+        check();
+        if (groups.length && !intent.filtered) {
+          tracks = balancedMix(groups, intent.count, intent.repeat);
+        } else {
+          const compact = candidates.map((t, i) => ({ ...t, id: "c" + i }));
+          const response = await this.helper.request("generate", { prompt: intent.prompt, count: intent.count, candidates: compact, restricted: !!sourceSet, previous: intent.more ? this.previous.slice(-10).map((t) => ({ title: t.title, artist: t.artist })) : [] }, signal);
+          generationMs = response.generationMs;
+          tracks = response.ids.map((id) => {
+            const index = compact.findIndex((c) => c.id === id);
+            if (index < 0) throw Error("Invalid model track selection.");
+            return candidates[index];
+          });
+          const suggestions = response.suggestions ?? [];
+          for (let i = 0; i < suggestions.length; i += 5) {
+            check();
+            const resolved = await Promise.all(suggestions.slice(i, i + 5).map((song) => this.spotify.resolve(song.title, song.artist)));
+            for (const t of resolved) {
+              if (t && !tracks.some((x) => x.uri === t.uri) && (!intent.more || intent.repeat || !this.previous.some((p) => p.uri === t.uri))) tracks.push(t);
+            }
+          }
+          if (groups.length > 1) {
+            const selected = new Set(tracks.map((t) => t.uri));
+            tracks = balancedMix(groups.map((g) => g.filter((t) => selected.has(t.uri))), intent.count, intent.repeat);
+          }
+        }
+      }
+      check();
+      validateSelection(tracks, sourceSet, intent.count, intent.repeat);
+      this.activity("Checking songs\u2026");
+      tracks = await this.spotify.validate(tracks);
+      check();
+      if (await this.spotify.account() !== account) throw Error("Spotify account changed during selection. Try again.");
+      if (sourceSet) {
+        let fresh = /* @__PURE__ */ new Set();
+        const playlists = [...new Set(tracks.map((t) => t.source).filter((s) => s.startsWith("spotify:playlist:")))];
+        for (const source of playlists) {
+          for (const t of await this.spotify.playlist(source, 200)) fresh.add(t.uri);
+        }
+        if (intent.liked) {
+          const likes = new Set((await this.spotify.liked(200)).map((t) => t.uri));
+          fresh = playlists.length ? new Set([...fresh].filter((uri) => likes.has(uri))) : likes;
+        }
+        validateSelection(tracks, fresh, intent.count, intent.repeat);
+      }
+      check();
+      this.mutation = true;
+      this.activity("Updating Spotify\u2019s queue\u2026", true);
+      try {
+        const result = await this.writer.commit(tracks, intent.mode, initial);
+        this.previous = tracks;
+        this.previousSources = usedSources;
+        return { ...result, requested: intent.count, generationMs, totalMs: Math.round(performance.now() - start2), coverage, mode: intent.mode };
+      } finally {
+        this.mutation = false;
+        if (this.generation === abort) this.generation = void 0;
+      }
+    }
+    cancel() {
+      if (!this.mutation) this.generation?.abort();
+    }
+  };
+
+  // src/index.ts
+  window.__queueCompanion?.dispose();
+  var lifecycle = new AbortController();
+  var helper = new Helper();
+  var spotify = new Spotify(helper);
+  var preferences = { length: 15, cap: 50, mode: "append", history: true };
+  var host;
+  var root;
+  var anchor;
+  var resize;
+  var input;
+  var feedback;
+  var submit;
+  var popover;
+  var feedbackTimer;
+  var authTimer;
+  var historyDispose;
+  var epoch = 0;
+  var disposing = false;
+  var lastPrompt = "";
+  var lastSuccessPrompt = "";
+  var lastSuccessAt = 0;
+  var status;
+  var journalKey = () => `queue-companion-write:${Spicetify.Platform.username}`;
+  var writer = new QueueWriter(spotify, (x) => localStorage.setItem(journalKey(), JSON.stringify(x)));
+  function message(text, error = false, retry = false) {
+    if (!feedback) return;
+    clearTimeout(feedbackTimer);
+    feedback.replaceChildren();
+    feedback.append(document.createTextNode(text));
+    feedback.dataset.error = String(error);
+    if (retry && !writer.blocked) {
+      const b = document.createElement("button");
+      b.textContent = "Retry";
+      b.type = "button";
+      b.onclick = () => void run(lastPrompt);
+      feedback.append(b);
+    }
+    if (!error) feedbackTimer = window.setTimeout(() => feedback.replaceChildren(), 5e3);
+  }
+  async function choose(name, choices, signal) {
+    return new Promise((resolve, reject) => {
+      clearTimeout(feedbackTimer);
+      feedback.replaceChildren();
+      const title = document.createElement("span");
+      title.textContent = `Choose \u201C${name}\u201D: `;
+      feedback.append(title);
+      const select = document.createElement("select");
+      select.setAttribute("aria-label", `Choose playlist ${name}`);
+      const placeholder = document.createElement("option");
+      placeholder.textContent = "Select playlist";
+      placeholder.value = "";
+      select.append(placeholder);
+      for (const p of choices) {
+        const option = document.createElement("option");
+        option.value = p.uri;
+        option.textContent = p.name + (p.owner ? " \u2014 " + p.owner : "") + " \xB7 " + p.uri.slice(-6);
+        select.append(option);
+      }
+      feedback.append(select);
+      select.focus();
+      const abort = () => {
+        feedback.replaceChildren();
+        reject(new DOMException("Cancelled", "AbortError"));
+      };
+      signal.addEventListener("abort", abort, { once: true });
+      select.onchange = () => {
+        const p = choices.find((c) => c.uri === select.value);
+        if (p) {
+          signal.removeEventListener("abort", abort);
+          feedback.replaceChildren();
+          resolve(p);
+          input.focus();
+        }
+      };
+    });
+  }
+  var pipeline = new Pipeline(spotify, helper, writer, choose, (text, writing) => {
+    if (writing) submit.disabled = true;
+    message(text);
+  });
+  async function refreshSettings() {
+    const account = await spotify.account();
+    status = await helper.request("status", { account });
+    preferences = status.settings;
+    return status;
+  }
+  async function reconcile() {
+    const raw = localStorage.getItem(journalKey());
+    if (!raw) return;
+    try {
+      const j = JSON.parse(raw);
+      if (j.state === "writing" || j.state === "uncertain") {
+        await spotify.snapshot();
+        message("A previous queue write was interrupted. Inspect Spotify\u2019s Queue before submitting another request.", true);
+        const b = document.createElement("button");
+        b.textContent = "I checked the Queue";
+        b.onclick = () => {
+          localStorage.removeItem(journalKey());
+          writer.acknowledge();
+          submit.disabled = false;
+          feedback.replaceChildren();
+          input.focus();
+        };
+        feedback.append(b);
+        submit.disabled = true;
+      }
+    } catch {
+      message("The saved queue receipt could not be read. Inspect Spotify\u2019s Queue, then repair Queue Companion.", true);
+      submit.disabled = true;
+    }
+  }
+  async function run(prompt) {
+    if (submit.disabled) return;
+    if (submit.dataset.busy === "true" && prompt.trim() === lastPrompt.trim() || prompt.trim() === lastSuccessPrompt && performance.now() - lastSuccessAt < 1500) return;
+    pipeline.cancel();
+    const call = ++epoch;
+    lastPrompt = prompt;
+    submit.dataset.busy = "true";
+    submit.textContent = "\u2026";
+    submit.setAttribute("aria-label", "Selecting songs");
+    try {
+      await refreshSettings();
+      const result = await pipeline.run(prompt, preferences);
+      if (call !== epoch) return;
+      const amount = `${result.count}${result.count < result.requested ? " of " + result.requested : ""} ${result.count === 1 ? "song" : "songs"}`;
+      message((result.mode === "replace" ? "Updated your queue" + (result.count < result.requested ? " \xB7 " + amount : ".") : "Added " + amount) + (result.coverage ? " \xB7 " + result.coverage : ""));
+      window.__queueCompanion.lastResult = result;
+      lastSuccessPrompt = prompt.trim();
+      lastSuccessAt = performance.now();
+    } catch (e) {
+      if (call !== epoch || e instanceof DOMException && e.name === "AbortError") return;
+      message(e instanceof Error ? e.message : "Selection failed. Try again.", true, true);
+    } finally {
+      if (call === epoch) {
+        submit.disabled = writer.blocked;
+        submit.dataset.busy = "false";
+        submit.textContent = "\u21B5";
+        submit.setAttribute("aria-label", "Add songs");
+      }
+    }
+  }
+  function element(tag, text) {
+    const e = document.createElement(tag);
+    if (text) e.textContent = text;
+    return e;
+  }
+  async function showSettings() {
+    if (!popover.hidden) {
+      popover.hidden = true;
+      clearTimeout(authTimer);
+      input.focus();
+      return;
+    }
+    popover.hidden = false;
+    popover.replaceChildren(element("p", "Connecting to helper\u2026"));
+    try {
+      const s = await refreshSettings();
+      if (popover.hidden) return;
+      popover.replaceChildren();
+      const title = element("strong", "Queue Companion");
+      popover.append(title);
+      popover.append(element("p", s.auth.connected ? `ChatGPT connected \xB7 ${s.auth.email}` : "Connect ChatGPT to select by mood. Eligible plans and quota apply."));
+      if (s.auth.error) popover.append(element("p", s.auth.error));
+      const connect = element("button", s.auth.connected ? "Reconnect ChatGPT" : "Continue with ChatGPT");
+      connect.type = "button";
+      connect.onclick = async () => {
+        try {
+          await helper.request("connect", {});
+          message("Finish ChatGPT sign-in in your browser.");
+          let attempts = 0;
+          const check = async () => {
+            try {
+              const s2 = await refreshSettings();
+              if (!s2.auth.pending) {
+                if (!popover.hidden) {
+                  popover.hidden = true;
+                  await showSettings();
+                }
+                return;
+              }
+              if (++attempts < 80 && !popover.hidden) authTimer = window.setTimeout(check, 1500);
+            } catch {
+            }
+          };
+          authTimer = window.setTimeout(check, 1500);
+        } catch (e) {
+          message(e.message, true);
+        }
+      };
+      popover.append(connect);
+      if (s.auth.connected) {
+        const disconnect = element("button", "Disconnect");
+        disconnect.type = "button";
+        disconnect.onclick = async () => {
+          try {
+            await helper.request("disconnect");
+            popover.hidden = true;
+            await showSettings();
+          } catch (e) {
+            message(e.message, true);
+          }
+        };
+        popover.append(disconnect);
+      }
+      const label = element("label", "Default songs ");
+      const length = element("input");
+      length.type = "number";
+      length.min = "1";
+      length.max = "50";
+      length.value = String(preferences.length);
+      label.append(length);
+      popover.append(label);
+      const capLabel = element("label", "Maximum songs ");
+      const cap = element("input");
+      cap.type = "number";
+      cap.min = "1";
+      cap.max = "50";
+      cap.value = String(preferences.cap);
+      capLabel.append(cap);
+      popover.append(capLabel);
+      const modeLabel = element("label", "Queue preference ");
+      const mode = element("select");
+      for (const value of ["append", "replace"]) {
+        const option = element("option", value === "append" ? "Append" : "Replace manually queued songs");
+        option.value = value;
+        option.disabled = value === "replace" && !spotify.replaceSupported();
+        mode.append(option);
+      }
+      mode.value = preferences.mode;
+      modeLabel.append(mode);
+      popover.append(modeLabel);
+      const historyLabel = element("label", "Count meaningful listening locally ");
+      const history = element("input");
+      history.type = "checkbox";
+      history.checked = preferences.history;
+      historyLabel.append(history);
+      popover.append(historyLabel);
+      let model;
+      if (s.auth.connected && s.auth.planUsage) {
+        try {
+          const choices = await helper.request("models");
+          model = element("select");
+          model.setAttribute("aria-label", "ChatGPT model");
+          const auto = element("option", "Automatic \xB7 fast available model");
+          auto.value = "";
+          model.append(auto);
+          for (const m of choices) {
+            const option = element("option", m.displayName);
+            option.value = m.slug;
+            model.append(option);
+          }
+          model.value = preferences.model ?? "";
+          const label2 = element("label", "Model ");
+          label2.append(model);
+          popover.append(label2);
+        } catch (e) {
+          popover.append(element("p", e.message));
+        }
+      }
+      popover.append(element("p", `${s.history.coverage}. ${s.history.meaningfulPlays} meaningful plays. ${s.history.threshold}`));
+      popover.append(element("p", s.quota));
+      const save = element("button", "Save");
+      save.type = "button";
+      save.onclick = async () => {
+        try {
+          preferences = await helper.request("settings", { length: Number(length.value), cap: Number(cap.value), mode: mode.value, history: history.checked, model: model?.value || null });
+          popover.hidden = true;
+          message("Settings saved.");
+          input.focus();
+        } catch (e) {
+          message(e.message, true);
+        }
+      };
+      popover.append(save);
+      const erase = element("button", "Clear local listening counts");
+      erase.type = "button";
+      erase.onclick = async () => {
+        try {
+          await helper.request("history.clear", { account: await spotify.account() });
+          popover.hidden = true;
+          message("Local listening counts cleared.");
+        } catch (e) {
+          message(e.message, true);
+        }
+      };
+      popover.append(erase);
+    } catch (e) {
+      popover.replaceChildren(element("p", e.message));
+      const reconnect = element("a", "Start helper");
+      reconnect.href = "queue-companion://start";
+      popover.append(reconnect);
+      const repair = element("a", "Repair installation");
+      repair.href = "queue-companion://repair";
+      popover.append(repair);
+    }
+  }
+  function mount() {
+    if (disposing) return;
+    const search = document.querySelector('input[data-testid="search-input"][data-top-bar-search="true"]');
+    if (!search) return;
+    if (host?.isConnected && anchor === search) {
+      position();
+      return;
+    }
+    if (!host) {
+      host = element("div");
+      host.id = "queue-companion";
+      root = host.attachShadow({ mode: "open" });
+      const style = element("style");
+      style.textContent = `
+      :host{display:block;position:fixed;z-index:1001;width:420px;color:var(--qc-text);font-family:var(--qc-font);font-size:12px;line-height:1.4}
+      *{box-sizing:border-box} [hidden]{display:none!important} form{height:26px;display:flex;align-items:center;background:var(--qc-bg);border:1px solid var(--qc-border);border-radius:16px;padding:0 5px 0 12px;gap:4px}
+      form:focus-within{outline:2px solid var(--qc-text);outline-offset:1px} input,button,select,a{font:inherit;color:inherit} input[type=text]{background:transparent;border:0;outline:0;min-width:0;flex:1;padding:0;height:24px} input::placeholder{color:var(--qc-muted)}
+      button{border:0;border-radius:12px;background:transparent;cursor:pointer;padding:3px 7px;white-space:nowrap} button:hover,a:hover{background:var(--qc-border)} button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--qc-text)} button:disabled{opacity:.5;cursor:default}
+      button[data-busy=true]{animation:pulse 1s ease-in-out infinite} @keyframes pulse{50%{opacity:.35}} @media(prefers-reduced-motion:reduce){button[data-busy=true]{animation:none}}
+      .feedback:empty{display:none}.feedback{position:absolute;top:30px;left:0;max-width:100%;background:var(--qc-bg);border-radius:8px;padding:5px 10px;box-shadow:0 4px 12px #0005}.feedback[data-error=true]{border:1px solid var(--qc-muted)}
+      .popover{position:absolute;right:0;top:32px;width:320px;max-width:90vw;max-height:70vh;overflow:auto;background:var(--qc-bg);padding:14px;border-radius:8px;border:1px solid var(--qc-border);box-shadow:0 8px 24px #0008}.popover p{margin:8px 0;color:var(--qc-muted)}.popover label{display:flex;justify-content:space-between;align-items:center;margin:10px 0;gap:8px}.popover input[type=number]{width:55px}.popover select{max-width:210px}select,input[type=number]{background:var(--qc-bg);border:1px solid var(--qc-muted);border-radius:4px;padding:3px}.popover a{display:inline-block;margin:6px;padding:4px}
+    `;
+      root.append(style);
+      const form = element("form");
+      form.setAttribute("aria-label", "Queue Companion");
+      input = element("input");
+      input.type = "text";
+      input.maxLength = 1e3;
+      input.autocomplete = "off";
+      input.placeholder = "What do you feel like listening to?";
+      input.setAttribute("aria-label", input.placeholder);
+      input.setAttribute("aria-describedby", "feedback");
+      submit = element("button", "\u21B5");
+      submit.type = "submit";
+      submit.setAttribute("aria-label", "Add songs");
+      const settings = element("button", "\u2699");
+      settings.type = "button";
+      settings.setAttribute("aria-label", "Queue Companion settings");
+      settings.setAttribute("aria-haspopup", "dialog");
+      settings.onclick = () => void showSettings();
+      form.append(input, submit, settings);
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        void run(input.value);
+      };
+      form.onkeydown = (e) => {
+        e.stopPropagation();
+        if (e.key === "Enter" && e.repeat) {
+          e.preventDefault();
+          return;
+        }
+        if (e.key === "Escape") {
+          pipeline.cancel();
+          popover.hidden = true;
+          input.focus();
+        }
+      };
+      feedback = element("div");
+      feedback.id = "feedback";
+      feedback.className = "feedback";
+      feedback.setAttribute("role", "status");
+      feedback.setAttribute("aria-live", "polite");
+      popover = element("div");
+      popover.className = "popover";
+      popover.hidden = true;
+      popover.setAttribute("role", "dialog");
+      popover.setAttribute("aria-label", "Queue Companion settings");
+      popover.onkeydown = (e) => {
+        e.stopPropagation();
+        if (e.key === "Escape") {
+          popover.hidden = true;
+          input.focus();
+        }
+      };
+      root.append(form, feedback, popover);
+    }
+    const container = search.closest("form")?.parentElement;
+    const local = container && getComputedStyle(container).position !== "static";
+    anchor = search;
+    host.style.position = local ? "absolute" : "fixed";
+    (local ? container : document.body).append(host);
+    resize?.disconnect();
+    resize = new ResizeObserver(position);
+    resize.observe(search);
+    position();
+  }
+  function position() {
+    if (!anchor || !host) return;
+    const r = anchor.getBoundingClientRect();
+    if (r.width < 100) {
+      host.style.visibility = "hidden";
+      return;
+    }
+    host.style.visibility = "visible";
+    const style = getComputedStyle(anchor);
+    host.style.setProperty("--qc-font", style.fontFamily);
+    host.style.setProperty("--qc-text", style.color);
+    host.style.setProperty("--qc-bg", style.backgroundColor === "rgba(0, 0, 0, 0)" ? "var(--background-elevated-base, #282828)" : style.backgroundColor);
+    host.style.setProperty("--qc-muted", "var(--text-subdued, #b3b3b3)");
+    host.style.setProperty("--qc-border", "var(--background-tinted-highlight, #404040)");
+    const parent = host.style.position === "absolute" ? host.parentElement : null;
+    const p = parent?.getBoundingClientRect();
+    host.style.left = `${parent && p ? r.left - p.left - parent.clientLeft + parent.scrollLeft : Math.max(8, r.left)}px`;
+    host.style.top = `${parent && p ? r.bottom - p.top - parent.clientTop + parent.scrollTop + 2 : r.bottom + 2}px`;
+    host.style.width = `${Math.min(r.width, window.innerWidth - 16)}px`;
+  }
+  var scheduled = false;
+  var observer = new MutationObserver(() => {
+    if (scheduled) return;
+    scheduled = true;
+    queueMicrotask(() => {
+      scheduled = false;
+      mount();
+    });
+  });
+  function dispose() {
+    disposing = true;
+    lifecycle.abort();
+    observer.disconnect();
+    resize?.disconnect();
+    clearTimeout(feedbackTimer);
+    clearTimeout(authTimer);
+    pipeline.cancel();
+    historyDispose?.();
+    helper.dispose();
+    host?.remove();
+  }
+  window.__queueCompanion = { dispose, run: (prompt) => run(prompt), snapshot: () => spotify.snapshot(), status: () => refreshSettings(), history: () => helper.request("history", { account: Spicetify.Platform.username, count: 15, days: 30 }) };
+  async function start() {
+    for (let i = 0; i < 120; i++) {
+      if (disposing) return;
+      if (globalThis.Spicetify?.Platform?.PlayerAPI && Spicetify.Queue && Spicetify.GraphQL?.Definitions?.getTrack && Spicetify.Platform.ConnectAPI) break;
+      if (i === 119) return;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    mount();
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener("resize", () => requestAnimationFrame(position), { signal: lifecycle.signal });
+    window.addEventListener("beforeunload", dispose, { once: true, signal: lifecycle.signal });
+    historyDispose = spotify.startHistory();
+    try {
+      await refreshSettings();
+      await reconcile();
+    } catch {
+    }
+  }
+  void start();
+})();

@@ -1,0 +1,80 @@
+{
+  "route": "Actual installed input and form submit handler",
+  "model": "gpt-5.6-luna",
+  "immediateActivity": true,
+  "result": {
+    "count": 15,
+    "insertionMs": 1221,
+    "requested": 15,
+    "generationMs": 8540,
+    "totalMs": 11365,
+    "coverage": "",
+    "mode": "replace"
+  },
+  "feedback": "",
+  "inserted": [
+    {
+      "uri": "spotify:track:7I8F9B3WufKRh5OS0ZziXi",
+      "uid": "q52"
+    },
+    {
+      "uri": "spotify:track:629T0ZagKDcDSeL4451qAb",
+      "uid": "q53"
+    },
+    {
+      "uri": "spotify:track:6mVwXmb4FE3mhqbOcefKQz",
+      "uid": "q54"
+    },
+    {
+      "uri": "spotify:track:4y2P14pQVjmfNOgaf1eckJ",
+      "uid": "q55"
+    },
+    {
+      "uri": "spotify:track:7cbV8mkWS1QXh0TGovgHub",
+      "uid": "q56"
+    },
+    {
+      "uri": "spotify:track:3YGVTfSxTCuDykWrENqmGp",
+      "uid": "q57"
+    },
+    {
+      "uri": "spotify:track:4ecLl0KCzgW9CjBZoFRxIC",
+      "uid": "q58"
+    },
+    {
+      "uri": "spotify:track:7cXi1zqMTvhi8kCSgPeAaN",
+      "uid": "q59"
+    },
+    {
+      "uri": "spotify:track:4WJ0RB2TLZso1uM909iiCO",
+      "uid": "q60"
+    },
+    {
+      "uri": "spotify:track:4R1TO3iPLWrmHsdPmXjA0i",
+      "uid": "q61"
+    },
+    {
+      "uri": "spotify:track:27IefxbDpbUttNvJItkX9I",
+      "uid": "q62"
+    },
+    {
+      "uri": "spotify:track:2XWIjP3DFozaXTW3JjHQCI",
+      "uid": "q63"
+    },
+    {
+      "uri": "spotify:track:6Av8YtRXWn1TEmJyVfwZmF",
+      "uid": "q64"
+    },
+    {
+      "uri": "spotify:track:5MVZw1b8vt9AF6A9UsGjPw",
+      "uid": "q65"
+    },
+    {
+      "uri": "spotify:track:5RDhIb98ZPlxln9BPJzZSU",
+      "uid": "q66"
+    }
+  ],
+  "oldManualRemoved": true,
+  "currentUnchanged": true,
+  "barCount": 1
+}

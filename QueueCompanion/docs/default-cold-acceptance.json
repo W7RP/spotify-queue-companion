@@ -1,0 +1,78 @@
+{
+  "route": "Actual installed input and form submit handler",
+  "immediateActivity": true,
+  "result": {
+    "count": 15,
+    "insertionMs": 464,
+    "requested": 15,
+    "generationMs": 4895,
+    "totalMs": 8098,
+    "coverage": "",
+    "mode": "append"
+  },
+  "feedback": "Added 15 songs",
+  "inserted": [
+    {
+      "uri": "spotify:track:6Z0Pm2MNFuNB8pZSyjkqHU",
+      "uid": "q7"
+    },
+    {
+      "uri": "spotify:track:0GpgtMhdoZgARgXxLn1N0K",
+      "uid": "q8"
+    },
+    {
+      "uri": "spotify:track:0EO6LOTwp0phsTic6dvlVk",
+      "uid": "q9"
+    },
+    {
+      "uri": "spotify:track:0EDmxBeZM4gudzfZL3GJg9",
+      "uid": "q10"
+    },
+    {
+      "uri": "spotify:track:0rKeBhctkplaeE2XtnRDSf",
+      "uid": "q11"
+    },
+    {
+      "uri": "spotify:track:7oeLazf9hUGsUEWjyaA5Xp",
+      "uid": "q12"
+    },
+    {
+      "uri": "spotify:track:3PbKkDQ9W4bZ4gnmSJnCHO",
+      "uid": "q13"
+    },
+    {
+      "uri": "spotify:track:3YGVTfSxTCuDykWrENqmGp",
+      "uid": "q14"
+    },
+    {
+      "uri": "spotify:track:3Nrvm4lMBMb7yem6dUnOdt",
+      "uid": "q15"
+    },
+    {
+      "uri": "spotify:track:5YmHoOQvEZ5ne4MRptqQpv",
+      "uid": "q16"
+    },
+    {
+      "uri": "spotify:track:4UNNAEekUk6BYJnKknLma8",
+      "uid": "q17"
+    },
+    {
+      "uri": "spotify:track:7p6tnzVKQK4FnnQdGpjMiD",
+      "uid": "q18"
+    },
+    {
+      "uri": "spotify:track:5JaDKSDhUiaYEhy2lvXrF9",
+      "uid": "q19"
+    },
+    {
+      "uri": "spotify:track:0bzFaHiymbvjmIDKf6XAbS",
+      "uid": "q20"
+    },
+    {
+      "uri": "spotify:track:2PD23eZV0pO15j27UCmISk",
+      "uid": "q21"
+    }
+  ],
+  "currentUnchanged": true,
+  "barCount": 1
+}

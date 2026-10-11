@@ -1,0 +1,6 @@
+{
+  "product": "premium",
+  "premiumObserved": true,
+  "source": "Actual client exposed initialProductState.product",
+  "broaderAccountSupportVerified": false
+}

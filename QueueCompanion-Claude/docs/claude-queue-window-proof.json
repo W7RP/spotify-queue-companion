@@ -1,0 +1,15 @@
+{
+  "testUsedNativeAPIs": true,
+  "addedThenRemovedOneExactTestUid": true,
+  "manualBefore": 15,
+  "manualAfter": 15,
+  "manualIdentitiesAndOrderPreserved": true,
+  "snapshotEntriesBefore": 80,
+  "snapshotEntriesDuring": 80,
+  "snapshotEntriesAfter": 80,
+  "contextEntriesDuring": 64,
+  "contextEntriesAfter": 65,
+  "contextPrefixPreserved": true,
+  "currentUnchanged": true,
+  "playing": false
+}

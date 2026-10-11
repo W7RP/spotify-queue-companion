@@ -1,0 +1,15 @@
+{
+  "route": "Actual Spotify settings popover and paired helper",
+  "defaultProvider": "claude",
+  "keyMasked": true,
+  "clearedOnSubmit": true,
+  "invalidKeyError": true,
+  "clearedOnClose": true,
+  "blankOnReopen": true,
+  "disconnectedError": "Connect a Claude API key in Queue Companion settings.Retry",
+  "queueUnchanged": true,
+  "currentUnchanged": true,
+  "selectionReturned": false,
+  "barCount": 1,
+  "credentialsRecorded": false
+}

@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "version": "0.2.2",
+  "manifestModules": [
+    "queue-companion",
+    "stdlib"
+  ],
+  "checks": {
+    "installedVersionIs022": true,
+    "installedHelperMatchesBuild": true,
+    "installedSetupMatchesBuild": true,
+    "productionBundleRestored": true,
+    "manifestOnlyRequiredModules": true,
+    "optionalExecutableTreesAbsent": true,
+    "optionalSourceArchivesRemoved": true,
+    "optionalSelectionsDisabled": true,
+    "pendingOptionalRetriesRemoved": true,
+    "requiredLibraryDependencyDeclared": true,
+    "protectedCredentialsUnchanged": true,
+    "payloadIntegrity": true,
+    "payloadOnlyRequiredLibrary": true,
+    "payloadNoPrivateState": true
+  }
+}

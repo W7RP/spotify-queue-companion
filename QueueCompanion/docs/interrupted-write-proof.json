@@ -1,0 +1,32 @@
+{
+  "ready": true,
+  "interruption": "Real renderer reload during native queue mutation",
+  "journalState": "writing",
+  "submittedUris": [
+    "spotify:track:7nZwBbH8F8FqArrVIe8Zl4",
+    "spotify:track:6HZdbb05lEXLvcmee3ZXO2"
+  ],
+  "feedback": "A previous queue write was interrupted. Inspect Spotify’s Queue before submitting another request.I checked the Queue",
+  "submitDisabled": true,
+  "manualNow": [
+    {
+      "uri": "spotify:track:21COaSe3MUTI4prPFQyhYj",
+      "uid": "q5"
+    },
+    {
+      "uri": "spotify:track:0lTWjclO8uUXE2FQQOLavS",
+      "uid": "q6"
+    },
+    {
+      "uri": "spotify:track:7nZwBbH8F8FqArrVIe8Zl4",
+      "uid": "q7"
+    },
+    {
+      "uri": "spotify:track:6HZdbb05lEXLvcmee3ZXO2",
+      "uid": "q8"
+    }
+  ],
+  "requiresInspection": true,
+  "automaticAppendRetry": false,
+  "barCount": 1
+}

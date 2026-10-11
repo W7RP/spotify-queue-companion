@@ -1,0 +1,18 @@
+{
+  "before": "spotify:track:0lTWjclO8uUXE2FQQOLavS",
+  "duration": 263068,
+  "pending": [
+    "spotify:track:2XfJgsvgAdYFzPLkVpWE4I",
+    "spotify:track:21COaSe3MUTI4prPFQyhYj",
+    "spotify:track:0lTWjclO8uUXE2FQQOLavS"
+  ],
+  "after": "spotify:track:2XfJgsvgAdYFzPLkVpWE4I",
+  "naturalTransitionMatchedPending": true,
+  "shuffleWorked": true,
+  "repeatWorked": true,
+  "shuffleRestored": true,
+  "repeatRestored": false,
+  "paused": true,
+  "testUsedNativeSeekNearEnd": true,
+  "implementationUsesSongEndHandling": false
+}

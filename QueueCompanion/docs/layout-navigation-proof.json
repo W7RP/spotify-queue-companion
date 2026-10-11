@@ -1,0 +1,43 @@
+{
+  "method": "Actual app renderer viewport changes and native history navigation; not a manual Windows resize",
+  "observations": [
+    {
+      "viewport": 1000,
+      "count": 1,
+      "belowSearch": true,
+      "leftAligned": true,
+      "widthFits": true,
+      "inputAccessible": "What do you feel like listening to?",
+      "progressListeners": 1
+    },
+    {
+      "viewport": 1250,
+      "count": 1,
+      "belowSearch": true,
+      "leftAligned": true,
+      "widthFits": true,
+      "inputAccessible": "What do you feel like listening to?",
+      "progressListeners": 1
+    },
+    {
+      "viewport": 1355,
+      "count": 1,
+      "belowSearch": true,
+      "leftAligned": true,
+      "widthFits": true,
+      "inputAccessible": "What do you feel like listening to?",
+      "progressListeners": 1,
+      "navigation": "/collection/tracks"
+    },
+    {
+      "viewport": 1355,
+      "count": 1,
+      "belowSearch": true,
+      "leftAligned": true,
+      "widthFits": true,
+      "inputAccessible": "What do you feel like listening to?",
+      "progressListeners": 1,
+      "navigation": "/"
+    }
+  ]
+}

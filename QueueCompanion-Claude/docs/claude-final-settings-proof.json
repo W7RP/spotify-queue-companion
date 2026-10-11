@@ -1,0 +1,12 @@
+{
+  "provider": "chatgpt",
+  "length": 15,
+  "cap": 50,
+  "mode": "replace",
+  "model": null,
+  "claudeModel": null,
+  "chatGptConnected": true,
+  "claudeConnected": false,
+  "playing": false,
+  "credentialsRecorded": false
+}

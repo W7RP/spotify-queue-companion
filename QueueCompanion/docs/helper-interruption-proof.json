@@ -1,0 +1,6 @@
+{
+  "interruption": "Local helper process stopped during selection; actual IPC connection closed",
+  "feedback": "Helper disconnected. No queue write has been retried.Retry",
+  "queueUnchanged": true,
+  "barCount": 1
+}

@@ -1,0 +1,152 @@
+
+added 8 packages, and audited 9 packages in 1s
+
+2 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+> queue-companion-extension@0.2.0 test
+> tsx --test ../tests/*.test.ts
+
+TAP version 13
+# Subtest: intent defaults, word counts, cap, explicit replace and add more
+ok 1 - intent defaults, word counts, cap, explicit replace and add more
+  ---
+  duration_ms: 3.1184
+  ...
+# Subtest: playlist mixing remains balanced and does not duplicate overlap
+ok 2 - playlist mixing remains balanced and does not duplicate overlap
+  ---
+  duration_ms: 0.4769
+  ...
+# Subtest: ambiguous names are retained, exact names outrank partial matches
+ok 3 - ambiguous names are retained, exact names outrank partial matches
+  ---
+  duration_ms: 0.1236
+  ...
+# Subtest: source constraints and accidental duplicates fail closed
+ok 4 - source constraints and accidental duplicates fail closed
+  ---
+  duration_ms: 0.3728
+  ...
+# Subtest: unlisted genres still require classification; simple named mashups do not
+ok 5 - unlisted genres still require classification; simple named mashups do not
+  ---
+  duration_ms: 0.1964
+  ...
+# Subtest: append confirmation requires fresh identities and ordered multiplicity
+ok 6 - append confirmation requires fresh identities and ordered multiplicity
+  ---
+  duration_ms: 0.1405
+  ...
+# Subtest: pipeline intersects playlist and liked restrictions before selecting
+ok 7 - pipeline intersects playlist and liked restrictions before selecting
+  ---
+  duration_ms: 4.1832
+  ...
+# Subtest: a liked-song removed during generation stops the native write
+ok 8 - a liked-song removed during generation stops the native write
+  ---
+  duration_ms: 0.8874
+  ...
+# Subtest: pipeline rejects suggestions outside an explicit source even if a provider misbehaves
+ok 9 - pipeline rejects suggestions outside an explicit source even if a provider misbehaves
+  ---
+  duration_ms: 0.2557
+  ...
+# Subtest: add more inherits the liked source, carries compact context and excludes the last selection
+ok 10 - add more inherits the liked source, carries compact context and excludes the last selection
+  ---
+  duration_ms: 0.3029
+  ...
+# Subtest: a second generation cancels the first before mutation
+ok 11 - a second generation cancels the first before mutation
+  ---
+  duration_ms: 0.3861
+  ...
+# Subtest: a rejected append that actually applied is reconciled without another write
+ok 12 - a rejected append that actually applied is reconciled without another write
+  ---
+  duration_ms: 1.2899
+  ...
+# Subtest: replace detects manual edits during generation before removing anything
+ok 13 - replace detects manual edits during generation before removing anything
+  ---
+  duration_ms: 0.3798
+  ...
+# Subtest: connect device switch and account switch pause writes
+ok 14 - connect device switch and account switch pause writes
+  ---
+  duration_ms: 0.1534
+  ...
+# Subtest: serialized writes and replacement preserve context entries
+ok 15 - serialized writes and replacement preserve context entries
+  ---
+  duration_ms: 0.2558
+  ...
+# Subtest: partial writes are reported and never blindly repeated
+ok 16 - partial writes are reported and never blindly repeated
+  ---
+  duration_ms: 3100.6599
+  ...
+# Subtest: native track availability must be explicit before queueing
+ok 17 - native track availability must be explicit before queueing
+  ---
+  duration_ms: 1.0769
+  ...
+# Subtest: catalogue resolution accepts exact artists and editions, rejecting other artists and partial titles
+ok 18 - catalogue resolution accepts exact artists and editions, rejecting other artists and partial titles
+  ---
+  duration_ms: 0.9853
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3277.4288
+
+> queue-companion-extension@0.2.0 build
+> tsc --noEmit && esbuild src/index.ts --bundle --format=iife --target=chrome120 --outfile=dist/queue-companion.js
+
+PASS custom Spotify detection skips stale defaults and rejects Store aliases
+PASS Spotify paths preserve spaces and apostrophes and reject command arguments
+PASS IPC trusts only the selected Spotify executable at its exact path
+PASS DPAPI encrypted round-trip; plaintext absent on disk
+PASS streaming contract and valid completed selection
+PASS truncated inference never becomes a selection
+PASS terminal provider failure rejects partial output
+PASS fabricated IDs are rejected
+PASS restricted library cannot accept catalogue suggestions
+PASS quota errors remain explicit
+PASS identity-only scope cannot perform inference
+PASS concurrent access rotates the refresh token once
+PASS revoked refresh grant clears tokens without retrying
+PASS failed network revocation still erases local tokens
+PASS unsolicited OAuth callback is rejected
+PASS history threshold, session deduplication and account partition
+PASS Claude API contract, one bounded inference, available-model preference and usage
+PASS Claude catalogue pagination, retired exclusion and unavailable-model rejection
+PASS Claude truncated, limited, refusal, error and tool streams cannot commit
+PASS Claude shared source, duplicate and JSON validation rejects unsafe selections
+PASS Claude HTTP failures are explicit, sanitized and never retried
+PASS Claude failed replacement and invalid token preserve existing protected key
+PASS Claude successful key rotation resets model cache and usage
+PASS Claude disconnect during connection cannot resurrect a key
+PASS Claude disconnect during model retrieval prevents an inference call
+PASS Claude disconnect during inference discards completed selection
+PASS Claude cancellation during key verification cannot persist a key
+PASS Claude removed key cannot reach the service and preferences keep provider-specific models
+28 helper tests passed (isolated stubs; no live acceptance claim).
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  QueueCompanion -> C:\Users\jdarr\Documents\Codex\2026-10-10\files-pasted-by-the-user-build\outputs\QueueCompanion-Claude\helper\bin\Release\net10.0-windows\win-x64\QueueCompanion.dll
+  QueueCompanion -> C:\Users\jdarr\Documents\Codex\2026-10-10\files-pasted-by-the-user-build\outputs\QueueCompanion-Claude\release\helper\
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  QueueCompanion.Setup -> C:\Users\jdarr\Documents\Codex\2026-10-10\files-pasted-by-the-user-build\outputs\QueueCompanion-Claude\installer\bin\Release\net10.0-windows\win-x64\QueueCompanion.Setup.dll
+  QueueCompanion.Setup -> C:\Users\jdarr\Documents\Codex\2026-10-10\files-pasted-by-the-user-build\outputs\QueueCompanion-Claude\release\setup\

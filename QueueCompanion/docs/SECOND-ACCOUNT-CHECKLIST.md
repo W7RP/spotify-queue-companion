@@ -1,0 +1,18 @@
+# Fresh Windows account / machine acceptance
+
+This check is pending because the second Windows environment is not available right now. Run it when convenient; no credentials, pairing keys or account emails need to be recorded.
+
+1. Use a different Windows account or machine with the desktop Spotify client from spotify.com and a Premium account. Record Windows and Spotify versions. Start a song on this computer.
+2. Run the supplied QueueCompanion.Setup.exe. Review the Spicetify disclosure. Confirm installation completes, Spotify restarts and one compact bar appears beneath its search. No terminal or separate helper window should be needed.
+3. Open the gear. Complete a fresh Continue with ChatGPT sign-in and eligible plan-usage consent. Confirm Connected and that account-specific models appear. This environment must not use the first user's connection or pairing files.
+4. Submit Something mellow for working. Confirm the native Queue contains up to 15 actual playable songs, the feedback gives the confirmed count and the current song is uninterrupted. Record total wall time; repeat with a different mood after warming metadata. The known default latency limitation is documented in VERIFICATION.md.
+5. Mix six songs from three actual playlists using their quoted names or URLs. Verify two from each when there are enough unique tracks. Try a genre request limited to liked songs and check every result is liked. Exercise an ambiguous playlist name and confirm the inline chooser requires a choice.
+6. Ask for more like the last selection. Confirm append, source inheritance and no unintended repeats. Ask to start over and verify only manual pending entries are replaced, with the current song and album/playlist context preserved. Replacement is unavailable on builds other than the tested 1.3.4.258 until separately verified.
+7. While a replacement is selecting, manually remove or reorder an entry in Spotify's Queue. Confirm it aborts without overwriting your edit.
+8. Select another Connect device during selection. Confirm a clear error and no write to the remote device. Select this computer again and retry deliberately.
+9. Switch Spotify accounts and confirm library/cache/history results follow the new account. Verify previous-selection context from the first account is discarded. Do not copy private app-data files between accounts.
+10. Ask for most played recently before any observations: expect an honest missing-coverage message. Listen for at least 30 seconds or half a track. Ask again: confirm the actual locally observed track and start date; no claim of historical Spotify counts.
+11. Stop the helper after successful insertion. Confirm native playback, Next, Previous, shuffle, repeat and transitions still work. Use Start helper in the gear to reconnect. Check a request interrupted by an Internet loss produces no automatic duplicate append; inspect the Queue before retrying an uncertain result.
+12. Navigate, resize and restart Spotify. Confirm one bar, keyboard submission and settings access. Open Queue Companion Setup from Start and Repair; verify the connection remains. Restore stock Spotify and confirm the bar is gone. Repair again, then uninstall and confirm stock Spotify and removal of own startup/URI/module/data entries. If disconnect/uninstall cannot confirm network revocation, revoke Queue Companion in ChatGPT's connected-app settings.
+
+Record pass/fail, versions, counts, timings, visible error text and credential-free screenshots. Use the native Queue for evidence. A failed check should remain a failed or unverified result, rather than being replaced by a stub test.

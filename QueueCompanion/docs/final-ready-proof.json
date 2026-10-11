@@ -1,0 +1,16 @@
+{
+  "installedBarCount": 1,
+  "chatGptConnected": true,
+  "planInferencePermission": true,
+  "settings": {
+    "length": 15,
+    "cap": 50,
+    "mode": "append",
+    "model": null
+  },
+  "manualQueued": 16,
+  "localDevice": true,
+  "current": "spotify:track:0lTWjclO8uUXE2FQQOLavS",
+  "playing": false,
+  "credentialsRecorded": false
+}

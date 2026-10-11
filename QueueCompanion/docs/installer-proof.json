@@ -1,0 +1,9 @@
+{
+  "installedHelper": true,
+  "helperRunning": true,
+  "moduleStaged": true,
+  "runEntry": true,
+  "uninstallEntry": true,
+  "uriHandler": true,
+  "backup": true
+}
