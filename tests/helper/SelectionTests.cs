@@ -68,6 +68,13 @@ static class SelectionTests
             Assert(legacy.PlaylistCount == 0 && legacy.PlaylistIds == null, "Legacy discovery changed.");
             SelectionRules.ValidateRequest(legacy);
         });
+        Test("blend instructions calculate both primary and reserve portions explicitly", () => {
+            var blend = new Generation("Similar songs including a few originals", 25, [track], false, Reserve: 13, Seeds: [new SongSuggestion("Seed", "Artist")], PlaylistCount: 3, PlaylistIds: ["c0"]);
+            var instructions = SelectionRules.InstructionsFor(blend);
+            Assert(instructions.Contains("3 playlist originals and 22 discoveries") && instructions.Contains("5 playlist-ID choices") && instructions.Contains("33 discovery choices") && instructions.Contains("38 choices total"), "Incorrect blend arithmetic.");
+            Assert(SelectionRules.InstructionsFor(blend with { Restricted = true, Reserve = 0 }).Contains("22 discovery choices"), "Restricted blend gained reserves.");
+            Assert(SelectionRules.InstructionsFor(request) == SelectionRules.Instructions, "Ordinary discovery instructions changed.");
+        });
         return passed;
     }
 }

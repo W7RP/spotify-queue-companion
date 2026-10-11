@@ -84,7 +84,7 @@ public sealed class ClaudeProvider(Storage store, HttpClient http) : IProvider
         lock (stateGate) { if (version != epoch) throw new InvalidOperationException("Claude connection changed. Try again."); }
         var model = selected ?? choices.FirstOrDefault(m => m.Line == "haiku")?.Slug ?? choices.FirstOrDefault(m => m.Line == "sonnet")?.Slug ?? choices[0].Slug;
         if (!choices.Any(m => m.Slug == model)) throw new InvalidOperationException("Selected Claude model is unavailable. Choose another in settings.");
-        var body = new { model, system = SelectionRules.Instructions, messages = new[] { new { role = "user", content = SelectionRules.Compact(request) } }, max_tokens = Math.Clamp(512 + (request.Count + request.Reserve) * 90, 512, 6000), stream = true };
+        var body = new { model, system = SelectionRules.InstructionsFor(request), messages = new[] { new { role = "user", content = SelectionRules.Compact(request) } }, max_tokens = Math.Clamp(512 + (request.Count + request.Reserve) * 90, 512, 6000), stream = true };
         using var req = Request(HttpMethod.Post, "messages", key);
         req.Content = new StringContent(JsonSerializer.Serialize(body, Storage.Json), Encoding.UTF8, "application/json");
         var clock = Stopwatch.StartNew(); using var response = await http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct); await Check(response, ct);

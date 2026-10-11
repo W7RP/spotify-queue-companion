@@ -31,7 +31,7 @@ public sealed class ChatGptProvider(OAuth auth, HttpClient http) : IProvider
         if (models == null || modelAccount != auth.Current?.ClientId) await Models(ct);
         var model = selected ?? models!.FirstOrDefault(x => x.Slug.Contains("luna", StringComparison.OrdinalIgnoreCase))?.Slug ?? models!.FirstOrDefault()?.Slug ?? throw new InvalidOperationException("No models available to this ChatGPT account.");
         if (!models!.Any(x => x.Slug == model)) throw new InvalidOperationException("Selected model is unavailable. Choose another in settings.");
-        var instructions = SelectionRules.Instructions;
+        var instructions = SelectionRules.InstructionsFor(request);
         var compact = SelectionRules.Compact(request);
         var body = new Dictionary<string, object> { ["model"] = model, ["instructions"] = instructions, ["input"] = new[] { new { role = "user", content = compact } }, ["store"] = false, ["stream"] = true };
         // Music selection needs modest reasoning. Only apply the documented

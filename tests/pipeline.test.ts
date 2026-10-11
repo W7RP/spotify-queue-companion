@@ -187,5 +187,5 @@ test('already queued originals are excluded while replacement can reuse them',as
 
 test('a playlist reused as reference and original source needs only one ambiguity choice',async()=>{
  let choices=0;const chosen='spotify:playlist:'+String(2).padStart(22,'0');const f=fixture({playlists:async()=>[{name:'Road',uri:'spotify:playlist:'+String(1).padStart(22,'0')},{name:'Road',uri:chosen}],choose:async(_name,options)=>{choices++;return options[1];},playlist:async uri=>{assert.equal(uri,chosen);return [t(1,uri)];},search:async()=>[t(20)],generate:async data=>({ids:[data.playlistIds[0],data.candidates.find((t:Track)=>!data.playlistIds.includes(t.id)).id],suggestions:[],generationMs:1})});
- const result=await f.pipeline.run('songs like "Road", include one song from it',{...preferences,length:2});assert.equal(result.count,2);assert.equal(choices,1);assert.equal(f.writes[0].find(t=>t.uri===t(1).uri)?.source,chosen);
+ const result=await f.pipeline.run('songs like "Road", include one song from it',{...preferences,length:2});assert.equal(result.count,2);assert.equal(choices,1);assert.equal(f.writes[0].find(candidate=>candidate.uri===t(1).uri)?.source,chosen);
 });
