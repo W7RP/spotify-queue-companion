@@ -19,13 +19,20 @@ public static class SelectionRules
             using var answer = JsonDocument.Parse(text);
             var ids = answer.RootElement.GetProperty("ids").EnumerateArray().Select(x => x.GetString()!).ToArray();
             var allowed = request.Candidates.Select(x => x.Id).ToHashSet();
-            if (ids.Length > request.Count + request.Reserve || ids.Any(id => !allowed.Contains(id))) throw new InvalidOperationException("Model returned invalid candidate IDs. Nothing was queued.");
+            if (ids.Length > 200 || ids.Any(id => !allowed.Contains(id))) throw new InvalidOperationException("Model returned invalid candidate IDs. Nothing was queued.");
             // Keep valid duplicate proposals for the client to remove and replace
             // from reserves. Unknown IDs and an oversized response still fail closed.
             var suggestions = answer.RootElement.TryGetProperty("suggestions", out var s) ? JsonSerializer.Deserialize<SongSuggestion[]>(s, Storage.Json) ?? [] : [];
             if (request.Restricted && suggestions.Length > 0) throw new InvalidOperationException("Model attempted to leave the requested library. Nothing was queued.");
-            if (ids.Length + suggestions.Length > request.Count + request.Reserve || suggestions.Any(x => x == null || string.IsNullOrWhiteSpace(x.Title) || string.IsNullOrWhiteSpace(x.Artist) || x.Title.Length > 200 || x.Artist.Length > 200)) throw new InvalidOperationException("Model returned an invalid selection. Nothing was queued.");
-            return new(ids, suggestions, milliseconds);
+            if (ids.Length + suggestions.Length > 200) throw new InvalidOperationException("Model response exceeded the proposal safety limit. Nothing was queued.");
+            var valid = suggestions.Where(x => x != null && !string.IsNullOrWhiteSpace(x.Title) && !string.IsNullOrWhiteSpace(x.Artist) && x.Title.Length <= 200 && x.Artist.Length <= 200).ToArray();
+            var limit = request.Count + request.Reserve;
+            var extra = Math.Max(0, ids.Length + valid.Length - limit);
+            // Validate every ID and the source restriction before capping valid
+            // proposals. Arithmetic mistakes or one malformed song need not
+            // discard the rest of a completed, bounded answer.
+            var boundedIds = ids.Take(limit).ToArray();
+            return new(boundedIds, valid.Take(limit - boundedIds.Length).ToArray(), milliseconds, suggestions.Length - valid.Length, extra);
         }
         catch (Exception e) when (e is JsonException or KeyNotFoundException) { throw new InvalidOperationException("Model returned invalid JSON. Nothing was queued."); }
     }

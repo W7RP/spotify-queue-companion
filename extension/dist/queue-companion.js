@@ -453,6 +453,7 @@
     if (report.unmatched) reasons.push(`${report.unmatched} suggested ${report.unmatched === 1 ? "song could" : "songs could"} not be matched on Spotify`);
     if (report.duplicates) reasons.push(`${report.duplicates} duplicate ${report.duplicates === 1 ? "match was" : "matches were"} skipped`);
     if (report.previous) reasons.push(`${report.previous} ${report.previous === 1 ? "song was" : "songs were"} already in your listening references, queue or previous selection`);
+    if (report.invalid) reasons.push(`${report.invalid} invalid song ${report.invalid === 1 ? "suggestion was" : "suggestions were"} skipped`);
     return reasons.length ? reasons.join("; ") + "." : `Only ${selected} matching songs were found.`;
   }
 
@@ -549,7 +550,7 @@
       let coverage = "";
       let generationMs = 0, retrievalMs = 0, resolutionMs = 0;
       let sourceSet = null;
-      const selection = { kind: intent.history ? "history" : "discovery", candidates: 0, proposed: 0, unmatched: 0, duplicates: 0, previous: 0 };
+      const selection = { kind: intent.history ? "history" : "discovery", candidates: 0, proposed: 0, unmatched: 0, duplicates: 0, previous: 0, invalid: 0, truncated: 0 };
       let references = [], seeds = [];
       if (intent.inspiration) {
         this.activity("Reading your listening references\u2026");
@@ -648,6 +649,8 @@
           const resolvingAt = performance.now();
           const suggestions = response.suggestions ?? [];
           selection.proposed = response.ids.length + suggestions.length;
+          selection.invalid = response.rejectedSuggestions ?? 0;
+          selection.truncated = response.extraChoices ?? 0;
           if (selection.proposed > intent.count + reserve) throw Error("Selection exceeded the bounded selection limit.");
           if (sourceSet && suggestions.length) throw Error("Selection left the requested source. Nothing was queued.");
           const proposed = response.ids.map((id) => {

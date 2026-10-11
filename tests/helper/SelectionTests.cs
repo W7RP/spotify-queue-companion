@@ -27,9 +27,14 @@ static class SelectionTests
             Reject(request with { Reserve = -1 }); Reject(request with { Reserve = 26 }); Reject(request with { Restricted = true });
             Reject(request with { Restricted = true, Reserve = 0 }, "{\"ids\":[],\"suggestions\":[{\"title\":\"Other\",\"artist\":\"Other\"}]}");
         });
-        Test("unused reserves cannot hide invalid IDs or exceed the proposal budget", () => {
+        Test("unused extra choices cannot hide invalid IDs", () => {
             Reject(request, "{\"ids\":[\"c0\",\"fake\"]}");
-            Reject(request, "{\"ids\":[\"c0\"],\"suggestions\":[{\"title\":\"A\",\"artist\":\"A\"},{\"title\":\"B\",\"artist\":\"B\"}]}");
+            Reject(request, "{\"ids\":[\"c0\",\"c0\",\"fake\"]}");
+        });
+        Test("completed answers cap extra valid choices and discard malformed suggestions", () => {
+            var selected = SelectionRules.Parse("{\"ids\":[\"c0\"],\"suggestions\":[{\"title\":\"\",\"artist\":\"Artist\"},{\"title\":\"A\",\"artist\":\"A\"},{\"title\":\"B\",\"artist\":\"B\"}]}", request, 1);
+            Assert(selected.Ids.Length + selected.Suggestions!.Length == 2 && selected.RejectedSuggestions == 1 && selected.ExtraChoices == 1, "Proposal normalization failed.");
+            Reject(request, JsonSerializer.Serialize(new { ids = Array.Empty<string>(), suggestions = Enumerable.Repeat(new SongSuggestion("Song", "Artist"), 201).ToArray() }));
         });
         Test("valid duplicate proposals survive parsing for client recovery", () => {
             var selection = SelectionRules.Parse("{\"ids\":[\"c0\",\"c0\"]}", request, 1);

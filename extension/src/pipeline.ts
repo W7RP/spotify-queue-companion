@@ -16,7 +16,7 @@ export class Pipeline {
     if(intent.more&&!this.previous.length)throw Error('Make a selection first, then ask for more like it.');
     if(intent.more&&!intent.liked&&!intent.playlistNames.length&&!intent.playlistUris.length){intent.liked=this.previousSources.liked;intent.playlistUris=this.previousSources.playlists.slice();}
     const usedSources:{liked:boolean;playlists:string[]}={liked:intent.liked,playlists:[]};let tracks:Track[]=[];let coverage='';let generationMs=0,retrievalMs=0,resolutionMs=0;let sourceSet:Set<string>|null=null;
-    const selection:SelectionDiagnostics={kind:intent.history?'history':'discovery',candidates:0,proposed:0,unmatched:0,duplicates:0,previous:0};
+    const selection:SelectionDiagnostics={kind:intent.history?'history':'discovery',candidates:0,proposed:0,unmatched:0,duplicates:0,previous:0,invalid:0,truncated:0};
     let references:Track[]=[],seeds:Track[]=[];
     if(intent.inspiration){
       this.activity('Reading your listening references…');
@@ -86,6 +86,7 @@ export class Pipeline {
         const response=await this.helper.request('generate',{prompt:intent.prompt,count:intent.count,reserve,candidates:compact,restricted:!!sourceSet,previous:intent.more?this.previous.slice(-10).map(t=>({title:t.title,artist:t.artist})):[],seeds:seeds.map(t=>({title:t.title,artist:primaryArtist(t)}))},signal);generationMs=response.generationMs;
         const resolvingAt=performance.now();
         const suggestions=response.suggestions??[];selection.proposed=response.ids.length+suggestions.length;
+        selection.invalid=response.rejectedSuggestions??0;selection.truncated=response.extraChoices??0;
         if(selection.proposed>intent.count+reserve)throw Error('Selection exceeded the bounded selection limit.');
         if(sourceSet&&suggestions.length)throw Error('Selection left the requested source. Nothing was queued.');
         const proposed:Track[]=response.ids.map((id:string)=>{const index=compact.findIndex(c=>c.id===id);if(index<0)throw Error('Invalid model track selection.');return candidates[index];});
