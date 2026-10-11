@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "provider": "chatgpt",
+  "requested": 50,
+  "selectedPlayableTracks": 50,
+  "availableRecentSongs": 47,
+  "seedCount": 12,
+  "familiarTracks": 0,
+  "relatedArtistTracks": 9,
+  "selectedArtists": 10,
+  "selection": {
+    "kind": "discovery",
+    "candidates": 81,
+    "proposed": 75,
+    "unmatched": 0,
+    "duplicates": 0,
+    "previous": 0,
+    "invalid": 0,
+    "truncated": 25
+  },
+  "shortfall": "",
+  "generationMs": 11498,
+  "totalMs": 14881,
+  "timings": {
+    "retrievalMs": 664,
+    "resolutionMs": 1,
+    "validationMs": 1843
+  },
+  "candidateSearches": 4,
+  "suggestionLookups": 0,
+  "inferenceCalls": 1,
+  "queueWrites": 0,
+  "queueUnchanged": true,
+  "spotifyVersion": "1.3.4.258"
+}
