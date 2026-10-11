@@ -1,12 +1,25 @@
 # Queue Companion
 
+<table>
+  <tr>
+    <th>Windows installer</th>
+    <th>Queue Companion in Spotify</th>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/screenshots/installer-preview.png" alt="Queue Companion installer preview in fresh-install mode" width="420"></td>
+    <td valign="top"><img src="docs/screenshots/plugin-preview.png" alt="Queue Companion request bar and Claude API settings with a sample queue" width="420"></td>
+  </tr>
+</table>
+
+*Rendered UI samples: the installer in fresh-install mode, and the current plugin in a Spotify layout fixture with sample queue data.*
+
 **Version 0.2.2.** Queue Companion supports ChatGPT and Claude API and bundles a minimal Spicetify integration. The optional Spicetify splash, Store and manager are omitted. Queue Companion-owned installations keep normal Spotify startup, including after Repair.
 
 A larger request bar inside Spotify’s Queue panel. The small queue icon immediately before Browse in Spotify’s Search opens Queue and focuses the bar. The request bar takes its own space below the Queue tabs, leaving native queue controls accessible. Songs go into Spotify’s real queue; Spotify handles playback. This is an unsigned Windows x64 preview. Queue Companion code is MIT licensed; bundled components retain their own licenses, including LGPL Spicetify and GPLv3 modules. Their notices and corresponding upstream source archives are included in `vendor`.
 
 ## Download
 
-Get the [Windows x64 installer ZIP](https://github.com/W7RP/queue-companion/releases/download/storage-2026-10-11/QueueCompanion.Claude.Setup.zip) or [installer executable](https://github.com/W7RP/queue-companion/releases/download/storage-2026-10-11/QueueCompanion.Claude.Setup.exe). The [saved release](https://github.com/W7RP/queue-companion/releases/tag/storage-2026-10-11) also contains checksums and the original distribution archives.
+Get the [Windows x64 installer ZIP](https://github.com/W7RP/spotify-queue-companion/releases/download/storage-2026-10-11/QueueCompanion.Claude.Setup.zip) or [installer executable](https://github.com/W7RP/spotify-queue-companion/releases/download/storage-2026-10-11/QueueCompanion.Claude.Setup.exe). The [saved release](https://github.com/W7RP/spotify-queue-companion/releases/tag/storage-2026-10-11) also contains checksums and the original distribution archives.
 
 This repository's main branch contains the final application source at the root. Earlier files remain available in the initial archive commit and saved release.
 
@@ -64,12 +77,14 @@ Install Node.js 22, Microsoft Edge (for the headless UI checks), and .NET SDK 10
 The bundled library has long nested paths. When cloning on Windows, enable Git's long-path support for the clone:
 
 ```powershell
-git -c core.longpaths=true clone https://github.com/W7RP/queue-companion.git
-cd queue-companion
+git -c core.longpaths=true clone https://github.com/W7RP/spotify-queue-companion.git
+cd spotify-queue-companion
 ./build.ps1
 ```
 
 The repository preserves original file bytes with `.gitattributes`, so bundled dependency checksums survive checkout.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the commit-message convention.
 
 Architecture: `extension/src/spotify.ts` owns native Spotify services; `domain.ts` parses and enforces constraints; `pipeline.ts` retrieves, classifies and validates; `queue.ts` serializes and reconciles native writes; `ipc.ts` talks to the helper; `index.ts` owns the disposable UI; `placement.ts` places the composer inside Queue and reserves space for the Search shortcut. The .NET helper separates OAuth, Claude API inference, shared selection validation, ChatGPT inference, DPAPI storage, peer verification and observed history. C# was chosen because the Windows host already had .NET 10 and no Rust toolchain, allowing a self-contained Windows helper and installer without a separate runtime installation.
 
