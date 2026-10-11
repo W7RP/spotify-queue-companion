@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "provider": "chatgpt",
+  "requested": 25,
+  "selectedPlayableTracks": 25,
+  "availableReferenceSongs": 27,
+  "seedCount": 12,
+  "modelPlaylistChoices": 11,
+  "modelDiscoveryChoices": 27,
+  "includedPlaylistTracks": 3,
+  "duplicateRecordings": 0,
+  "blend": {
+    "requested": 3,
+    "included": 3,
+    "discovered": 22
+  },
+  "relatedArtistTracks": 11,
+  "selectedArtists": 13,
+  "restricted": false,
+  "selection": {
+    "kind": "discovery",
+    "candidates": 80,
+    "proposed": 38,
+    "unmatched": 0,
+    "duplicates": 0,
+    "previous": 0,
+    "invalid": 0,
+    "truncated": 11
+  },
+  "shortfall": "",
+  "generationMs": 6427,
+  "totalMs": 9445,
+  "timings": {
+    "retrievalMs": 923,
+    "resolutionMs": 0,
+    "validationMs": 1188
+  },
+  "discoveryInferenceCalls": 1,
+  "directSourceTracks": 5,
+  "directOutsideSource": 0,
+  "directInferenceCalls": 0,
+  "queueWrites": 0,
+  "queueUnchanged": true,
+  "spotifyVersion": "1.3.4.258"
+}

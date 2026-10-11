@@ -1,0 +1,12 @@
+{
+  "settingsPreserved": true,
+  "pairingPreserved": true,
+  "protectedConnectionUsable": true,
+  "credentialPresent": true,
+  "credentialBytesChangedDuringLiveAuthentication": false,
+  "upgradeBeforeInferencePreserved": {
+    "credentials.dat": true,
+    "settings.json": true,
+    "pairing.json": true
+  }
+}

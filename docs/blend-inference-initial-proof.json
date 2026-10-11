@@ -1,0 +1,42 @@
+{
+  "passed": false,
+  "provider": "chatgpt",
+  "requested": 25,
+  "selectedPlayableTracks": 7,
+  "availableReferenceSongs": 27,
+  "seedCount": 12,
+  "includedPlaylistTracks": 3,
+  "blend": {
+    "requested": 3,
+    "included": 3,
+    "discovered": 4
+  },
+  "relatedArtistTracks": 1,
+  "selectedArtists": 5,
+  "restricted": false,
+  "selection": {
+    "kind": "discovery",
+    "candidates": 82,
+    "proposed": 18,
+    "unmatched": 3,
+    "duplicates": 0,
+    "previous": 0,
+    "invalid": 0,
+    "truncated": 0
+  },
+  "shortfall": "The model returned 18 choices; 3 suggested songs could not be matched on Spotify.",
+  "generationMs": 3809,
+  "totalMs": 7017,
+  "timings": {
+    "retrievalMs": 1057,
+    "resolutionMs": 938,
+    "validationMs": 357
+  },
+  "discoveryInferenceCalls": 1,
+  "directSourceTracks": 5,
+  "directOutsideSource": 0,
+  "directInferenceCalls": 0,
+  "queueWrites": 0,
+  "queueUnchanged": true,
+  "spotifyVersion": "1.3.4.258"
+}
