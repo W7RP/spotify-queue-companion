@@ -20,6 +20,7 @@ async Task<Selection> Select(string stream, bool restricted = true, HttpStatusCo
         Assert(body.RootElement.GetProperty("stream").GetBoolean(), "Streaming must be enabled.");
         Assert(!body.RootElement.GetProperty("store").GetBoolean(), "Store must be false.");
         Assert(!body.RootElement.TryGetProperty("max_output_tokens", out _), "Unsupported API field.");
+        Assert(!body.RootElement.TryGetProperty("reasoning", out _), "Unknown model received a reasoning parameter.");
         Assert(!body.RootElement.GetProperty("input")[0].GetProperty("content").GetString()!.Contains("spotify:track:"), "Unnecessary catalogue URIs sent to inference.");
         using var compact = JsonDocument.Parse(body.RootElement.GetProperty("input")[0].GetProperty("content").GetString()!);
         Assert(compact.RootElement.GetProperty("count").GetInt32() == 1 && compact.RootElement.GetProperty("selectionLimit").GetInt32() == 1 + reserve, "Queue target or reserve budget lost.");
@@ -52,6 +53,18 @@ try
     await Test("ChatGPT accepts bounded discovery reserves", async () => {
         var s = await Select(Stream("{\"ids\":[\"" + track.Id + "\"],\"suggestions\":[{\"title\":\"Reserve\",\"artist\":\"Artist\"}]}"), false, reserve: 1);
         Assert(s.Ids.Length == 1 && s.Suggestions?.Length == 1, "Reserve choice lost.");
+    });
+    await Test("known GPT-6 models use low effort in one streaming inference", async () => {
+        Credentials(); var posts = 0;
+        using var client = new HttpClient(new FakeHandler(async request => {
+            if (request.Method == HttpMethod.Get) return new(HttpStatusCode.OK) { Content = new StringContent("{\"models\":[{\"slug\":\"gpt-6-luna\",\"display_name\":\"Luna\",\"visibility\":\"list\"}]}") };
+            posts++; using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            Assert(body.RootElement.GetProperty("reasoning").GetProperty("effort").GetString() == "low", "Wrong reasoning effort.");
+            Assert(body.RootElement.GetProperty("stream").GetBoolean() && !body.RootElement.GetProperty("store").GetBoolean(), "Streaming/privacy contract changed.");
+            return new(HttpStatusCode.OK) { Content = new StringContent(Stream("{\"ids\":[\"" + track.Id + "\"]}")) };
+        }));
+        var selected = await new ChatGptProvider(new OAuth(store, client), client).Select(new("Mellow songs", 1, [track], true), null, default);
+        Assert(selected.Ids.Single() == track.Id && posts == 1, "Selection failed or inference repeated.");
     });
     await Test("truncated inference never becomes a selection", () => Reject(() => Select(Stream("{\"ids\":[\"" + track.Id + "\"]}", false)), "ended before completion"));
     await Test("terminal provider failure rejects partial output", () => Reject(() => Select("data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"usage_limit\"}}}\n\n"), "usage_limit"));
