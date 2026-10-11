@@ -1,0 +1,9 @@
+{
+  "productionFilesMatch": true,
+  "checks": {
+    "profileExtension": true,
+    "stagedExtension": true,
+    "helper": true,
+    "installer": true
+  }
+}
