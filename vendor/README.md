@@ -16,4 +16,6 @@ The snapshots omit unrelated gallery preview images; source and module resources
 
 The .NET 10.0.8 runtime is bundled in the helper/installer. Microsoft runtime licenses and third-party notices are in `dotnet`. The embedded stdlib query-core 5.103.0 dependency has its MIT notice and original package/source archive included. Additional dependency notices and lockfiles are retained in the corresponding upstream archives.
 
+macOS builds download the matching official CLI/daemon archive from the same pinned release and verify its archive SHA-256 before extraction. The Apple Silicon archive hash is `c67804e0742b82013ac704bb70ceae98c079283c94f9356343f8a9e813356eab`; Intel is `2cbf92b5eb0d3933175455a1b12ec76d8877198ef15fd67b6800812b309d51fb`. Upstream code is unchanged. Unsigned Intel executables receive ad-hoc macOS signatures; the original archive is retained in the Mac payload's `vendor/source` and `MACOS-UPSTREAM.json` records original and packaged binary hashes. Windows vendor binaries remain byte-identical.
+
 Sources: [Spicetify](https://github.com/spicetify/cli/tree/v3.0.0-rc.3), [v3 modules](https://github.com/spicetify/modules), [query-core registry package](https://www.npmjs.com/package/@tanstack/query-core/v/5.103.0).

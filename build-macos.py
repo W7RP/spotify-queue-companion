@@ -82,15 +82,24 @@ def build():
     shutil.copy2(output / "helper/QueueCompanion", resources / "QueueCompanion")
     shutil.copy2(native / "QueueCompanion.Keychain", resources / "QueueCompanion.Keychain")
     shutil.copytree(ROOT / "vendor", resources / "vendor", ignore=shutil.ignore_patterns("*.exe"))
+    original_binaries = {}
+    signature_added = []
     for executable in ("spicetify", "spicetify-daemon"):
         found = list(unpack.rglob(executable))
         if len(found) != 1:
             raise RuntimeError("Missing/ambiguous upstream binary: " + executable)
         destination = resources / "vendor" / executable
         shutil.copy2(found[0], destination); destination.chmod(0o755)
-        # Preserve upstream binary bytes and their existing signatures.
+        original_binaries[executable] = sha(destination)
+        # The Intel upstream release has no signature. Add only an ad-hoc
+        # signature; retain its original archive and source beside the runtime.
+        verification = subprocess.run(["/usr/bin/codesign", "--verify", str(destination)], capture_output=True)
+        if verification.returncode != 0:
+            sign(destination); signature_added.append(executable)
         run("/usr/bin/codesign", "--verify", destination)
+    shutil.copy2(archive, resources / "vendor/source" / archive.name)
     (resources / "vendor/MACOS-UPSTREAM.json").write_text(json.dumps({"url": url, "archiveSha256": expected,
+        "originalBinaries": original_binaries, "adHocSignatureAdded": signature_added,
         "binaries": {name: sha(resources / "vendor" / name) for name in ("spicetify", "spicetify-daemon")}}, indent=2) + "\n")
     extension = resources / "extension"; extension.mkdir()
     for source, name in [("extension/dist/queue-companion.js", "queue-companion.js"),
