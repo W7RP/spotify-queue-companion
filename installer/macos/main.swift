@@ -79,22 +79,25 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
 }
 
 if CommandLine.arguments.contains("--self-test") {
+    func check(_ condition: Bool, _ label: String) {
+        if !condition { FileHandle.standardError.write(Data(("Installer check failed: " + label + "\n").utf8)); exit(1) }
+    }
     let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     let child = root.appendingPathComponent("safe/file")
-    precondition(NativeSetup.inside(child, root))
-    precondition(!NativeSetup.inside(root, root))
-    precondition(!NativeSetup.inside(root.appendingPathComponent("../escape"), root))
+    check(NativeSetup.inside(child, root), "new child path")
+    check(!NativeSetup.inside(root, root), "root cannot be removed")
+    check(!NativeSetup.inside(root.appendingPathComponent("../escape"), root), "parent traversal")
     try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: root) }
     try FileManager.default.createSymbolicLink(at: root.appendingPathComponent("link"), withDestinationURL: URL(fileURLWithPath: "/tmp"))
-    precondition(!NativeSetup.inside(root.appendingPathComponent("link/foreign"), root))
+    check(!NativeSetup.inside(root.appendingPathComponent("link/foreign"), root), "external symlink")
     let native = NativeSetup()
     let fake = root.appendingPathComponent("Spotify.app")
     try FileManager.default.createDirectory(at: fake.appendingPathComponent("Contents"), withIntermediateDirectories: true)
-    precondition(!native.validSpotify(fake))
+    check(!native.validSpotify(fake), "empty Spotify bundle")
     try native.write(Data("private".utf8), to: root.appendingPathComponent("private.json"), privateFile: true)
     let mode = try FileManager.default.attributesOfItem(atPath: root.appendingPathComponent("private.json").path)[.posixPermissions] as! Int
-    precondition(mode == 0o600)
+    check(mode == 0o600, "private file permissions")
     print("6 native macOS installer checks passed")
     exit(0)
 }

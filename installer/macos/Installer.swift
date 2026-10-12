@@ -35,8 +35,24 @@ struct NativeSetup {
     }
 
     static func inside(_ path: URL, _ root: URL) -> Bool {
-        path.standardizedFileURL.path.hasPrefix(root.standardizedFileURL.path + "/")
-            && path.resolvingSymlinksInPath().path.hasPrefix(root.resolvingSymlinksInPath().path + "/")
+        func canonical(_ input: URL) -> String? {
+            // Foundation's resolver can leave a non-existing leaf unresolved.
+            // Resolve its nearest existing ancestor first, including /var aliases.
+            var ancestor = input.standardizedFileURL
+            var suffix: [String] = []
+            while !FileManager.default.fileExists(atPath: ancestor.path) {
+                if (try? FileManager.default.destinationOfSymbolicLink(atPath: ancestor.path)) != nil { return nil }
+                let parent = ancestor.deletingLastPathComponent()
+                if parent.path == ancestor.path { return nil }
+                suffix.insert(ancestor.lastPathComponent, at: 0); ancestor = parent
+            }
+            var resolved = ancestor.resolvingSymlinksInPath()
+            for part in suffix { resolved.appendPathComponent(part) }
+            return resolved.standardizedFileURL.path
+        }
+        guard path.standardizedFileURL.path.hasPrefix(root.standardizedFileURL.path + "/"),
+              let actual = canonical(path), let boundary = canonical(root) else { return false }
+        return actual.hasPrefix(boundary + "/")
     }
     func removeOwned(_ path: URL, within root: URL) throws {
         guard Self.inside(path, root) else { throw SetupError.message("An installation path leaves the intended folder.") }
@@ -103,6 +119,11 @@ struct NativeSetup {
         try process.run()
     }
     func integration(_ bundle: URL, _ command: String) throws {
+        if command != "apply" {
+            try run(spice, ["--spotify-exec", bundle.appendingPathComponent("Contents/MacOS/Spotify").path,
+                "--spotify-data-dir", bundle.appendingPathComponent("Contents/Resources").path, command])
+            return
+        }
         // Upstream Apply registers a separate Spicetify.app URL handler. The minimal
         // runtime has no manager UI that needs it; preserve an existing handler.
         let handler = applications.appendingPathComponent("Spicetify.app")
