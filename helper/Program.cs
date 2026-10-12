@@ -7,9 +7,25 @@ using QueueCompanion;
 var store = new Storage();
 var pairing = store.Read<Pairing>("pairing.json") ?? new Pairing(OAuth.Random()); store.Write("pairing.json", pairing);
 var executable = Environment.ProcessPath!;
+if (OperatingSystem.IsMacOS() && args.Contains("--stop"))
+{
+    if (store.Read<int>("helper-pid.json") is var pid && pid > 0 && pid != Environment.ProcessId)
+    {
+        try
+        {
+            using var process = System.Diagnostics.Process.GetProcessById(pid);
+            if (process.MainModule?.FileName == executable) { process.Kill(); process.WaitForExit(5_000); }
+        }
+        catch (ArgumentException) { } // A stale receipt never authorizes killing another executable.
+    }
+    return;
+}
 if (args.Any(x => x.Equals("queue-companion://repair/", StringComparison.OrdinalIgnoreCase) || x.Equals("queue-companion://repair", StringComparison.OrdinalIgnoreCase)))
 {
-    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "QueueCompanion.Setup.exe")) { UseShellExecute = true }); return;
+    var repair = OperatingSystem.IsMacOS()
+        ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Applications", "Queue Companion Setup.app")
+        : Path.Combine(AppContext.BaseDirectory, "QueueCompanion.Setup.exe");
+    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(repair) { UseShellExecute = true }); return;
 }
 if (args.Contains("--revoke"))
 {
@@ -45,9 +61,10 @@ if (args.Contains("--init"))
     }
     return;
 }
-if (args.Contains("--forget")) { store.Delete("credentials.dat"); store.Delete("claude-key.dat"); return; }
-using var singleton = new Mutex(true, "Local\\QueueCompanion-" + Storage.Key(Environment.UserName), out var first);
+if (args.Contains("--forget")) { store.Delete("credentials.dat"); store.Delete("claude-key.dat"); store.Delete("pending-registration.dat"); return; }
+using var singleton = new Mutex(true, (OperatingSystem.IsWindows() ? "Local\\" : "") + "QueueCompanion-" + Storage.Key(Environment.UserName), out var first);
 if (!first) return;
+if (OperatingSystem.IsMacOS()) store.Write("helper-pid.json", Environment.ProcessId);
 using var http = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(45) };
 var oauth = new OAuth(store, http); IProvider chatGpt = new ChatGptProvider(oauth, http); var claude = new ClaudeProvider(store, http); var history = new History(store);
 IProvider Provider(string name) => name switch { "claude" => claude, "chatgpt" => chatGpt, _ => throw new InvalidOperationException("Choose Claude API or ChatGPT in settings.") };

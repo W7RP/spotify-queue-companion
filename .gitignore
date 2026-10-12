@@ -5,6 +5,7 @@
 **/installer/payload.zip
 *.user
 *.log
+__pycache__/
 *.dat
 .env
 .env.*

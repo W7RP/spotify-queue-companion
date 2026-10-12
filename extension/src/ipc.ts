@@ -4,18 +4,18 @@ export class Helper {
   private closed=false;
   async connect():Promise<void> {
     if(this.ready)return this.ready;
-    const config=window.__queueCompanionPairing;if(!config)throw Error('Queue Companion needs repair. Open Queue Companion Setup from Start.');
+    const config=window.__queueCompanionPairing;if(!config)throw Error('Queue Companion needs repair. Open Queue Companion Setup.');
     this.closed=false;
     this.ready=new Promise((resolve,reject)=>{
       const ws=new WebSocket(`ws://127.0.0.1:${config.port}/v1`); this.socket=ws;
-      const deadline=window.setTimeout(()=>{ws.close();reject(Error('Local helper is unavailable. Open Queue Companion from Start.'));},5000);
+      const deadline=window.setTimeout(()=>{ws.close();reject(Error('Local helper is unavailable. Open Queue Companion.'));},5000);
       ws.onopen=()=>ws.send(JSON.stringify({v:1,type:'pair',token:config.token}));
       ws.onmessage=e=>{let m:any;try{m=JSON.parse(e.data);}catch{return;}if(m.v!==1)return;
         if(m.type==='paired'){clearTimeout(deadline);resolve();return;}
         const p=this.pending.get(m.id);if(!p)return;this.pending.delete(m.id);clearTimeout(p.timer);m.ok?p.resolve(m.data):p.reject(Error(m.error));
       };
-      ws.onerror=()=>reject(Error('Cannot connect to the local helper. Open Queue Companion from Start.'));
-      ws.onclose=()=>{clearTimeout(deadline);this.ready=undefined;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(Error('Helper disconnected. No queue write has been retried.'));}this.pending.clear();if(!this.closed)reject(Error('Local pairing failed. Repair Queue Companion from Start.'));};
+      ws.onerror=()=>reject(Error('Cannot connect to the local helper. Open Queue Companion.'));
+      ws.onclose=()=>{clearTimeout(deadline);this.ready=undefined;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(Error('Helper disconnected. No queue write has been retried.'));}this.pending.clear();if(!this.closed)reject(Error('Local pairing failed. Open Queue Companion Setup and use Repair.'));};
     });
     return this.ready;
   }

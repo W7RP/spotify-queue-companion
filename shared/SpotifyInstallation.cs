@@ -2,6 +2,18 @@ namespace QueueCompanion;
 
 public sealed record SpotifyInstallation(string Executable, string DataDirectory)
 {
+    public static bool MatchesMacPeer(string? actual, string expected)
+    {
+        const string main = "/Contents/MacOS/Spotify";
+        if (actual == null || !expected.StartsWith('/') || !expected.EndsWith(main, StringComparison.Ordinal)) return false;
+        var bundle = expected[..^main.Length];
+        if (!bundle.EndsWith(".app", StringComparison.Ordinal)) return false;
+        if (actual == expected) return true;
+        var helpers = bundle + "/Contents/Frameworks/";
+        return actual.StartsWith(helpers, StringComparison.Ordinal) && !actual.Split('/').Any(p => p is "." or "..")
+            && Path.GetFileName(actual).StartsWith("Spotify Helper", StringComparison.Ordinal)
+            && actual.Contains(".app/Contents/MacOS/Spotify Helper", StringComparison.Ordinal);
+    }
     public static bool IsStorePath(string path) => path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(part => part.Equals("WindowsApps", StringComparison.OrdinalIgnoreCase) || part.StartsWith("SpotifyAB.SpotifyMusic_", StringComparison.OrdinalIgnoreCase));
     public static bool MatchesPeer(string? actual, string expected)
     {

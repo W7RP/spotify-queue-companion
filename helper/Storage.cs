@@ -14,8 +14,11 @@ public sealed class Storage
     public string Root { get; }
     public Storage(string? root = null)
     {
-        Root = root ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QueueCompanion");
+        Root = root ?? (OperatingSystem.IsMacOS()
+            ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "QueueCompanion")
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QueueCompanion"));
         Directory.CreateDirectory(Root);
+        if (!OperatingSystem.IsWindows()) { File.SetUnixFileMode(Root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute); return; }
         var owner = WindowsIdentity.GetCurrent().User!;
         var acl = new DirectorySecurity(); acl.SetOwner(owner); acl.SetAccessRuleProtection(true, false);
         foreach (var sid in new[] { owner, new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null) })
@@ -27,21 +30,32 @@ public sealed class Storage
     public void Atomic(string name, byte[] bytes)
     {
         lock (gate) { var path = Path.Combine(Root, name); var temp = path + ".tmp";
-        File.WriteAllBytes(temp, bytes); File.Move(temp, path, true); }
+        File.WriteAllBytes(temp, bytes);
+        if (!OperatingSystem.IsWindows()) File.SetUnixFileMode(temp, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        File.Move(temp, path, true); }
     }
     public T? ReadSecret<T>(string name)
     {
         var path = Path.Combine(Root, name);
         if (!File.Exists(path)) return default;
-        var raw = Protect(File.ReadAllBytes(path), false);
+        var raw = OperatingSystem.IsMacOS() ? MacSecrets.Run("get", Key(Root + ":" + name)) : Protect(File.ReadAllBytes(path), false);
+        if (raw.Length == 0) return default;
         try { return JsonSerializer.Deserialize<T>(raw, Json); } finally { CryptographicOperations.ZeroMemory(raw); }
     }
     public void WriteSecret<T>(string name, T value)
     {
         var raw = JsonSerializer.SerializeToUtf8Bytes(value, Json);
-        try { Atomic(name, Protect(raw, true)); } finally { CryptographicOperations.ZeroMemory(raw); }
+        try
+        {
+            if (OperatingSystem.IsMacOS()) { MacSecrets.Run("set", Key(Root + ":" + name), raw); Atomic(name, "keychain-v1"u8.ToArray()); }
+            else Atomic(name, Protect(raw, true));
+        } finally { CryptographicOperations.ZeroMemory(raw); }
     }
-    public void Delete(string name) { var p = Path.Combine(Root, name); if (File.Exists(p)) File.Delete(p); }
+    public void Delete(string name)
+    {
+        if (OperatingSystem.IsMacOS() && name.EndsWith(".dat", StringComparison.Ordinal)) MacSecrets.Run("delete", Key(Root + ":" + name));
+        var p = Path.Combine(Root, name); if (File.Exists(p)) File.Delete(p);
+    }
     public static string Key(string account) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(account))).ToLowerInvariant();
     [StructLayout(LayoutKind.Sequential)] struct Blob { public int Size; public IntPtr Data; }
     [DllImport("crypt32.dll", SetLastError = true)] static extern bool CryptProtectData(ref Blob input, string? description, IntPtr entropy, IntPtr reserved, IntPtr prompt, int flags, out Blob output);

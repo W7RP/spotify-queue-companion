@@ -21,6 +21,8 @@ A larger request bar inside Spotify’s Queue panel. The small queue icon immedi
 
 Get the [Windows x64 installer ZIP](https://github.com/W7RP/spotify-queue-companion/releases/download/v0.2.6/QueueCompanion.Setup.zip) or [installer executable](https://github.com/W7RP/spotify-queue-companion/releases/download/v0.2.6/QueueCompanion.Setup.exe). The [0.2.6 release](https://github.com/W7RP/spotify-queue-companion/releases/tag/v0.2.6) contains checksums and the matching source archive. The [saved release](https://github.com/W7RP/spotify-queue-companion/releases/tag/storage-2026-10-11) retains the original distribution archives.
 
+**macOS preview:** separate native disk images are built for **Apple Silicon (arm64)** and **Intel (x64)**, for macOS 13 or newer. The Windows `.exe` does not work on a Mac. See [Mac installation and preview limits](docs/MACOS-INSTALL.md). macOS uses the same Spotify panel with Keychain credentials and an invisible helper at login; queue replacement awaits a real Mac Spotify test.
+
 This repository's main branch contains the final application source at the root. Earlier files remain available in the initial archive commit and saved release.
 
 ## Install and use

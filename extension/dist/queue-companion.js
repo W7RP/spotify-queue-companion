@@ -9,14 +9,14 @@
     async connect() {
       if (this.ready) return this.ready;
       const config = window.__queueCompanionPairing;
-      if (!config) throw Error("Queue Companion needs repair. Open Queue Companion Setup from Start.");
+      if (!config) throw Error("Queue Companion needs repair. Open Queue Companion Setup.");
       this.closed = false;
       this.ready = new Promise((resolve, reject) => {
         const ws = new WebSocket(`ws://127.0.0.1:${config.port}/v1`);
         this.socket = ws;
         const deadline = window.setTimeout(() => {
           ws.close();
-          reject(Error("Local helper is unavailable. Open Queue Companion from Start."));
+          reject(Error("Local helper is unavailable. Open Queue Companion."));
         }, 5e3);
         ws.onopen = () => ws.send(JSON.stringify({ v: 1, type: "pair", token: config.token }));
         ws.onmessage = (e) => {
@@ -38,7 +38,7 @@
           clearTimeout(p.timer);
           m.ok ? p.resolve(m.data) : p.reject(Error(m.error));
         };
-        ws.onerror = () => reject(Error("Cannot connect to the local helper. Open Queue Companion from Start."));
+        ws.onerror = () => reject(Error("Cannot connect to the local helper. Open Queue Companion."));
         ws.onclose = () => {
           clearTimeout(deadline);
           this.ready = void 0;
@@ -47,7 +47,7 @@
             p.reject(Error("Helper disconnected. No queue write has been retried."));
           }
           this.pending.clear();
-          if (!this.closed) reject(Error("Local pairing failed. Repair Queue Companion from Start."));
+          if (!this.closed) reject(Error("Local pairing failed. Open Queue Companion Setup and use Repair."));
         };
       });
       return this.ready;
@@ -119,7 +119,7 @@
       return { account, local: device?.isLocal === true && device?.isActive === true, revision: String(q.queueRevision), current: q.track.contextTrack.uri, entries: q.nextTracks.map((e) => ({ uri: e.contextTrack.uri, uid: e.contextTrack.uid ?? "", manual: e.provider === "queue" && e.contextTrack.metadata?.is_queued === "true", raw: { uri: e.contextTrack.uri, uid: e.contextTrack.uid } })) };
     }
     replaceSupported() {
-      return Spicetify.Platform.version === "1.3.4.258" && typeof Spicetify.removeFromQueue === "function" && typeof Spicetify.Player.origin?._queue?.removeFromQueue === "function";
+      return !(typeof navigator !== "undefined" && /Macintosh|Mac OS X/.test(navigator.userAgent ?? "")) && Spicetify.Platform.version === "1.3.4.258" && typeof Spicetify.removeFromQueue === "function" && typeof Spicetify.Player.origin?._queue?.removeFromQueue === "function";
     }
     async append(uris) {
       if (typeof Spicetify.Player.origin?._queue?.addToQueue !== "function") throw Error("Native queue integration is unavailable. Repair Spicetify.");

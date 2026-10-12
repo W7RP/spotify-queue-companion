@@ -26,7 +26,7 @@ export class Spotify implements QueueAdapter {
   }
   replaceSupported():boolean {
     // Semantics accepted against 1.3.4.258 only. A new client must be revalidated before destructive writes.
-    return Spicetify.Platform.version==='1.3.4.258'&&typeof Spicetify.removeFromQueue==='function'&&typeof Spicetify.Player.origin?._queue?.removeFromQueue==='function';
+      return !(typeof navigator!=='undefined'&&/Macintosh|Mac OS X/.test(navigator.userAgent??''))&&Spicetify.Platform.version==='1.3.4.258'&&typeof Spicetify.removeFromQueue==='function'&&typeof Spicetify.Player.origin?._queue?.removeFromQueue==='function';
   }
   async append(uris:string[]) {if(typeof Spicetify.Player.origin?._queue?.addToQueue!=='function')throw Error('Native queue integration is unavailable. Repair Spicetify.');await Spicetify.addToQueue(uris.map(uri=>({uri})));}
   async remove(before:QueueSnapshot) {

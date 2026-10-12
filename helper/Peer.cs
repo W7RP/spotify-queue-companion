@@ -9,6 +9,8 @@ public static class Peer
     [StructLayout(LayoutKind.Sequential)] struct Row { public uint State, LocalAddress, LocalPort, RemoteAddress, RemotePort, Pid; }
     public static bool IsSpotify(int peerPort, int servicePort, string? selectedExecutable = null)
     {
+        if (OperatingSystem.IsMacOS()) return MacPeer.IsSpotify(peerPort, servicePort, selectedExecutable);
+        if (!OperatingSystem.IsWindows()) return false;
         int size = 0; GetExtendedTcpTable(IntPtr.Zero, ref size, false, 2, 5, 0);
         var table = Marshal.AllocHGlobal(size);
         try

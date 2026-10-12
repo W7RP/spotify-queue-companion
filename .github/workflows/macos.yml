@@ -1,0 +1,41 @@
+name: macOS installers
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-15
+          - arch: x64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.300'
+      - name: Build and test the Spotify extension
+        working-directory: extension
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Build and verify native installer
+        run: python3 build-macos.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: QueueCompanion-macOS-${{ matrix.arch }}
+          path: |
+            release/macos-${{ matrix.arch }}/*.dmg
+            release/macos-${{ matrix.arch }}/*.sha256
+            release/macos-${{ matrix.arch }}/*-build-proof.json
+          if-no-files-found: error

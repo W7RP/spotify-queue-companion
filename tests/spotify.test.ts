@@ -1,6 +1,17 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {Spotify} from '../extension/src/spotify';
 const track={id:'0000000000000000000001',uri:'spotify:track:0000000000000000000001',title:'Track',artist:'Artist',source:'liked'};
 
+test('macOS cannot enable unverified queue replacement on an otherwise accepted Spotify version',()=>{
+  const original=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  (globalThis as any).Spicetify={Platform:{version:'1.3.4.258'},removeFromQueue(){},Player:{origin:{_queue:{removeFromQueue(){}}}}};
+  try{
+    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}});
+    assert.equal(new Spotify({} as any).replaceSupported(),false);
+    Object.defineProperty(globalThis,'navigator',{configurable:true,value:{userAgent:'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}});
+    assert.equal(new Spotify({} as any).replaceSupported(),true);
+  }finally{if(original)Object.defineProperty(globalThis,'navigator',original);else delete (globalThis as any).navigator;}
+});
+
 function searchFixture(page:(offset:number,limit:number)=>any){
   const calls:{offset:number;limit:number}[]=[];const cached:any[]=[];
   (globalThis as any).Spicetify={Platform:{UserAPI:{getUser:async()=>({username:'a'})}},GraphQL:{Request:async(_definition:any,args:any)=>{calls.push({offset:args.offset,limit:args.limit});return {data:{searchV2:{tracksV2:page(args.offset,args.limit)}}};}}};
