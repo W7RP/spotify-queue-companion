@@ -8,7 +8,8 @@ enum SetupError: LocalizedError {
 
 struct NativeSetup {
     let fm = FileManager.default
-    let home = FileManager.default.homeDirectoryForCurrentUser
+    let home: URL
+    init(home: URL = FileManager.default.homeDirectoryForCurrentUser) { self.home = home }
     var applications: URL { home.appendingPathComponent("Applications") }
     var app: URL { applications.appendingPathComponent("Queue Companion.app") }
     var setup: URL { applications.appendingPathComponent("Queue Companion Setup.app") }

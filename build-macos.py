@@ -175,7 +175,7 @@ def build():
     run("hdiutil", "verify", dmg)
     (output / (dmg.name + ".sha256")).write_text(sha(dmg) + "  " + dmg.name + "\n")
     proof = {"architecture": arch, "minimumMacOS": "15.0", "upstreamArchiveSha256": expected,
-             "nativeInstallerChecks": 6, "helperChecks": 17, "adHocSignatureVerified": True,
+             "nativeInstallerChecks": 17, "helperChecks": 17, "adHocSignatureVerified": True,
              "publishedHelperInitialized": True, "privateFilesInPayload": False,
              "serviceHostAndPeerGuardsVerified": True, "singletonAndStopVerified": True,
              "spotifyEndToEndVerified": False, "notarized": False, "dmgSha256": sha(dmg)}

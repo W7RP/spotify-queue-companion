@@ -79,8 +79,10 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
 }
 
 if CommandLine.arguments.contains("--self-test") {
+    var passed = 0
     func check(_ condition: Bool, _ label: String) {
         if !condition { FileHandle.standardError.write(Data(("Installer check failed: " + label + "\n").utf8)); exit(1) }
+        passed += 1
     }
     let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     let child = root.appendingPathComponent("safe/file")
@@ -91,14 +93,55 @@ if CommandLine.arguments.contains("--self-test") {
     defer { try? FileManager.default.removeItem(at: root) }
     try FileManager.default.createSymbolicLink(at: root.appendingPathComponent("link"), withDestinationURL: URL(fileURLWithPath: "/tmp"))
     check(!NativeSetup.inside(root.appendingPathComponent("link/foreign"), root), "external symlink")
-    let native = NativeSetup()
+    let native = NativeSetup(home: root)
     let fake = root.appendingPathComponent("Spotify.app")
     try FileManager.default.createDirectory(at: fake.appendingPathComponent("Contents"), withIntermediateDirectories: true)
     check(!native.validSpotify(fake), "empty Spotify bundle")
     try native.write(Data("private".utf8), to: root.appendingPathComponent("private.json"), privateFile: true)
     let mode = try FileManager.default.attributesOfItem(atPath: root.appendingPathComponent("private.json").path)[.posixPermissions] as! Int
     check(mode == 0o600, "private file permissions")
-    print("6 native macOS installer checks passed")
+    let source = root.appendingPathComponent("source"), destination = root.appendingPathComponent("destination")
+    try native.write(Data("module".utf8), to: source.appendingPathComponent("nested/module.js"))
+    try native.write(Data("pairing".utf8), to: source.appendingPathComponent("queue-companion-pairing.js"))
+    try native.copyTree(source, to: destination)
+    check(FileManager.default.fileExists(atPath: destination.appendingPathComponent("nested/module.js").path)
+        && !FileManager.default.fileExists(atPath: destination.appendingPathComponent("queue-companion-pairing.js").path), "module copy excludes local pairing")
+    try FileManager.default.createSymbolicLink(at: source.appendingPathComponent("external"), withDestinationURL: URL(fileURLWithPath: "/tmp"))
+    var rejected = false
+    do { try native.copyTree(source, to: destination) } catch { rejected = true }
+    check(rejected, "module copy rejects links")
+    try native.write(PropertyListSerialization.data(fromPropertyList: ["CFBundleIdentifier": "com.spotify.client"], format: .xml, options: 0), to: fake.appendingPathComponent("Contents/Info.plist"))
+    try FileManager.default.createDirectory(at: fake.appendingPathComponent("Contents/Resources/Apps"), withIntermediateDirectories: true)
+    try native.write(Data(contentsOf: URL(fileURLWithPath: "/usr/bin/true")), to: fake.appendingPathComponent("Contents/MacOS/Spotify"))
+    try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: fake.appendingPathComponent("Contents/MacOS/Spotify").path)
+    check(native.validSpotify(fake), "valid custom Spotify bundle")
+    check(try native.locateSpotify(fake).path == fake.resolvingSymlinksInPath().path, "custom Spotify selection")
+    try native.write(PropertyListSerialization.data(fromPropertyList: ["CFBundleIdentifier": "other.app"], format: .xml, options: 0), to: fake.appendingPathComponent("Contents/Info.plist"))
+    check(!native.validSpotify(fake), "foreign bundle identifier")
+    let selection = root.appendingPathComponent("bundled-vault.json")
+    let bundled: [String: Any] = ["modules": ["stdlib": ["enabled": "1.13.2", "v": ["1.13.2": ["installed": true]]],
+        "manager": ["v": ["1": [:]]], "store": ["v": ["1": [:]]], "spicetify-splash": ["v": ["1": [:]]]]]
+    try native.json(bundled, to: selection)
+    try native.json(["modules": ["unrelated": ["enabled": "2", "v": ["2": ["custom": true]]], "spicetify-splash": ["enabled": "1"]],
+        "pending_defaults": ["spicetify-splash", "unrelated"]], to: native.profile.appendingPathComponent("modules/vault.json"))
+    for parent in ["modules", "store"] {
+        for id in ["manager", "store", "spicetify-splash", "stdlib", "queue-companion"] {
+            try native.write(Data("retained".utf8), to: native.profile.appendingPathComponent(parent + "/" + id + "/fixture.txt"))
+        }
+    }
+    try native.applyMinimalProfile(selection)
+    let vault = try native.readJSON(native.profile.appendingPathComponent("modules/vault.json"))
+    let modules = vault["modules"] as! [String: Any]
+    check((modules["unrelated"] as! [String: Any])["enabled"] as? String == "2", "unrelated selections preserved")
+    check(["manager", "store", "spicetify-splash"].allSatisfy { (modules[$0] as! [String: Any])["enabled"] == nil }, "optional defaults disabled")
+    check(vault["pending_defaults"] as? [String] == ["unrelated"], "only optional pending defaults removed")
+    check(!FileManager.default.fileExists(atPath: native.profile.appendingPathComponent("modules/spicetify-splash").path), "optional package pruned")
+    check(FileManager.default.fileExists(atPath: native.profile.appendingPathComponent("modules/stdlib/fixture.txt").path)
+        && FileManager.default.fileExists(atPath: native.profile.appendingPathComponent("modules/queue-companion/fixture.txt").path), "stdlib and extension preserved")
+    let first = try Data(contentsOf: native.profile.appendingPathComponent("modules/vault.json"))
+    try native.applyMinimalProfile(selection)
+    check(try Data(contentsOf: native.profile.appendingPathComponent("modules/vault.json")) == first, "repeat repair idempotent")
+    print("\(passed) native macOS installer checks passed")
     exit(0)
 }
 let application = NSApplication.shared
