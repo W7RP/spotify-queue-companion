@@ -138,6 +138,38 @@ def build():
     fixture_home = output / "helper-smoke-home"; fixture_home.mkdir(exist_ok=True)
     env = dict(os.environ, HOME=str(fixture_home), DOTNET_BUNDLE_EXTRACT_BASE_DIR=str(output / "dotnet-extract"))
     run(resources / "QueueCompanion", "--init", "--extension-dir", output / "pairing-fixture", env=env)
+    # Exercise the actual service and singleton, not just its early --init exit.
+    import http.client
+    import time
+    service = subprocess.Popen([str(resources / "QueueCompanion")], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        ready = False
+        for _ in range(100):
+            if service.poll() is not None:
+                raise RuntimeError("Published helper exited before listening")
+            try:
+                connection = http.client.HTTPConnection("127.0.0.1", 43829, timeout=1)
+                connection.request("GET", "/")
+                assert connection.getresponse().status == 404
+                connection.close(); ready = True; break
+            except (ConnectionError, OSError):
+                time.sleep(0.1)
+        assert ready, "Published helper never became ready"
+        connection = http.client.HTTPConnection("127.0.0.1", 43829, timeout=3)
+        connection.request("GET", "/", headers={"Host": "foreign.example"})
+        assert connection.getresponse().status == 403; connection.close()
+        connection = http.client.HTTPConnection("127.0.0.1", 43829, timeout=3)
+        connection.request("GET", "/v1", headers={"Connection": "Upgrade", "Upgrade": "websocket",
+            "Sec-WebSocket-Version": "13", "Sec-WebSocket-Key": "dGhlIHNhbXBsZSBub25jZQ==", "Origin": "https://xpui.app.spotify.com"})
+        assert connection.getresponse().status == 403; connection.close()
+        subprocess.run([str(resources / "QueueCompanion")], env=env, check=True, timeout=5,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        assert service.poll() is None, "Singleton replaced the running service"
+        subprocess.run([str(resources / "QueueCompanion"), "--stop"], env=env, check=True, timeout=10)
+        service.wait(timeout=10)
+    finally:
+        if service.poll() is None:
+            service.kill(); service.wait()
     dmg = output / ("QueueCompanion-" + VERSION + "-macOS-" + arch + ".dmg")
     run("hdiutil", "create", "-volname", "Queue Companion", "-srcfolder", stage, "-ov", "-format", "UDZO", dmg)
     run("hdiutil", "verify", dmg)
@@ -145,6 +177,7 @@ def build():
     proof = {"architecture": arch, "minimumMacOS": "15.0", "upstreamArchiveSha256": expected,
              "nativeInstallerChecks": 6, "helperChecks": 17, "adHocSignatureVerified": True,
              "publishedHelperInitialized": True, "privateFilesInPayload": False,
+             "serviceHostAndPeerGuardsVerified": True, "singletonAndStopVerified": True,
              "spotifyEndToEndVerified": False, "notarized": False, "dmgSha256": sha(dmg)}
     (output / ("macOS-" + arch + "-build-proof.json")).write_text(json.dumps(proof, indent=2) + "\n")
     print("Built " + str(dmg))

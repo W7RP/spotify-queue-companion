@@ -103,10 +103,38 @@ struct NativeSetup {
         try process.run()
     }
     func integration(_ bundle: URL, _ command: String) throws {
-        try run(spice, ["--spotify-exec", bundle.appendingPathComponent("Contents/MacOS/Spotify").path,
-            "--spotify-data-dir", bundle.appendingPathComponent("Contents/Resources").path, command])
+        // Upstream Apply registers a separate Spicetify.app URL handler. The minimal
+        // runtime has no manager UI that needs it; preserve an existing handler.
+        let handler = applications.appendingPathComponent("Spicetify.app")
+        let backup = data.appendingPathComponent("protocol-backup/Spicetify.app")
+        if fm.fileExists(atPath: backup.path) { throw SetupError.message("A saved Spicetify URL handler needs recovery from QueueCompanion/protocol-backup before another Apply.") }
+        let existed = fm.fileExists(atPath: handler.path)
+        if existed {
+            try fm.createDirectory(at: backup.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try fm.copyItem(at: handler, to: backup)
+        }
+        let result = Result {
+            try run(spice, ["--spotify-exec", bundle.appendingPathComponent("Contents/MacOS/Spotify").path,
+                "--spotify-data-dir", bundle.appendingPathComponent("Contents/Resources").path, command])
+        }
+        if fm.fileExists(atPath: handler.path), let plist = NSDictionary(contentsOf: handler.appendingPathComponent("Contents/Info.plist")),
+           plist["CFBundleIdentifier"] as? String == "app.spicetify.protocol" {
+            try removeOwned(handler, within: applications)
+        }
+        if existed {
+            guard !fm.fileExists(atPath: handler.path) else { throw SetupError.message("Could not restore the pre-existing Spicetify handler. Its saved copy is retained in QueueCompanion/protocol-backup.") }
+            try fm.copyItem(at: backup, to: handler)
+            try removeOwned(backup, within: data)
+            try run(URL(fileURLWithPath: "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"), ["-f", handler.path], timeout: 15)
+        }
+        _ = try result.get()
     }
-    func receipt() throws -> [String: Any] { try readJSON(data.appendingPathComponent("install-macos.json")) }
+    func receipt() throws -> [String: Any] {
+        let record = try readJSON(data.appendingPathComponent("install-macos.json"))
+        guard let path = record["spotifyBundle"] as? String, path.hasPrefix("/"), path.hasSuffix(".app"),
+              record["ownedProfile"] is Bool else { throw SetupError.message("The saved installation record is invalid. Your backup is retained.") }
+        return record
+    }
 
     func install(_ selected: URL?) throws {
         let bundle = try locateSpotify(selected)
