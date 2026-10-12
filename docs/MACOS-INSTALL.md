@@ -4,7 +4,7 @@ The Windows `.exe` does not run on macOS. This preview uses the same Queue panel
 
 ## Installation
 
-1. Use the **arm64** disk image for Apple Silicon (M1 or newer), or **x64** for an Intel Mac. macOS 13 Ventura or newer is required. No separate .NET, Python or Spicetify installation is needed.
+1. Use the **arm64** disk image for Apple Silicon (M1 or newer), or **x64** for an Intel Mac. macOS 15 Sequoia or newer is required. No separate .NET, Python or Spicetify installation is needed.
 2. Install Spotify from spotify.com, sign in, and open it once. Use desktop Spotify on this Mac as the playback device. Spotify Premium remains the tested target on Windows.
 3. Open the `.dmg`, then **Queue Companion Setup.app** inside it. This is an ad-hoc signed preview, without Apple Developer ID notarization. If macOS blocks opening it, use **System Settings → Privacy & Security → Open Anyway** after attempting to open Setup. Keep Gatekeeper enabled.
 4. Choose **Install / Repair**. Spotify restarts. Setup installs Queue Companion and its maintenance app into **~/Applications**, and the helper starts at login without a window. Eject the disk image afterward.

@@ -42,7 +42,7 @@ def build():
     run("dotnet", "publish", "helper/QueueCompanion.csproj", "-r", rid, "-c", "Release", "-o", output / "helper", "--no-restore")
     native = output / "native"
     native.mkdir(exist_ok=True)
-    target = ("arm64" if arch == "arm64" else "x86_64") + "-apple-macos13.0"
+    target = ("arm64" if arch == "arm64" else "x86_64") + "-apple-macos15.0"
     run("xcrun", "swiftc", "-swift-version", "5", "-O", "-target", target,
         "installer/macos/Installer.swift", "installer/macos/main.swift", "-o", native / "QueueCompanion.Launcher")
     run("xcrun", "swiftc", "-O", "-target", target, "installer/macos/Keychain.swift", "-o", native / "QueueCompanion.Keychain")
@@ -101,7 +101,7 @@ def build():
         if path.is_file() and (path.name in {"pairing.json", "credentials.dat", "claude-key.dat", "daemon-token", "queue-companion-pairing.js"} or path.suffix in {".dat", ".log"}):
             raise RuntimeError("Private data found in installer")
     base = {"CFBundleExecutable": "QueueCompanion.Launcher", "CFBundlePackageType": "APPL",
-            "CFBundleVersion": "0.2.6", "CFBundleShortVersionString": "0.2.6", "LSMinimumSystemVersion": "13.0",
+            "CFBundleVersion": "0.2.6", "CFBundleShortVersionString": "0.2.6", "LSMinimumSystemVersion": "15.0",
             "NSHighResolutionCapable": True}
     with (companion / "Contents/Info.plist").open("wb") as stream:
         plistlib.dump({**base, "CFBundleIdentifier": "org.queuecompanion.app", "CFBundleName": "Queue Companion", "LSUIElement": True,
@@ -142,7 +142,7 @@ def build():
     run("hdiutil", "create", "-volname", "Queue Companion", "-srcfolder", stage, "-ov", "-format", "UDZO", dmg)
     run("hdiutil", "verify", dmg)
     (output / (dmg.name + ".sha256")).write_text(sha(dmg) + "  " + dmg.name + "\n")
-    proof = {"architecture": arch, "minimumMacOS": "13.0", "upstreamArchiveSha256": expected,
+    proof = {"architecture": arch, "minimumMacOS": "15.0", "upstreamArchiveSha256": expected,
              "nativeInstallerChecks": 6, "helperChecks": 17, "adHocSignatureVerified": True,
              "publishedHelperInitialized": True, "privateFilesInPayload": False,
              "spotifyEndToEndVerified": False, "notarized": False, "dmgSha256": sha(dmg)}
