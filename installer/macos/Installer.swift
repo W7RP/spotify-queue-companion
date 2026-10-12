@@ -113,8 +113,9 @@ struct NativeSetup {
         if fm.fileExists(atPath: helper.path) { try run(helper, ["--stop"], timeout: 15) }
     }
     func startHelper() throws {
-        try run(URL(fileURLWithPath: "/bin/launchctl"), ["kickstart", domain + "/org.queuecompanion.helper"], timeout: 15, allowFailure: true)
-        // The singleton makes this safe whether the login agent is already running or disabled.
+        let status = try run(URL(fileURLWithPath: "/bin/launchctl"), ["kickstart", domain + "/org.queuecompanion.helper"], timeout: 15, allowFailure: true)
+        if status == 0 { return }
+        // A disabled/unregistered login agent can still be started explicitly.
         let process = Process(); process.executableURL = helper
         process.standardOutput = FileHandle.nullDevice; process.standardError = FileHandle.nullDevice
         try process.run()
