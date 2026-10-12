@@ -6,7 +6,7 @@ The Windows `.exe` does not run on macOS. This preview uses the same Queue panel
 
 1. Use the **arm64** disk image for Apple Silicon (M1 or newer), or **x64** for an Intel Mac. macOS 15 Sequoia or newer is required. No separate .NET, Python or Spicetify installation is needed.
 2. Install Spotify from spotify.com, sign in, and open it once. Use desktop Spotify on this Mac as the playback device. Spotify Premium remains the tested target on Windows.
-3. Open the `.dmg`, then **Queue Companion Setup.app** inside it. This is an ad-hoc signed preview, without Apple Developer ID notarization. If macOS blocks opening it, use **System Settings → Privacy & Security → Open Anyway** after attempting to open Setup. Keep Gatekeeper enabled.
+3. Open the `.dmg`, then **Queue Companion Setup.app** inside it. This is an ad-hoc signed preview, without Apple Developer ID notarization. If macOS blocks opening it, use **System Settings → Privacy & Security → Open Anyway** after attempting to open Setup, following [Apple’s opening instructions](https://support.apple.com/en-us/102445). Keep Gatekeeper enabled.
 4. Choose **Install / Repair**. Spotify restarts. Setup installs Queue Companion and its maintenance app into **~/Applications**, and the helper starts at login without a window. Eject the disk image afterward.
 5. In Spotify, click the queue icon beside Search or open Queue. Open the gear to connect your own **Claude API key** or **ChatGPT** account. Claude Pro/Max subscriptions do not supply API credits.
 
