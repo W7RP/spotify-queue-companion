@@ -15,6 +15,14 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
         alert.window.isReleasedWhenClosed = false
         return alert
     }
+    func dismissUITest(_ alert: NSAlert, response: NSApplication.ModalResponse) {
+        // GCD's main queue cannot re-enter a block that is inside runModal.
+        // Use the modal run loop itself to simulate a button response.
+        let timer = Timer(timeInterval: 0.15, repeats: false) { _ in
+            NSApp.stopModal(withCode: response); alert.window.orderOut(nil)
+        }
+        RunLoop.main.add(timer, forMode: .modalPanel)
+    }
 
     func application(_ application: NSApplication, open urls: [URL]) {
         receivedURL = true
@@ -38,20 +46,20 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
         }
     }
     func showError(_ error: Error) {
-        let alert = alert(); alert.messageText = "Queue Companion setup could not finish"
+        let alert = self.alert(); alert.messageText = "Queue Companion setup could not finish"
         alert.informativeText = error.localizedDescription; alert.alertStyle = .warning
         alert.runModal()
     }
     func menu() {
         NSApp.setActivationPolicy(.regular); NSApp.activate(ignoringOtherApps: true)
-        let alert = alert(); alert.messageText = "Queue Companion"
+        let alert = self.alert(); alert.messageText = "Queue Companion"
         alert.informativeText = "Install the Queue Companion search bar inside Spotify’s Queue. Spotify will restart during installation or restore. Connect ChatGPT or Claude API in the bar’s settings.\n\nmacOS preview: appending songs is available. Queue replacement awaits Mac verification."
         for label in ["Install / Repair", "Choose Spotify…", "Restore Spotify", "Uninstall", "Cancel"] { alert.addButton(withTitle: label) }
         if uiTesting {
             // Exercise real modal-to-progress transitions, without touching Spotify.
             let response = uiCycles == 1 ? NSApplication.ModalResponse.alertThirdButtonReturn :
                 NSApplication.ModalResponse(rawValue: NSApplication.ModalResponse.alertFirstButtonReturn.rawValue + (uiCycles == 2 ? 3 : 0))
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { NSApp.stopModal(withCode: response); alert.window.orderOut(nil) }
+            dismissUITest(alert, response: response)
         }
         switch alert.runModal() {
         case .alertFirstButtonReturn:
@@ -74,7 +82,7 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
             let confirm = self.alert(); confirm.messageText = "Uninstall Queue Companion?"
             confirm.informativeText = "This removes Queue Companion and its saved connections, history and settings. Spotify will restart."
             confirm.addButton(withTitle: "Uninstall"); confirm.addButton(withTitle: "Cancel")
-            if uiTesting { DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { NSApp.stopModal(withCode: .alertFirstButtonReturn); confirm.window.orderOut(nil) } }
+            if uiTesting { dismissUITest(confirm, response: .alertFirstButtonReturn) }
             if confirm.runModal() == .alertFirstButtonReturn {
                 execute("Removing Queue Companion…") {
                     if self.uiTesting { Thread.sleep(forTimeInterval: 0.15); return "Uninstall UI test" }
@@ -101,7 +109,7 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
                 switch result {
                 case .success(let message):
                     let alert = self.alert(); alert.messageText = "Queue Companion"; alert.informativeText = message
-                    if self.uiTesting { DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { NSApp.stopModal(withCode: .alertFirstButtonReturn); alert.window.orderOut(nil) } }
+                    if self.uiTesting { self.dismissUITest(alert, response: .alertFirstButtonReturn) }
                     alert.runModal()
                     if self.uiTesting {
                         self.uiCycles += 1
