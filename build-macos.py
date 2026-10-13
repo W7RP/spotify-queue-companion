@@ -12,7 +12,7 @@ import sys
 import urllib.request
 
 ROOT = Path(__file__).resolve().parent
-VERSION = "0.2.6-macos.1"
+VERSION = "0.2.6-macos.2"
 UPSTREAM = {
     "arm64": ("aarch64", "c67804e0742b82013ac704bb70ceae98c079283c94f9356343f8a9e813356eab"),
     "x64": ("x86_64", "2cbf92b5eb0d3933175455a1b12ec76d8877198ef15fd67b6800812b309d51fb"),
@@ -47,6 +47,7 @@ def build():
         "installer/macos/Installer.swift", "installer/macos/main.swift", "-o", native / "QueueCompanion.Launcher")
     run("xcrun", "swiftc", "-O", "-target", target, "installer/macos/Keychain.swift", "-o", native / "QueueCompanion.Keychain")
     run(native / "QueueCompanion.Launcher", "--self-test")
+    run(native / "QueueCompanion.Launcher", "--ui-self-test", timeout=45)
 
     suffix, expected = UPSTREAM[arch]
     archive = output / ("spicetify-3.0.0-rc.3-macos-" + suffix + ".tar.zst")
@@ -110,7 +111,7 @@ def build():
         if path.is_file() and (path.name in {"pairing.json", "credentials.dat", "claude-key.dat", "daemon-token", "queue-companion-pairing.js"} or path.suffix in {".dat", ".log"}):
             raise RuntimeError("Private data found in installer")
     base = {"CFBundleExecutable": "QueueCompanion.Launcher", "CFBundlePackageType": "APPL",
-            "CFBundleVersion": "0.2.6", "CFBundleShortVersionString": "0.2.6", "LSMinimumSystemVersion": "15.0",
+            "CFBundleVersion": "0.2.6.2", "CFBundleShortVersionString": "0.2.6", "LSMinimumSystemVersion": "15.0",
             "NSHighResolutionCapable": True}
     with (companion / "Contents/Info.plist").open("wb") as stream:
         plistlib.dump({**base, "CFBundleIdentifier": "org.queuecompanion.app", "CFBundleName": "Queue Companion", "LSUIElement": True,
@@ -185,6 +186,7 @@ def build():
     (output / (dmg.name + ".sha256")).write_text(sha(dmg) + "  " + dmg.name + "\n")
     proof = {"architecture": arch, "minimumMacOS": "15.0", "upstreamArchiveSha256": expected,
              "nativeInstallerChecks": 17, "helperChecks": 17, "adHocSignatureVerified": True,
+             "installerUiLifecycleChecks": 3,
              "publishedHelperInitialized": True, "privateFilesInPayload": False,
              "serviceHostAndPeerGuardsVerified": True, "singletonAndStopVerified": True,
              "spotifyEndToEndVerified": False, "notarized": False, "dmgSha256": sha(dmg)}

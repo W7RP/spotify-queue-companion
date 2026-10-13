@@ -5,6 +5,16 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
     var receivedURL = false
     var selected: URL?
     var progress: NSWindow?
+    let uiTesting = CommandLine.arguments.contains("--ui-self-test")
+    var uiCycles = 0
+
+    func alert() -> NSAlert {
+        let alert = NSAlert()
+        // ARC owns these windows. AppKit's separate release-on-close would
+        // release them twice when the main run loop drains its autorelease pool.
+        alert.window.isReleasedWhenClosed = false
+        return alert
+    }
 
     func application(_ application: NSApplication, open urls: [URL]) {
         receivedURL = true
@@ -18,7 +28,9 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
         }
     }
     func applicationDidFinishLaunching(_ notification: Notification) {
-        if Bundle.main.bundleIdentifier == "org.queuecompanion.setup" { menu(); return }
+        if Bundle.main.bundleIdentifier == "org.queuecompanion.setup" || uiTesting {
+            DispatchQueue.main.async { self.menu() }; return
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             if self.receivedURL { return }
             do { try self.setup.startHelper() } catch { self.showError(error) }
@@ -26,38 +38,56 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
         }
     }
     func showError(_ error: Error) {
-        let alert = NSAlert(); alert.messageText = "Queue Companion setup could not finish"
+        let alert = alert(); alert.messageText = "Queue Companion setup could not finish"
         alert.informativeText = error.localizedDescription; alert.alertStyle = .warning
         alert.runModal()
     }
     func menu() {
         NSApp.setActivationPolicy(.regular); NSApp.activate(ignoringOtherApps: true)
-        let alert = NSAlert(); alert.messageText = "Queue Companion"
+        let alert = alert(); alert.messageText = "Queue Companion"
         alert.informativeText = "Install the Queue Companion search bar inside Spotify’s Queue. Spotify will restart during installation or restore. Connect ChatGPT or Claude API in the bar’s settings.\n\nmacOS preview: appending songs is available. Queue replacement awaits Mac verification."
         for label in ["Install / Repair", "Choose Spotify…", "Restore Spotify", "Uninstall", "Cancel"] { alert.addButton(withTitle: label) }
+        if uiTesting {
+            // Exercise real modal-to-progress transitions, without touching Spotify.
+            let response = uiCycles == 1 ? NSApplication.ModalResponse.alertThirdButtonReturn :
+                NSApplication.ModalResponse(rawValue: NSApplication.ModalResponse.alertFirstButtonReturn.rawValue + (uiCycles == 2 ? 3 : 0))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { NSApp.stopModal(withCode: response); alert.window.orderOut(nil) }
+        }
         switch alert.runModal() {
-        case .alertFirstButtonReturn: execute("Installing Queue Companion…") { try self.setup.install(self.selected); return "Installed. Open Spotify’s Queue or click the queue icon beside Search. Connect Claude API or ChatGPT using the gear." }
+        case .alertFirstButtonReturn:
+            DispatchQueue.main.async { self.execute("Installing Queue Companion…") {
+                if self.uiTesting { Thread.sleep(forTimeInterval: 0.15); return "Installation UI test" }
+                try self.setup.install(self.selected); return "Installed. Open Spotify’s Queue or click the queue icon beside Search. Connect Claude API or ChatGPT using the gear."
+            } }
         case .alertSecondButtonReturn:
             let panel = NSOpenPanel(); panel.canChooseFiles = true; panel.canChooseDirectories = false
+            panel.isReleasedWhenClosed = false
             panel.allowsMultipleSelection = false; panel.message = "Choose the installed Spotify.app"
             panel.directoryURL = URL(fileURLWithPath: "/Applications")
-            if panel.runModal() == .OK { selected = panel.url }; menu()
-        case .alertThirdButtonReturn: execute("Restoring Spotify…") { try self.setup.restore(); return "Stock Spotify restored. Use Install / Repair to reinstall Queue Companion." }
+            if panel.runModal() == .OK { selected = panel.url }; DispatchQueue.main.async { self.menu() }
+        case .alertThirdButtonReturn:
+            DispatchQueue.main.async { self.execute("Restoring Spotify…") {
+                if self.uiTesting { Thread.sleep(forTimeInterval: 0.15); return "Restore UI test" }
+                try self.setup.restore(); return "Stock Spotify restored. Use Install / Repair to reinstall Queue Companion."
+            } }
         case NSApplication.ModalResponse(rawValue: NSApplication.ModalResponse.alertFirstButtonReturn.rawValue + 3):
-            let confirm = NSAlert(); confirm.messageText = "Uninstall Queue Companion?"
+            let confirm = self.alert(); confirm.messageText = "Uninstall Queue Companion?"
             confirm.informativeText = "This removes Queue Companion and its saved connections, history and settings. Spotify will restart."
             confirm.addButton(withTitle: "Uninstall"); confirm.addButton(withTitle: "Cancel")
+            if uiTesting { DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { NSApp.stopModal(withCode: .alertFirstButtonReturn); confirm.window.orderOut(nil) } }
             if confirm.runModal() == .alertFirstButtonReturn {
                 execute("Removing Queue Companion…") {
+                    if self.uiTesting { Thread.sleep(forTimeInterval: 0.15); return "Uninstall UI test" }
                     let unconfirmed = try self.setup.uninstall()
                     return "Queue Companion was removed." + (unconfirmed ? " Also revoke Queue Companion in ChatGPT settings: network revocation could not be confirmed." : "")
                 }
-            } else { menu() }
+            } else { DispatchQueue.main.async { self.menu() } }
         default: NSApp.terminate(nil)
         }
     }
     func execute(_ label: String, operation: @escaping () throws -> String) {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 410, height: 130), styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
         window.title = "Queue Companion"; window.center()
         let text = NSTextField(labelWithString: label); text.frame = NSRect(x: 25, y: 70, width: 360, height: 25)
         let spinner = NSProgressIndicator(frame: NSRect(x: 25, y: 35, width: 360, height: 20)); spinner.style = .bar
@@ -70,8 +100,15 @@ final class CompanionDelegate: NSObject, NSApplicationDelegate {
                 self.progress?.close(); self.progress = nil
                 switch result {
                 case .success(let message):
-                    let alert = NSAlert(); alert.messageText = "Queue Companion"; alert.informativeText = message; alert.runModal(); NSApp.terminate(nil)
-                case .failure(let error): self.showError(error); self.menu()
+                    let alert = self.alert(); alert.messageText = "Queue Companion"; alert.informativeText = message
+                    if self.uiTesting { DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { NSApp.stopModal(withCode: .alertFirstButtonReturn); alert.window.orderOut(nil) } }
+                    alert.runModal()
+                    if self.uiTesting {
+                        self.uiCycles += 1
+                        if self.uiCycles < 3 { DispatchQueue.main.async { self.menu() } }
+                        else { DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { print("3 installer UI lifecycle checks passed"); NSApp.terminate(nil) } }
+                    } else { NSApp.terminate(nil) }
+                case .failure(let error): self.showError(error); DispatchQueue.main.async { self.menu() }
                 }
             }
         }

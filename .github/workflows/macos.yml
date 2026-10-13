@@ -4,6 +4,15 @@ on:
 permissions:
   contents: read
 jobs:
+  ui-tahoe:
+    runs-on: macos-26
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exercise installer windows on macOS 26
+        run: |
+          xcrun swiftc -swift-version 5 -O installer/macos/Installer.swift installer/macos/main.swift -o /tmp/QueueCompanion.Launcher
+          python3 -c 'import subprocess; subprocess.run(["/tmp/QueueCompanion.Launcher", "--ui-self-test"], check=True, timeout=45)'
   build:
     strategy:
       fail-fast: false

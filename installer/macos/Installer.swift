@@ -188,7 +188,7 @@ struct NativeSetup {
         } else {
             let config = profile.appendingPathComponent("config.toml")
             let owned = !fm.fileExists(atPath: config.path)
-            record = ["version": "0.2.6-macos.1", "spotifyBundle": bundle.path, "ownedProfile": owned]
+            record = ["version": "0.2.6-macos.2", "spotifyBundle": bundle.path, "ownedProfile": owned]
             if !owned { record["originalConfig"] = try String(contentsOf: config, encoding: .utf8) }
             let stock = apps.appendingPathComponent(fm.fileExists(atPath: apps.appendingPathComponent("xpui.spa.backup").path) ? "xpui.spa.backup" : "xpui.spa")
             guard fm.fileExists(atPath: stock.path) else { throw SetupError.message("Spotify’s original app archive is missing. Restore stock Spotify before installing.") }
