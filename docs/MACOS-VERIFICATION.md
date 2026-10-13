@@ -11,3 +11,11 @@ The packaged helper also initializes pairing, serves its loopback endpoint, reje
 The `macOS installers` workflow produces per-architecture build proofs and disk-image SHA-256 files. Release assets include these records and matching source. These checks do not install the extension into a signed-in Mac Spotify client or verify native queue writes. That final test is pending the user's friend. Append is available; destructive queue replacement remains disabled on macOS.
 
 The preview is ad-hoc signed and **not notarized by Apple**. It has no Apple Developer ID identity. It may require Open Anyway for initial launch. Daily use stays inside Spotify; maintenance controls are in Queue Companion Setup.
+
+## Preview 2 installer crash fix
+
+A user-supplied macOS 26 crash report showed `objc_release` failing while the main AppKit run loop drained an autorelease pool, with installation still running on a worker thread. The installer created a Swift-owned progress window with AppKit's default release-on-close behavior. [Apple documents that Swift/ARC clients must disable this behavior](https://developer.apple.com/documentation/appkit/nswindow/isreleasedwhenclosed) to avoid releasing a window too many times.
+
+Preview 2 explicitly keeps Swift ownership of progress, alert and file-picker windows, and defers modal-to-progress transitions until the current modal call returns. The new UI test opens and dismisses real installer dialogs and progress windows for Install, Restore and Uninstall using harmless simulated work. Both architecture builds run it, and a separate macOS 26 runner exercises window cleanup with memory scribbling. Spotify and installation state are untouched by the UI fixtures. The original private crash report is not included in the repository or distribution.
+
+The macOS 26 regression run reproduced a segmentation fault (exit signal 11) when the progress window's ownership fix was removed. With the fix restored, all three UI transitions completed successfully. These checks supplement the existing native/helper checks; signed-in Spotify queue testing remains separate.

@@ -2,6 +2,8 @@
 
 The Windows `.exe` does not run on macOS. This preview uses the same Queue panel, Search shortcut, playlist discovery and Claude API/ChatGPT settings, with a native Mac installer and background helper.
 
+Use **0.2.6-macos.2 or newer**. Preview 1 could crash while cleaning up an installer window. If installation crashed, eject the old disk image, open the new download and choose **Install / Repair**. The saved stock Spotify backup and existing connection are reused; uninstalling first is unnecessary.
+
 ## Installation
 
 1. Use the **arm64** disk image for Apple Silicon (M1 or newer), or **x64** for an Intel Mac. macOS 15 Sequoia or newer is required. No separate .NET, Python or Spicetify installation is needed.
