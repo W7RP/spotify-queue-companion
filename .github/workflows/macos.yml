@@ -11,8 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Exercise installer windows on macOS 26
         run: |
-          xcrun swiftc -swift-version 5 -O installer/macos/Installer.swift installer/macos/main.swift -o /tmp/QueueCompanion.Launcher
-          python3 -c 'import subprocess; subprocess.run(["/tmp/QueueCompanion.Launcher", "--ui-self-test"], check=True, timeout=45)'
+          python3 tests/macos/ui-lifecycle.py
   build:
     strategy:
       fail-fast: false
