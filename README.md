@@ -23,7 +23,9 @@ Get the [Windows x64 installer ZIP](https://github.com/W7RP/spotify-queue-compan
 
 **macOS preview (macOS 15 or newer):** download the [Apple Silicon installer](https://github.com/W7RP/spotify-queue-companion/releases/download/v0.2.6-macos.2/QueueCompanion-0.2.6-macos.2-macOS-arm64.dmg) or [Intel installer](https://github.com/W7RP/spotify-queue-companion/releases/download/v0.2.6-macos.2/QueueCompanion-0.2.6-macos.2-macOS-x64.dmg). Preview 2 fixes the installer window-cleanup crash in preview 1. The Windows `.exe` does not work on a Mac. See [Mac installation and preview limits](docs/MACOS-INSTALL.md). macOS uses the same Spotify panel with Keychain credentials and an invisible helper at login; queue replacement awaits a real Mac Spotify test.
 
-This repository's main branch contains the final application source at the root. Earlier files remain available in the initial archive commit and saved release.
+**iPhone web app preview:** [Open Queue Companion](https://queue-companion-mobile.quirkycoati256.chatgpt.site) in Safari and add it to the Home Screen. This hosted preview is currently owner-only. It uses Spotify Premium, the configured Spotify developer app and your own Claude API credits. Start playback in Spotify, request songs in Queue Companion, and keep it open until sending finishes; then playback continues with the companion closed. No computer needs to run. The mobile app appends to the native queue and keeps Spotify API data out of model requests. See [mobile setup, limitations and source](mobile/README.md).
+
+This repository's main branch contains desktop application source at the root and the hosted mobile app under `mobile/`. Earlier files remain available in the initial archive commit and saved release.
 
 ## Install and use
 

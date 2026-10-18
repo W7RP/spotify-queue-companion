@@ -1,0 +1,157 @@
+'use client';
+import { useCallback, useEffect, useRef, useState } from 'react';
+type Track = { uri: string; title: string; artist: string; image: string; url: string };
+type Status = { signedIn?: boolean; spotify: boolean; claude: boolean; model: string; count: number; queueReview?: boolean; queueBusy?: boolean };
+type Playback = { device: { id: string; name: string; type: string; restricted: boolean } | null; playing: Track | null; queue: Track[]; isPlaying: boolean };
+type RequestRow = { id: string; prompt: string; accepted: number; total: number; state: string; at: number };
+function Icon({ name, size = 22 }: { name: string; size?: number }) {
+  const paths: Record<string, React.ReactNode> = {
+    queue: <><path d="M3 5h14M3 10h14M3 15h8"/><path d="m16 14 5 3-5 3z"/></>,
+    settings: <><path d="m9 3-1 3-3 1-1 3 2 2-1 3 3 2 3-1 2 2 3-1 1-3 3-1V9l-3-1-1-3-3 1-2-3z"/><circle cx="12" cy="11" r="3"/></>,
+    history: <><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/><path d="M12 7v5l3 2"/></>,
+    arrow: <path d="m9 5 7 7-7 7"/>, refresh: <><path d="M20 10a8 8 0 0 0-14-5L3 8m0-5v5h5m-4 6a8 8 0 0 0 14 5l3-3m0 5v-5h-5"/></>,
+    phone: <><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M10 18h4"/></>,
+    device: <><rect x="2" y="3" width="15" height="12" rx="1"/><path d="M6 19h7m-3-4v4"/><rect x="17" y="10" width="5" height="11" rx="1"/></>,
+    note: <><path d="M9 18V5l10-2v13M9 8l10-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="16" cy="16" rx="3" ry="2"/></>,
+    close: <path d="m6 6 12 12M6 18 18 6"/>, external: <><path d="M14 3h7v7m0-7L10 14"/><path d="M10 3H4v17h17v-6"/></>,
+    user: <><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></>, chevron: <path d="m6 9 6 6 6-6"/>, play: <path d="m8 4 13 8-13 8z"/>,
+  };
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name] ?? paths.note}</svg>;
+}
+async function api(path: string, input?: object): Promise<any> {
+  const response = await fetch('/api/' + path, { ...(input ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) } : {}), cache: 'no-store' });
+  if (!response.headers.get('content-type')?.includes('application/json')) throw Error('The service could not respond. Refresh and try again.');
+  const result: any = await response.json(); if (!response.ok) throw Object.assign(new Error(result.error ?? 'The request could not finish.'), result); return result;
+}
+function TrackRow({ track, index, playing = false }: { track: Track; index?: number; playing?: boolean }) {
+  return <a className={'track-row' + (playing ? ' is-playing' : '')} href={track.url} target="_blank" rel="noopener noreferrer">
+    {index !== undefined && <span className="track-number">{index + 1}</span>}
+    {track.image ? <img src={track.image} width="48" height="48" alt="" referrerPolicy="no-referrer" loading="lazy"/> : <span className="artwork-placeholder"><Icon name="note"/></span>}
+    <span className="track-copy"><strong>{track.title}</strong><span>{track.artist}</span></span><span className="track-link"><Icon name={playing ? 'play' : 'external'} size={16}/></span>
+  </a>;
+}
+export default function Home() {
+  const [tab, setTab] = useState('queue'), [status, setStatus] = useState<Status | null>(null), [playback, setPlayback] = useState<Playback | null>(null);
+  const [prompt, setPrompt] = useState(''), [count, setCount] = useState(15), [busy, setBusy] = useState(''), [loading, setLoading] = useState(true), [key, setKey] = useState('');
+  const [message, setMessage] = useState(''), [error, setError] = useState(''), [models, setModels] = useState<{ id: string; name: string }[]>([]), [requests, setRequests] = useState<RequestRow[]>([]);
+  const [sheet, setSheet] = useState(''), [choice, setChoice] = useState<{ name: string; options: { uri: string; name: string; owner?: string }[] } | null>(null);
+  const [installPrompt, setInstallPrompt] = useState<any>(null), [cooldown, setCooldown] = useState(0), [selectionNote, setSelectionNote] = useState('');
+  const working = useRef(false), choices = useRef<Record<string, string>>({}), composer = useRef<HTMLTextAreaElement>(null);
+  const showError = useCallback((e: any) => { setError(e.message ?? 'The request could not finish.'); if (e.retryAfter) setCooldown(Date.now() + e.retryAfter * 1000); }, []);
+  const loadPlayback = useCallback(async () => { const result = await api('playback'); setPlayback(result); return result; }, []);
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try { const value = await api('status'); setStatus(value); setCount(value.count); if (value.spotify) await loadPlayback(); else setPlayback(null); }
+    catch (e: any) { if (e.code === 'sign_in') setStatus({ signedIn: false, spotify: false, claude: false, model: '', count: 15 }); else showError(e); }
+    finally { setLoading(false); }
+  }, [loadPlayback, showError]);
+  useEffect(() => {
+    refresh(); setPrompt(sessionStorage.getItem('qc-draft') ?? '');
+    const last = sessionStorage.getItem('qc-selection');
+    if (last) api('receipt?selection=' + encodeURIComponent(last)).then(result => {
+      if (result.receipt?.state === 'complete') { setMessage(`${result.receipt.accepted} songs sent to Spotify. You can close Queue Companion.`); sessionStorage.removeItem('qc-selection'); }
+      else if (result.receipt) setError(result.receipt.message ?? 'Check Spotify’s Queue before making another request.');
+      else sessionStorage.removeItem('qc-selection');
+    }).catch(() => {});
+    const install = (e: Event) => { e.preventDefault(); setInstallPrompt(e); }; window.addEventListener('beforeinstallprompt', install);
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+    const params = new URLSearchParams(location.search);
+    if (params.get('connection') === 'failed') setError('Spotify sign-in did not finish. Check the callback URL, Premium and allowed users, then reconnect.');
+    if (params.get('connection') === 'connected') setMessage('Spotify connected. Your next request will use the active playback device.');
+    if (params.has('connection')) history.replaceState(null, '', '/');
+    return () => window.removeEventListener('beforeinstallprompt', install);
+  }, [refresh]);
+  useEffect(() => { sessionStorage.setItem('qc-draft', prompt); }, [prompt]);
+  useEffect(() => { if (!cooldown) return; const timer = setTimeout(() => setCooldown(0), Math.max(0, cooldown - Date.now())); return () => clearTimeout(timer); }, [cooldown]);
+  useEffect(() => {
+    if (!sheet) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]');
+    const background = [...document.querySelectorAll<HTMLElement>('main,.app-header,.bottom-nav,.desktop-nav')];
+    background.forEach(element => element.inert = true);
+    dialog?.querySelector<HTMLElement>('button,a,input')?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { setSheet(''); return; }
+      if (event.key !== 'Tab') return;
+      const targets = [...dialog?.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled)') ?? []].filter(element => element.offsetParent !== null);
+      const first = targets[0], last = targets.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => { background.forEach(element => element.inert = false); document.removeEventListener('keydown', onKey); previous?.focus(); };
+  }, [sheet]);
+  useEffect(() => { if (tab === 'requests' && status?.signedIn) api('requests').then(result => setRequests(result.requests)).catch(showError); if (tab === 'settings' && status?.claude) api('models').then(result => setModels(result.models)).catch(showError); }, [tab, status?.claude, status?.signedIn, showError]);
+  async function saveSettings(nextCount = count, model = status?.model ?? '') {
+    if (!status?.signedIn) return;
+    try { await api('settings', { count: nextCount, model }); setStatus(value => value && { ...value, count: nextCount, model }); } catch (e) { showError(e); }
+  }
+  async function add(playlistChoice?: { name: string; uri: string }) {
+    if (working.current || cooldown > Date.now()) return;
+    if (!status?.spotify) { setTab('settings'); setError('Connect Spotify to add songs to your queue.'); return; }
+    if (playlistChoice) choices.current[playlistChoice.name] = playlistChoice.uri; else choices.current = {};
+    if (!prompt.trim()) { composer.current?.focus(); return; }
+    working.current = true; setBusy('Finding songs…'); setError(''); setMessage(''); setSelectionNote(''); setChoice(null);
+    try {
+      const latest = await loadPlayback(); if (!latest.device || latest.device.restricted) throw Error('Open Spotify and start a song on your iPhone, then try again.');
+      const selected = await api('select', { prompt, count, device: latest.device.id, choices: choices.current });
+      setBusy(`Sending ${selected.tracks.length} songs to Spotify…`); sessionStorage.setItem('qc-selection', selected.id);
+      const result = await api('queue', { selection: selected.id });
+      if (result.state === 'complete') {
+        sessionStorage.removeItem('qc-selection');
+        setMessage(`${result.accepted} ${result.accepted === 1 ? 'song' : 'songs'} sent to Spotify${result.accepted < selected.requested ? ` of ${selected.requested} requested` : ''}. You can close Queue Companion.`);
+        setSelectionNote(selected.unmatched ? `${selected.unmatched} ${selected.unmatched === 1 ? 'suggestion could' : 'suggestions could'} not be matched on Spotify.` : selected.familiar ? `${selected.familiar} playlist originals included.` : selected.note ?? ''); await loadPlayback();
+      } else if (result.state === 'failed') { sessionStorage.removeItem('qc-selection'); setError(`${result.accepted} of ${result.total} songs were sent. ${result.message ?? 'Check Spotify before making another request.'}`); }
+      else setError(result.message ?? 'The queue change is not confirmed. Check Spotify before adding more songs.');
+    } catch (e: any) { if (e.code === 'playlist_choice') { setChoice(e.choice); setSheet('playlist'); } else showError(e); }
+    finally { working.current = false; setBusy(''); await refresh(); }
+  }
+  async function connectClaude(e: React.FormEvent) {
+    e.preventDefault(); if (working.current) return; working.current = true; setBusy('Connecting Claude…'); setError('');
+    try { const result = await api('claude/connect', { key }); setKey(''); setModels(result.models); setMessage('Claude API connected.'); await refresh(); }
+    catch (e) { showError(e); } finally { working.current = false; setBusy(''); }
+  }
+  async function disconnect(provider: string) {
+    if (working.current) return;
+    try { await api('disconnect', { provider }); setMessage(provider === 'spotify' ? 'Spotify disconnected. You can also remove access in your Spotify account.' : 'Claude API key removed.'); await refresh(); } catch (e) { showError(e); }
+  }
+  async function review() { try { await api('review', {}); sessionStorage.removeItem('qc-selection'); setError(''); setMessage('Queue review saved. New requests are enabled.'); await refresh(); } catch (e) { showError(e); } }
+  const device = playback?.device;
+  const nav = <>{[['queue', 'queue', 'Queue'], ['requests', 'history', 'Requests'], ['settings', 'settings', 'Settings']].map(([id, icon, label]) => <button key={id} disabled={loading} className={tab === id ? 'active' : ''} onClick={() => setTab(id)} aria-current={tab === id ? 'page' : undefined}><Icon name={icon}/><span>{label}</span></button>)}</>;
+  return <div className="app-shell">
+    <header className="app-header"><a className="wordmark" href="/" aria-label="Queue Companion home"><Icon name="queue" size={25}/><span>Queue Companion</span></a><button disabled={loading} className="icon-button profile-button" aria-label="Open account settings" onClick={() => setTab('settings')}><Icon name="user" size={20}/></button></header>
+    <aside className="desktop-nav" aria-label="Main navigation">{nav}<p>Made for your queue.<br/>Playback stays in Spotify.</p></aside>
+    <main>
+      <div className="page-heading"><h1>{tab === 'queue' ? 'Queue' : tab === 'requests' ? 'Your requests' : 'Settings'}</h1>{tab === 'queue' && <button className="icon-button" aria-label="Refresh Spotify queue" disabled={!!busy || loading || cooldown > Date.now()} onClick={() => { setError(''); refresh(); }}><Icon name="refresh" size={21}/></button>}</div>
+      {(message || error) && <div className={'notice ' + (error ? 'notice-error' : 'notice-success')} role={error ? 'alert' : 'status'}><span>{error || message}{!error && selectionNote && <small>{selectionNote}</small>}</span><button aria-label="Dismiss message" className="icon-button" onClick={() => { setMessage(''); setError(''); }}><Icon name="close" size={17}/></button></div>}
+      {tab === 'queue' && <>
+        <section className="request-section" aria-label="Request music"><label className="request-label" htmlFor="music-request">What do you want to hear?</label>
+          <textarea id="music-request" ref={composer} value={prompt} onChange={e => setPrompt(e.target.value)} maxLength={1000} placeholder="Classic rock hidden gems, a little less obvious." rows={3} disabled={!!busy || loading}/>
+          <div className="request-controls"><label className="count-control"><select aria-label="Number of songs" value={count} disabled={!!busy} onChange={e => { const value = Number(e.target.value); setCount(value); saveSettings(value); }}>{[5,10,15,20,25,30,40,50].map(n => <option key={n} value={n}>{n} songs</option>)}</select><Icon name="chevron" size={16}/></label><span className="queue-mode">Add to queue</span></div>
+          <button className="primary-button add-button" disabled={!!busy || loading || cooldown > Date.now() || !!status?.queueReview} onClick={() => add()}>{busy ? <><span className="spinner"/>{busy}</> : <><Icon name="queue" size={20}/>Add to queue</>}</button>
+          <button className={'device-button' + (device ? ' connected' : '')} disabled={!!busy} onClick={() => setSheet('device')}><Icon name={device?.type === 'Smartphone' ? 'phone' : 'device'} size={18}/><span>{device ? device.name : status?.spotify ? 'Open Spotify to find your device' : 'Connect Spotify to get started'}</span><Icon name="arrow" size={14}/></button>
+        </section>
+        {status?.queueReview && <section className="review-notice"><h2>Check your Spotify queue</h2><p>A previous request may still be running or may have added songs. Review it in Spotify before making another request.</p><button className="secondary-button" onClick={review} disabled={!!status.queueBusy || !!busy}>I’ve checked my queue</button></section>}
+        <div className="queue-content">{playback?.playing && <section className="now-playing"><h2>{playback.isPlaying ? 'Now playing' : 'Current song'}</h2><TrackRow track={playback.playing} playing/></section>}
+          <section className="next-up"><div className="section-heading"><h2>Next up</h2>{!!playback?.queue.length && <span>{playback.queue.length} visible in Spotify</span>}</div>
+            {loading && !playback ? <div className="empty-state loading-state"><span className="spinner"/><p>Loading your queue…</p></div> : playback?.queue.length ? <div className="track-list">{playback.queue.map((track, index) => <TrackRow key={track.uri + index} track={track} index={index}/>)}</div> : <div className="empty-state"><Icon name="queue" size={43}/><h3>{status?.spotify ? 'Room for something good' : 'Your next songs start here'}</h3><p>{status?.spotify ? 'Describe what you want to hear. We’ll add it after the songs already queued.' : 'Connect Spotify, start a song, and tell us what should come next.'}</p>{!status?.spotify && <button className="secondary-button" onClick={() => setTab('settings')}>Connect Spotify</button>}</div>}
+          </section></div>
+      </>}
+      {tab === 'requests' && <section className="requests-list"><p className="section-description">Music you’ve asked for on this account.</p>{requests.length ? requests.map(row => <article className="request-row" key={row.id}><span className="request-history-icon"><Icon name="history"/></span><div><h2>{row.prompt}</h2><p>{row.accepted} of {row.total} sent · {new Date(row.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>{row.state !== 'complete' && <span className="request-status">{row.state === 'reviewed' ? 'Queue reviewed' : row.state === 'failed' ? 'Stopped early' : 'Check Spotify’s queue'}</span>}</div></article>) : <div className="empty-state"><Icon name="history" size={43}/><h3>No requests yet</h3><p>Your completed requests will appear here.</p><button className="secondary-button" onClick={() => setTab('queue')}>Make a request</button></div>}</section>}
+      {tab === 'settings' && <div className="settings-content"><section className="settings-section"><h2>Connections</h2>
+        {!status?.signedIn && <div className="connection-row"><span className="connection-icon"><Icon name="user"/></span><div><h3>Your account</h3><p>Sign in to keep your connections private.</p></div><a className="secondary-button small" href="/signin-with-chatgpt?return_to=%2F">Sign in</a></div>}
+        <div className="connection-row"><span className="connection-icon"><Icon name="note"/></span><div><h3>Spotify</h3><p>{status?.spotify ? 'Connected · Premium playback' : 'Play and queue on your active device'}</p></div>{status?.spotify ? <button className="text-button" disabled={!!busy} onClick={() => disconnect('spotify')}>Disconnect</button> : <a className={'secondary-button small' + (!status?.signedIn ? ' disabled' : '')} aria-disabled={!status?.signedIn} href={status?.signedIn ? '/api/spotify/start' : undefined}>Connect</a>}</div>
+        <div className="connection-row"><span className="connection-icon"><Icon name="queue"/></span><div><h3>Claude API</h3><p>{status?.claude ? 'Connected · Your API credits' : 'Used to select songs from your request'}</p></div>{status?.claude && <button className="text-button" disabled={!!busy} onClick={() => disconnect('claude')}>Disconnect</button>}</div>
+        {!status?.claude && <form className="key-form" onSubmit={connectClaude}><label htmlFor="claude-key">API key</label><div><input id="claude-key" type="password" autoComplete="off" spellCheck={false} placeholder="Paste your Claude API key" value={key} onChange={e => setKey(e.target.value)} disabled={!!busy || !status?.signedIn}/><button className="secondary-button small" type="submit" disabled={!key.trim() || !!busy || !status?.signedIn}>Connect</button></div><p>Encrypted on the server. Claude Pro subscriptions don’t include API credits.</p></form>}
+      </section><section className="settings-section"><h2>Requests</h2><label className="setting-row"><span><strong>Default song count</strong><small>You can change this for each request.</small></span><select value={count} disabled={!!busy} onChange={e => { const value = Number(e.target.value); setCount(value); saveSettings(value); }}>{[5,10,15,20,25,30,40,50].map(n => <option value={n} key={n}>{n}</option>)}</select></label>{status?.claude && <label className="setting-row"><span><strong>Claude model</strong><small>Models available to your API key.</small></span><select value={status.model} onChange={e => saveSettings(count, e.target.value)} disabled={!!busy}>{models.map(model => <option key={model.id} value={model.id}>{model.name}</option>)}</select></label>}<div className="setting-row"><span><strong>Queue behavior</strong><small>Keep the current song and existing queue.</small></span><span className="setting-value">Append</span></div></section>
+      <section className="settings-section"><h2>This iPhone</h2><button className="setting-row setting-button" onClick={() => setSheet('install')}><span><strong>Add to Home Screen</strong><small>Open Queue Companion like an app.</small></span><Icon name="arrow" size={17}/></button><button className="setting-row setting-button" onClick={() => setSheet('privacy')}><span><strong>Privacy and saved data</strong><small>Manage your connections and requests.</small></span><Icon name="arrow" size={17}/></button></section><p className="settings-footnote">Queue Companion · Mobile preview<br/>An independent companion for Spotify. Not affiliated with Spotify.</p></div>}
+      {(playback?.playing || !!playback?.queue.length) && <p className="attribution"><a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer">Music information provided by Spotify <Icon name="external" size={13}/></a></p>}
+    </main><nav className="bottom-nav" aria-label="Main navigation">{nav}</nav>
+    {sheet && <div className="sheet-backdrop" onClick={e => { if (e.target === e.currentTarget) setSheet(''); }}><section className="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"><div className="sheet-handle"/><header><h2 id="sheet-title">{sheet === 'device' ? 'Listening on' : sheet === 'install' ? 'Add to Home Screen' : sheet === 'playlist' ? 'Choose a playlist' : 'Privacy and saved data'}</h2><button className="icon-button" aria-label="Close" onClick={() => setSheet('')}><Icon name="close"/></button></header>
+      {sheet === 'device' && <><div className="device-detail"><Icon name="phone" size={34}/><div><h3>{device?.name ?? 'Start listening in Spotify'}</h3><p>{device ? 'This is Spotify’s active playback device.' : 'Open Spotify on this iPhone and start a song, then return here and refresh.'}</p></div></div><a className="primary-button" href="https://open.spotify.com" target="_blank" rel="noopener noreferrer">Open Spotify</a><button className="secondary-button" onClick={async () => { setSheet(''); await refresh(); }}>Refresh device</button><p className="sheet-note">To switch devices, use Spotify’s device picker. Queue Companion follows the active device.</p></>}
+      {sheet === 'install' && <><p>In Safari, open the Share menu, tap <strong>Add to Home Screen</strong>, and leave <strong>Open as Web App</strong> enabled. Then tap Add.</p><p>Your queue keeps playing in Spotify after you close this app.</p>{installPrompt && <button className="primary-button" onClick={async () => { await installPrompt.prompt(); setInstallPrompt(null); setSheet(''); }}>Install Queue Companion</button>}<button className="secondary-button" onClick={() => setSheet('')}>Got it</button></>}
+      {sheet === 'playlist' && <><p>More than one playlist matches “{choice?.name}”.</p>{choice?.options.map(option => <button className="playlist-option" key={option.uri} onClick={() => { setSheet(''); add({ name: choice.name, uri: option.uri }); }}><span className="connection-icon"><Icon name="queue"/></span><span><strong>{option.name}</strong><small>{option.owner ?? 'Spotify playlist'}</small></span><Icon name="arrow" size={16}/></button>)}</>}
+      {sheet === 'privacy' && <><p>Your Spotify tokens and Claude API key are encrypted on the server and tied to your signed-in account. Keys are never saved in browser storage.</p><p>Claude receives the request you type. Your Spotify queue, playlists, artwork and listening history are not sent to the model. Playlist similarity uses genre information locally.</p><p>Requests save your own prompt and the number of songs sent. Selection details expire after ten minutes.</p><button className="secondary-button danger" disabled={!!busy} onClick={async () => { if (!confirm('Remove your saved connections and request history? Your Spotify queue will keep playing.')) return; try { await api('erase', {}); setSheet(''); setRequests([]); setMessage('Saved connections and requests removed.'); await refresh(); } catch (e) { showError(e); } }}>Remove my saved data</button><p className="sheet-note">To revoke Spotify permission completely, remove Queue Companion from your Spotify account’s Apps page.</p></>}
+    </section></div>}
+  </div>;
+}

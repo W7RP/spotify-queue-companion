@@ -1,0 +1,7 @@
+// Visitor-owned encrypted connections, short-lived selections and queue receipts.
+import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core';
+export const accounts = sqliteTable('accounts', { userId: text('user_id').primaryKey(), sealed: text('sealed').notNull(), revision: integer('revision').notNull().default(0), refreshUntil: integer('refresh_until').notNull().default(0) });
+export const oauthAttempts = sqliteTable('oauth_attempts', { state: text('state').primaryKey(), userId: text('user_id').notNull(), sealed: text('sealed').notNull(), expiresAt: integer('expires_at').notNull() });
+export const selections = sqliteTable('selections', { id: text('id').primaryKey(), userId: text('user_id').notNull(), sealed: text('sealed').notNull(), expiresAt: integer('expires_at').notNull() });
+export const jobs = sqliteTable('queue_jobs', { id: text('id').primaryKey(), userId: text('user_id').notNull(), selectionId: text('selection_id').notNull(), state: text('state').notNull(), count: integer('count').notNull().default(0), total: integer('total').notNull(), updatedAt: integer('updated_at').notNull(), sealed: text('sealed').notNull() }, t => [uniqueIndex('one_write_per_selection').on(t.userId, t.selectionId)]);
+export const locks = sqliteTable('queue_locks', { userId: text('user_id').primaryKey(), jobId: text('job_id').notNull(), expiresAt: integer('expires_at').notNull() });
