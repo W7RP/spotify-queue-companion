@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('real server denies anonymous private APIs and cross-origin writes', async ({ request }) => {
-  for (const path of ['status', 'playback', 'requests', 'models', 'receipt?selection=someone-elses-id', 'spotify/start']) {
+  for (const path of ['selection?id=someone-elses-id', 'status', 'playback', 'requests', 'models', 'receipt?selection=someone-elses-id', 'spotify/start']) {
     const result = await request.get('/api/' + path, { maxRedirects: 0 });
     expect(result.status()).toBe(401);
     expect(result.headers()['cache-control']).toContain('no-store');

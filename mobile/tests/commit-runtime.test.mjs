@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import ts from 'typescript';
 import { Miniflare, Log, LogLevel } from 'miniflare';
 
-const files = ['core.mjs', 'http.mjs', 'lease.mjs', 'review.mjs', 'playback.mjs', 'server.ts', 'commit.ts'];
+const files = ['core.mjs', 'http.mjs', 'lease.mjs', 'review.mjs', 'playback.mjs', 'server.ts', 'devices.ts', 'commit.ts'];
 let source = "import { env } from 'cloudflare:workers';\n";
 for (const file of files) {
   let value = await readFile(new URL('../lib/queue/' + file, import.meta.url), 'utf8');
@@ -22,7 +22,7 @@ export default { async fetch(request) {
     const params = new URL(request.url).searchParams;
     if (new URL(request.url).pathname === '/init') {
       for (const sql of ${JSON.stringify(schema)}.split(';').map(s => s.trim()).filter(Boolean)) await db().prepare(sql).run();
-      await saveAccount('owner', { spotify: { access: 'FAKE_ACCESS', refresh: 'FAKE_REFRESH', expires: Date.now() + 3600000, subject: 'fake-owner' } }, -1);
+      await saveAccount('owner', { spotify: { access: 'FAKE_ACCESS', refresh: 'FAKE_REFRESH', expires: Date.now() + 3600000, subject: 'fake-owner' }, lastDevice: { id: 'paused-phone', name: 'iPhone', type: 'Smartphone', seen: Date.now(), subject: 'fake-owner' } }, -1);
       await db().prepare('INSERT INTO selections VALUES (?, ?, ?, ?)').bind(selectionId, 'owner', await seal({ tracks: fixtureTracks, prompt: 'Fixture request', count: 20, subject: 'fake-owner', deviceId: 'paused-phone' }, 'owner'), Date.now() + 600000).run();
       return response({ ready: true });
     }
@@ -31,18 +31,19 @@ export default { async fetch(request) {
 } };
 `;
 
-async function fixture(mode, status = 200) {
-  const writes = []; let playing = false;
+async function fixture(mode, status = 200, cold = false, refusesWake = false) {
+  const writes = []; let playing = false, active = !cold;
   const raw = t => ({ type: 'track', id: t.id, name: t.title, artists: [{ name: t.artist }], album: { images: [] } });
   const worker = new Miniflare({ modules: true, compatibilityDate: '2026-05-15', script: source, d1Databases: ['DB'], bindings: { DATA_ENCRYPTION_KEY: '01'.repeat(32) }, log: new Log(LogLevel.NONE), outboundService: async request => {
     const path = new URL(request.url).pathname;
-    if (request.method !== 'GET') { writes.push({ path, method: request.method, body: request.method === 'PUT' ? await request.json() : null }); playing = true; return new Response(null, { status }); }
-    if (path.endsWith('/devices')) return Response.json({ devices: [{ id: 'paused-phone', name: 'iPhone', is_active: false }] });
+    if (request.method !== 'GET') { writes.push({ path, method: request.method, body: request.method === 'PUT' ? await request.json() : null }); if (refusesWake && !active) return new Response(null, { status: 404 }); active = true; playing = true; return new Response(null, { status }); }
+    if (path.endsWith('/devices')) return Response.json({ devices: cold ? [] : [{ id: 'paused-phone', name: 'iPhone', type: 'Smartphone', is_active: playing }] });
     if (path.endsWith('/queue')) return Response.json({ currently_playing: playing && mode === 'replace' ? raw(tracks[0]) : null, queue: playing && mode === 'replace' ? tracks.slice(1).map(raw) : [] });
+    if (!active) return new Response(null, { status: 204 });
     return Response.json({ device: { id: 'paused-phone' }, shuffle_state: false, repeat_state: 'off', is_playing: playing, item: playing ? raw(tracks[0]) : null });
   } });
   const init = await worker.dispatchFetch('https://fixture.test/init'); assert.equal(init.status, 200, await init.text());
-  return { worker, writes, send: () => worker.dispatchFetch('https://fixture.test/send?mode=' + mode) };
+  return { worker, writes, makeReachable: () => { active = true; playing = true; }, send: () => worker.dispatchFetch('https://fixture.test/send?mode=' + mode) };
 }
 
 test('actual commit route with D1 handles twenty empty-success append replies and receipts prevent replay', async () => {
@@ -59,7 +60,27 @@ test('actual Play now route starts a paused phone with all twenty URIs in one PU
   try {
     const result = await send(); assert.equal(result.status, 200); const body = await result.json();
     assert.equal(body.accepted, 20); assert.equal(body.playbackConfirmed, true); assert.equal(body.sequenceConfirmed, true);
-    assert.equal(writes.length, 1); assert.equal(writes[0].path, '/v1/me/player/play'); assert.deepEqual(writes[0].body, { uris: tracks.map(t => t.uri), position_ms: 0 });
-    await send(); assert.equal(writes.length, 1);
+    assert.equal(writes.length, 2); assert.deepEqual(writes[0].body, { device_ids: ['paused-phone'], play: true }); assert.equal(writes[1].path, '/v1/me/player/play'); assert.deepEqual(writes[1].body, { uris: tracks.map(t => t.uri), position_ms: 0 });
+    await send(); assert.equal(writes.length, 2);
+  } finally { await worker.dispose(); }
+});
+
+
+test('a remembered phone missing from devices and playback state can be resumed before sending', async () => {
+  const { worker, writes, send } = await fixture('replace', 204, true);
+  try {
+    const result = await send(); assert.equal(result.status, 200); assert.equal((await result.json()).accepted, 20);
+    assert.deepEqual(writes.map(w => w.path), ['/v1/me/player', '/v1/me/player/play']);
+    assert.equal(writes[0].body.play, true);
+  } finally { await worker.dispose(); }
+});
+
+test('a refused wake leaves the selection unsent and it can finish after the user reconnects Spotify', async () => {
+  const { worker, writes, send, makeReachable } = await fixture('replace', 204, true, true);
+  try {
+    const first = await send(); assert.equal(first.status, 404);
+    assert.equal(writes.filter(w => w.path.endsWith('/play')).length, 0);
+    makeReachable(); const resumed = await send(); assert.equal(resumed.status, 200); assert.equal((await resumed.json()).accepted, 20);
+    await send(); assert.equal(writes.filter(w => w.path.endsWith('/play')).length, 1);
   } finally { await worker.dispose(); }
 });

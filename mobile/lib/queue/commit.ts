@@ -3,6 +3,7 @@ import { renewQueueLease, releaseReviewedLease } from './lease.mjs';
 import { chooseDevice, availableDevices, startSelection, observeSelection, preparePlaybackOrder } from './playback.mjs';
 import { reviewedSelection } from './review.mjs';
 import { db, open, seal, spotifyAccess, spotify, account, song, type Song } from './server';
+import { resolveDevice, rememberDevice } from './devices';
 
 async function getJob(userId: string, selectionId: string) {
   return db().prepare('SELECT id, state, count, total, updated_at, sealed FROM queue_jobs WHERE user_id = ? AND selection_id = ?').bind(userId, selectionId).first<{ id: string; state: string; count: number; total: number; updated_at: number; sealed: string }>();
@@ -38,7 +39,7 @@ export async function addSelection(userId: string, selectionId: string, keepUris
     const duplicate = await receipt(userId, selectionId); if (duplicate) return duplicate;
     const credentials = await spotifyAccess(userId);
     if (credentials.subject !== selection.subject) throw new AppError('Spotify account changed. Make a new request.', 409);
-    const device = chooseDevice(availableDevices(await spotify(credentials.access, '/me/player/devices')), requestedDevice || selection.deviceId || '');
+    const device = await resolveDevice(userId, credentials.access, requestedDevice ?? '', selection.deviceId ?? '');
     selection.deviceId = device.id; selection.deviceName = device.name;
     if (mode === 'append') {
       const queue = await spotify(credentials.access, '/me/player/queue');
@@ -100,6 +101,7 @@ export async function addSelection(userId: string, selectionId: string, keepUris
     if (result.state !== 'uncertain') await db().prepare('DELETE FROM queue_locks WHERE user_id = ? AND job_id = ?').bind(userId, id).run();
     let observed: { playbackConfirmed?: boolean; sequenceConfirmed?: boolean } = {};
     if (mode === 'replace' && result.state === 'complete') {
+      await rememberDevice(userId, device).catch(() => {});
       // Playback reads may lag an accepted command. Never resend to fix a lagging read.
       try {
         for (let attempt = 0; attempt < 4; attempt++) {

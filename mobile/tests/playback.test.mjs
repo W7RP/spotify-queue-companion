@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { availableDevices, chooseDevice, startSelection, observeSelection, preparePlaybackOrder } from '../lib/queue/playback.mjs';
+import { availableDevices, chooseDevice, startSelection, observeSelection, preparePlaybackOrder, refreshedDeviceId } from '../lib/queue/playback.mjs';
 import { spotifyResponse } from '../lib/queue/http.mjs';
 import { AppError } from '../lib/queue/core.mjs';
 const tracks = Array.from({ length: 50 }, (_, i) => ({ uri: 'spotify:track:' + String(i).padStart(22, '0') }));
@@ -10,7 +10,7 @@ test('a paused available device can start playback without any current song', ()
   assert.equal(chooseDevice(devices).id, 'paused-phone');
   assert.equal(chooseDevice(devices, 'paused-phone').id, 'paused-phone');
   assert.throws(() => chooseDevice(devices, 'old-device'), e => e.code === 'spotify_device');
-  assert.throws(() => chooseDevice([]), /do not need to start a song/);
+  assert.throws(() => chooseDevice([]), /Your songs are kept/);
   assert.throws(() => chooseDevice([...devices, { id: 'computer' }]), /Choose which/);
 });
 
@@ -48,7 +48,7 @@ test('shuffle and repeat-one are confirmed off before ordered playback, includin
   let state = null; const writes = [];
   await preparePlaybackOrder('phone', async () => state, async (kind, body) => {
     writes.push(kind);
-    if (kind === 'transfer') { assert.deepEqual(body, { device_ids: ['phone'], play: false }); state = { device: { id: 'phone' }, shuffle_state: true, repeat_state: 'track' }; }
+    if (kind === 'transfer') { assert.deepEqual(body, { device_ids: ['phone'], play: true }); state = { device: { id: 'phone' }, shuffle_state: true, repeat_state: 'track' }; }
     if (kind === 'shuffle') state.shuffle_state = body.state;
     if (kind === 'repeat') state.repeat_state = body.state;
   }, async () => {});
@@ -60,4 +60,19 @@ test('a lagging shuffle response is observed instead of racing the play command'
   await preparePlaybackOrder('phone', async () => ({ device: { id: 'phone' }, shuffle_state: !written || ++reads < 3, repeat_state: 'off' }), async () => { written = true; }, async () => {});
   assert.equal(reads, 3);
   await assert.rejects(preparePlaybackOrder('phone', async () => ({ device: { id: 'phone' }, shuffle_state: true }), async () => {}, async () => {}), /not confirmed/);
+});
+
+
+test('a paused device is explicitly resumed before the full selection is sent', async () => {
+  let playing = false; const calls = [];
+  await preparePlaybackOrder('phone', async () => ({ device: { id: 'phone' }, is_playing: playing, shuffle_state: false, repeat_state: 'off' }), async (kind, value) => { calls.push({ kind, value }); playing = true; }, async () => {});
+  assert.deepEqual(calls, [{ kind: 'transfer', value: { device_ids: ['phone'], play: true } }]);
+});
+
+
+test('a rotated device ID only follows a unique matching name and device type', () => {
+  const old = [{ id: 'old', name: 'iPhone', type: 'Smartphone' }], current = [{ id: 'new', name: 'iPhone', type: 'Smartphone' }];
+  assert.equal(refreshedDeviceId('old', old, current), 'new');
+  assert.equal(refreshedDeviceId('old', old, [...current, { ...current[0], id: 'another' }]), 'old');
+  assert.equal(refreshedDeviceId('old', old, [{ id: 'computer', name: 'iPhone', type: 'Computer' }]), 'old');
 });

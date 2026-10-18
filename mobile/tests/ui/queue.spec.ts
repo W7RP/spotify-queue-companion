@@ -37,7 +37,35 @@ test('songs generate without a device and remain available for sending after Spo
  await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
  await expect(page.getByRole('alert')).toContainText('do not need to start a song');
  await expect(page.getByRole('region', { name: 'Review selection' })).toContainText('Fixture song 5'); expect(generations).toBe(1);
- await expect(page.getByRole('button', { name: 'Play 1 song to Spotify', exact: true })).toBeEnabled();
+ await expect(page.getByRole('button', { name: 'Continue selection', exact: true })).toBeEnabled();
+});
+
+test('a disconnected selection survives returning from Spotify without generating again', async ({ page }) => {
+ let generations = 0, writes = 0, ready = false;
+ const selection = { id: 'saved-selection', mode: 'replace', tracks: [track(5), track(6)], requested: 2 };
+ await page.route('**/api/**', async route => {
+  const path = new URL(route.request().url()).pathname;
+  if (path === '/api/select') { generations++; return route.fulfill({ json: selection }); }
+  if (path === '/api/selection') return route.fulfill({ json: selection });
+  if (path === '/api/receipt') return route.fulfill({ json: { receipt: null } });
+  if (path === '/api/queue') {
+   if (!ready) return route.fulfill({ status: 404, json: { error: 'Spotify lost its connection.', code: 'spotify_device' } });
+   writes++; expect(route.request().postDataJSON().keepUris).toEqual([track(5).uri]); return route.fulfill({ json: { state: 'complete', accepted: 1, total: 1, mode: 'replace', playbackConfirmed: true, sequenceConfirmed: true, deviceName: 'iPhone' } });
+  }
+  await route.fulfill({ json: path === '/api/status' ? { ...status, mode: 'replace', review: false } : { device: ready ? { id: 'fresh-phone', name: 'iPhone', type: 'Smartphone' } : null, devices: [], queue: [] } });
+ });
+ await page.goto('/'); await page.getByLabel('What do you want to hear?').fill('Soul music');
+ await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
+ await expect(page.getByRole('link', { name: 'Open first song in Spotify', exact: true })).toHaveAttribute('href', track(5).uri);
+ await page.getByRole('button', { name: 'Remove Fixture song 6 from selection', exact: true }).click();
+ await page.reload();
+ await expect(page.getByRole('region', { name: 'Review selection' })).not.toContainText('Fixture song 6');
+ await expect(page.getByRole('region', { name: 'Review selection' })).toContainText('Fixture song 5');
+ expect(generations).toBe(1); expect(writes).toBe(0);
+ ready = true; await page.getByRole('button', { name: 'Continue selection', exact: true }).click();
+ await expect(page.getByRole('status')).toContainText('Playing your selection on iPhone');
+ expect(generations).toBe(1); expect(writes).toBe(1);
+ expect(await page.evaluate(() => sessionStorage.getItem('qc-pending-selection'))).toBeNull();
 });
 test('request adds one selection, reports acceptance and preserves native playback', async ({ page }) => {
  let writes = 0, selections = 0, submitted: any;

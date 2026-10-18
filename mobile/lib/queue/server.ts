@@ -4,7 +4,8 @@ import { AppError, guardOrigin } from './core.mjs';
 import { boundedFetch, spotifyResponse } from './http.mjs';
 export { boundedFetch };
 
-export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; claudeKey?: string; model?: string; count?: number; mode?: 'append' | 'replace'; review?: boolean; provider?: 'chatgpt' | 'claude' | 'spotify' };
+export type DeviceHint = { id: string; name: string; type: string; seen: number; subject?: string };
+export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; lastDevice?: DeviceHint; claudeKey?: string; model?: string; count?: number; mode?: 'append' | 'replace'; review?: boolean; provider?: 'chatgpt' | 'claude' | 'spotify' };
 export type Song = { id: string; uri: string; title: string; artist: string; artistNames: string[]; artistIds: string[]; image: string; url: string; source: string };
 export function db() { if (!env.DB) throw new AppError('The service is being prepared. Please try again shortly.', 503); return env.DB; }
 export function origin() { if (!env.APP_ORIGIN) throw new AppError('The service is being prepared.', 503); return env.APP_ORIGIN; }
@@ -77,7 +78,7 @@ export async function spotify(token: string, path: string, method = 'GET', value
     if (result.status === 429) throw new AppError(`Spotify is busy. Wait ${wait} seconds before trying again.`, 429, 'spotify_rate_limit', wait);
     if (result.status === 401) throw new AppError('Reconnect Spotify in Settings.', 401, 'spotify_connect');
     if (result.status === 403) throw new AppError('Spotify denied access. Check Premium and the developer app’s allowed users.', 403, 'spotify_access');
-    if (result.status === 404) throw new AppError('Spotify cannot see that device. Open Spotify on your iPhone and refresh devices; starting a song is not required.', 404, 'spotify_device');
+    if (result.status === 404) throw new AppError('Spotify lost its connection to that device. Your generated songs are kept. Reconnect Spotify, then return to finish.', 404, 'spotify_device');
     throw new AppError('Spotify could not complete the request. Try again after checking Spotify.', 502, 'spotify_failed');
   }
   return spotifyResponse(result, method);

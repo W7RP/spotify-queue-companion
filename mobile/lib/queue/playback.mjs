@@ -13,7 +13,14 @@ export function chooseDevice(devices, requested = '') {
   const active = devices.find(d => d.active);
   if (active) return active;
   if (devices.length === 1) return devices[0];
-  throw new AppError(devices.length ? 'Choose which Spotify device should play this request.' : 'Open Spotify on your iPhone, then refresh devices. You do not need to start a song.', 409, 'spotify_device');
+  throw new AppError(devices.length ? 'Choose which Spotify device should play this request.' : 'Spotify is not advertising a device. Your songs are kept; open the first one in Spotify, tap Play, then return to finish.', 409, 'spotify_device');
+}
+export function refreshedDeviceId(id, previous, current) {
+  if (!id || current.some(d => d.id === id)) return id;
+  const old = previous.find(d => d.id === id);
+  if (!old?.name || !old.type) return id;
+  const matches = current.filter(d => d.name === old.name && d.type === old.type);
+  return matches.length === 1 ? matches[0].id : id;
 }
 // The write response confirms acceptance of the entire list. Playback observation
 // is separate: a slow/missing read must never replay a successful PUT.
@@ -37,14 +44,16 @@ export function observeSelection(tracks, playing, queue, isPlaying) {
 
 export async function preparePlaybackOrder(deviceId, read, write, wait = () => new Promise(resolve => setTimeout(resolve, 500))) {
   let state = await read();
-  if (state?.device?.id !== deviceId) {
-    await write('transfer', { device_ids: [deviceId], play: false });
+  if (state?.device?.id !== deviceId || state?.is_playing === false) {
+    // A no-play transfer can leave iOS suspended. Explicitly resume this known
+    // device, then replace its context once it acknowledges the connection.
+    await write('transfer', { device_ids: [deviceId], play: true });
     for (let attempt = 0; attempt < 6; attempt++) {
       state = await read();
       if (state?.device?.id === deviceId) break;
       await wait();
     }
-    if (state?.device?.id !== deviceId) throw new AppError('Spotify has not activated that device yet. Keep Spotify open, refresh devices and try again.', 409, 'spotify_device');
+    if (state?.device?.id !== deviceId) throw new AppError('Spotify did not reconnect. Your songs are kept; open the first one in Spotify, tap Play, then return to finish.', 409, 'spotify_device');
   }
   const shuffle = state.shuffle_state !== false, repeatTrack = state.repeat_state === 'track';
   if (shuffle) await write('shuffle', { state: false });

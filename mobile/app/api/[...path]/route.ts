@@ -15,12 +15,19 @@ export async function GET(request: Request) {
     }
     if (path === '/api/playback') {
       const credentials = await spotifyAccess(person.userId);
-      return response(await playbackSnapshot(credentials.access));
+      return response(await playbackSnapshot(credentials.access, person.userId));
     }
     if (path === '/api/models') { const record = await account(person.userId); return response({ models: record.value.provider === 'chatgpt' || !record.value.provider && !record.value.claudeKey ? (await computerStatus(person.userId)).models : record.value.provider !== 'spotify' && record.value.claudeKey ? await claudeModels(record.value.claudeKey) : [] }); }
     if (path === '/api/requests') {
       const result = await db().prepare('SELECT id, state, count, total, updated_at, sealed FROM queue_jobs WHERE user_id = ? ORDER BY updated_at DESC LIMIT 20').bind(person.userId).all();
       return response({ requests: await Promise.all(result.results.map(async (r: any) => ({ id: r.id, state: r.state, accepted: r.count, total: r.total, at: r.updated_at, ...await open<object>(r.sealed, person.userId) }))) });
+    }
+    if (path === '/api/selection') {
+      const id = new URL(request.url).searchParams.get('id') ?? '';
+      const row = await db().prepare('SELECT sealed FROM selections WHERE id = ? AND user_id = ? AND expires_at > ?').bind(id, person.userId, Date.now()).first<{ sealed: string }>();
+      if (!row) throw new AppError('This selection expired. Make a new request.', 410);
+      const selected = await open<any>(row.sealed, person.userId);
+      return response({ id, tracks: selected.tracks, requested: selected.count, mode: selected.mode, note: selected.note });
     }
     if (path === '/api/receipt') {
       const id = new URL(request.url).searchParams.get('selection') ?? '';
@@ -49,7 +56,7 @@ export async function POST(request: Request) {
     }
     if (path === '/api/disconnect') {
       const record = await account(person.userId);
-      if (input.provider === 'spotify') delete record.value.spotify;
+      if (input.provider === 'spotify') { delete record.value.spotify; delete record.value.lastDevice; }
       else if (input.provider === 'claude') { delete record.value.claudeKey; delete record.value.model; }
       else throw new AppError('Choose a connection to disconnect.');
       await saveAccount(person.userId, record.value, record.revision);
