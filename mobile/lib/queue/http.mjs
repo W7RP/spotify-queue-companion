@@ -8,3 +8,14 @@ export async function boundedFetch(url, init = {}, timeout = 15_000) {
   }
   return response;
 }
+
+export async function spotifyResponse(response, method = 'GET') {
+  // Player writes have no useful response body, including empty 200/202 replies.
+  // Parsing those as JSON loses the accepted write and stops the next song.
+  if (method !== 'GET' || response.status === 204) {
+    await response.body?.cancel();
+    return null;
+  }
+  const text = await response.text();
+  return text.trim() ? JSON.parse(text) : null;
+}

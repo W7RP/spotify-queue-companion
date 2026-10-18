@@ -3,6 +3,7 @@ import { response, user, account, saveAccount, fail, mutation, body, spotifyAcce
 import { AppError } from '@/lib/queue/core.mjs';
 import { makeSelection, claudeModels } from '@/lib/queue/select';
 import { addSelection, receipt, reviewQueue } from '@/lib/queue/commit';
+import { playbackSnapshot } from '@/lib/queue/devices';
 import { computerEndpoint, computerStatus } from '@/lib/queue/pc';
 export async function GET(request: Request) {
   try {
@@ -10,13 +11,11 @@ export async function GET(request: Request) {
     if (path === '/api/status') {
       const record = await account(person.userId), lock = await db().prepare('SELECT job_id, expires_at FROM queue_locks WHERE user_id = ?').bind(person.userId).first();
       const pc = await computerStatus(person.userId);
-      return response({ signedIn: true, spotify: !!record.value.spotify, claude: !!record.value.claudeKey, provider: record.value.provider ?? (record.value.claudeKey ? 'claude' : 'chatgpt'), chatgpt: pc.connected, pc, model: record.value.model ?? '', count: record.value.count ?? 15, spotifyConfigured: !!env.SPOTIFY_CLIENT_ID, queueReview: !!lock, queueBusy: lock ? Number(lock.expires_at) > Date.now() : false });
+      return response({ signedIn: true, spotify: !!record.value.spotify, claude: !!record.value.claudeKey, provider: record.value.provider ?? (record.value.claudeKey ? 'claude' : 'chatgpt'), chatgpt: pc.connected, pc, model: record.value.model ?? '', count: record.value.count ?? 15, mode: record.value.mode ?? 'replace', review: record.value.review ?? false, spotifyConfigured: !!env.SPOTIFY_CLIENT_ID, queueReview: !!lock, queueBusy: lock ? Number(lock.expires_at) > Date.now() : false });
     }
     if (path === '/api/playback') {
       const credentials = await spotifyAccess(person.userId);
-      const [playback, queue] = await Promise.all([spotify(credentials.access, '/me/player'), spotify(credentials.access, '/me/player/queue')]);
-      return response({ device: playback?.device ? { id: playback.device.id, name: playback.device.name, type: playback.device.type, restricted: playback.device.is_restricted } : null,
-        playing: song(playback?.item ?? queue?.currently_playing), queue: (queue?.queue ?? []).map((raw: any) => song(raw)).filter(Boolean), isPlaying: playback?.is_playing === true });
+      return response(await playbackSnapshot(credentials.access));
     }
     if (path === '/api/models') { const record = await account(person.userId); return response({ models: record.value.provider === 'chatgpt' || !record.value.provider && !record.value.claudeKey ? (await computerStatus(person.userId)).models : record.value.provider !== 'spotify' && record.value.claudeKey ? await claudeModels(record.value.claudeKey) : [] }); }
     if (path === '/api/requests') {
@@ -38,7 +37,8 @@ export async function POST(request: Request) {
       const record = await account(person.userId);
       if (!Number.isInteger(input.count) || input.count < 1 || input.count > 50 || typeof input.model !== 'string' || input.model.length > 120) throw new AppError('Choose a valid count and model.');
       if (input.provider !== undefined && !['chatgpt', 'claude', 'spotify'].includes(input.provider)) throw new AppError('Choose a valid music source.');
-      await saveAccount(person.userId, { ...record.value, count: input.count, model: input.model, ...(input.provider !== undefined ? { provider: input.provider } : {}) }, record.revision); return response({ saved: true });
+      if (input.mode !== undefined && !['append', 'replace'].includes(input.mode) || input.review !== undefined && typeof input.review !== 'boolean') throw new AppError('Choose valid playback settings.');
+      await saveAccount(person.userId, { ...record.value, ...(input.mode !== undefined ? { mode: input.mode } : {}), ...(input.review !== undefined ? { review: input.review } : {}), count: input.count, model: input.model, ...(input.provider !== undefined ? { provider: input.provider } : {}) }, record.revision); return response({ saved: true });
     }
     if (path === '/api/claude/connect') {
       if (typeof input.key !== 'string' || input.key.length < 20 || input.key.length > 500 || /\s/.test(input.key)) throw new AppError('Enter a valid Claude API key.');
@@ -58,13 +58,15 @@ export async function POST(request: Request) {
       return response({ disconnected: true });
     }
     if (path === '/api/select') {
-      if (typeof input.device !== 'string' || input.device.length > 200) throw new AppError('Choose the active Spotify device.');
-      try { return response(await makeSelection(person.userId, input.prompt, input.count, input.device, input.choices)); }
+      if (input.device !== undefined && (typeof input.device !== 'string' || input.device.length > 200)) throw new AppError('Choose the active Spotify device.');
+      if (input.mode !== undefined && !['append', 'replace'].includes(input.mode)) throw new AppError('Choose a valid playback mode.');
+      try { return response(await makeSelection(person.userId, input.prompt, input.count, input.device, input.choices, input.mode)); }
       catch (error: any) { if (error instanceof AppError && error.code === 'playlist_choice') return response({ error: error.message, code: error.code, choice: (error as any).choice }, 409); throw error; }
     }
     if (path === '/api/queue') {
-      if (input.mode !== undefined && input.mode !== 'append') throw new AppError('Spotify’s API cannot replace or clear the native queue. Use Spotify’s Queue to edit existing songs.', 400, 'queue_capability');
-      return response(await addSelection(person.userId, input.selection, input.keepUris));
+      if (input.mode !== undefined && !['append', 'replace'].includes(input.mode)) throw new AppError('Choose a valid playback mode.');
+      if (input.device !== undefined && (typeof input.device !== 'string' || input.device.length > 200)) throw new AppError('Choose a valid Spotify device.');
+      return response(await addSelection(person.userId, input.selection, input.keepUris, input.mode, input.device));
     }
     if (path === '/api/review') { await reviewQueue(person.userId); return response({ reviewed: true }); }
     if (path === '/api/erase') {

@@ -1,0 +1,65 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import ts from 'typescript';
+import { Miniflare, Log, LogLevel } from 'miniflare';
+
+const files = ['core.mjs', 'http.mjs', 'lease.mjs', 'review.mjs', 'playback.mjs', 'server.ts', 'commit.ts'];
+let source = "import { env } from 'cloudflare:workers';\n";
+for (const file of files) {
+  let value = await readFile(new URL('../lib/queue/' + file, import.meta.url), 'utf8');
+  value = value.replace(/^import .*;\r?\n/gm, '').replace('export { boundedFetch };', '');
+  source += file.endsWith('.ts') ? ts.transpileModule(value, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText : value;
+  source += '\n';
+}
+const schema = await readFile(new URL('../drizzle/0000_low_thunderbolt.sql', import.meta.url), 'utf8');
+const tracks = Array.from({ length: 20 }, (_, n) => ({ id: String(n + 1).padStart(22, '0'), uri: 'spotify:track:' + String(n + 1).padStart(22, '0'), title: 'Song ' + n, artist: 'Artist ' + n, artistNames: ['Artist ' + n], artistIds: [], source: 'catalogue', image: '', url: '' }));
+source += `
+const fixtureTracks = ${JSON.stringify(tracks)};
+const selectionId = '00000000-0000-4000-8000-000000000001';
+export default { async fetch(request) {
+  try {
+    const params = new URL(request.url).searchParams;
+    if (new URL(request.url).pathname === '/init') {
+      for (const sql of ${JSON.stringify(schema)}.split(';').map(s => s.trim()).filter(Boolean)) await db().prepare(sql).run();
+      await saveAccount('owner', { spotify: { access: 'FAKE_ACCESS', refresh: 'FAKE_REFRESH', expires: Date.now() + 3600000, subject: 'fake-owner' } }, -1);
+      await db().prepare('INSERT INTO selections VALUES (?, ?, ?, ?)').bind(selectionId, 'owner', await seal({ tracks: fixtureTracks, prompt: 'Fixture request', count: 20, subject: 'fake-owner', deviceId: 'paused-phone' }, 'owner'), Date.now() + 600000).run();
+      return response({ ready: true });
+    }
+    return response(await addSelection(params.get('owner') || 'owner', selectionId, undefined, params.get('mode') || 'replace', 'paused-phone'));
+  } catch (error) { return fail(error); }
+} };
+`;
+
+async function fixture(mode, status = 200) {
+  const writes = []; let playing = false;
+  const raw = t => ({ type: 'track', id: t.id, name: t.title, artists: [{ name: t.artist }], album: { images: [] } });
+  const worker = new Miniflare({ modules: true, compatibilityDate: '2026-05-15', script: source, d1Databases: ['DB'], bindings: { DATA_ENCRYPTION_KEY: '01'.repeat(32) }, log: new Log(LogLevel.NONE), outboundService: async request => {
+    const path = new URL(request.url).pathname;
+    if (request.method !== 'GET') { writes.push({ path, method: request.method, body: request.method === 'PUT' ? await request.json() : null }); playing = true; return new Response(null, { status }); }
+    if (path.endsWith('/devices')) return Response.json({ devices: [{ id: 'paused-phone', name: 'iPhone', is_active: false }] });
+    if (path.endsWith('/queue')) return Response.json({ currently_playing: playing && mode === 'replace' ? raw(tracks[0]) : null, queue: playing && mode === 'replace' ? tracks.slice(1).map(raw) : [] });
+    return Response.json({ device: { id: 'paused-phone' }, shuffle_state: false, repeat_state: 'off', is_playing: playing, item: playing ? raw(tracks[0]) : null });
+  } });
+  const init = await worker.dispatchFetch('https://fixture.test/init'); assert.equal(init.status, 200, await init.text());
+  return { worker, writes, send: () => worker.dispatchFetch('https://fixture.test/send?mode=' + mode) };
+}
+
+test('actual commit route with D1 handles twenty empty-success append replies and receipts prevent replay', async () => {
+  const { worker, writes, send } = await fixture('append');
+  try {
+    const result = await send(); assert.equal(result.status, 200); assert.equal((await result.json()).accepted, 20); assert.equal(writes.length, 20);
+    const replay = await (await send()).json(); assert.equal(replay.accepted, 20); assert.equal(writes.length, 20);
+    const other = await worker.dispatchFetch('https://fixture.test/send?owner=other'); assert.equal(other.status, 410); assert.equal(writes.length, 20);
+  } finally { await worker.dispose(); }
+});
+
+test('actual Play now route starts a paused phone with all twenty URIs in one PUT, observes order and never replays', async () => {
+  const { worker, writes, send } = await fixture('replace', 202);
+  try {
+    const result = await send(); assert.equal(result.status, 200); const body = await result.json();
+    assert.equal(body.accepted, 20); assert.equal(body.playbackConfirmed, true); assert.equal(body.sequenceConfirmed, true);
+    assert.equal(writes.length, 1); assert.equal(writes[0].path, '/v1/me/player/play'); assert.deepEqual(writes[0].body, { uris: tracks.map(t => t.uri), position_ms: 0 });
+    await send(); assert.equal(writes.length, 1);
+  } finally { await worker.dispose(); }
+});

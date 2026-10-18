@@ -1,5 +1,6 @@
 import { AppError, enqueueSequential, uniqueTracks } from './core.mjs';
 import { renewQueueLease, releaseReviewedLease } from './lease.mjs';
+import { chooseDevice, availableDevices, startSelection, observeSelection, preparePlaybackOrder } from './playback.mjs';
 import { reviewedSelection } from './review.mjs';
 import { db, open, seal, spotifyAccess, spotify, account, song, type Song } from './server';
 
@@ -14,10 +15,10 @@ export async function receipt(userId: string, selectionId: string) {
   const selection = row ? await open<any>(row.sealed, userId) : null;
   const tracks = selection ? (details.selectedIndexes ?? selection.tracks.map((_: any, i: number) => i)).map((i: number) => selection.tracks[i]) : [];
   const stale = ['sending', 'writing', 'preparing'].includes(job.state) && Date.now() - job.updated_at > 90_000;
-  return { id: job.id, state: stale ? 'uncertain' : job.state, accepted: job.count, total: job.total, tracks, requested: details.requested ?? job.total, deviceName: details.deviceName,
+  return { id: job.id, state: stale ? 'uncertain' : job.state, accepted: job.count, total: job.total, tracks, requested: details.requested ?? job.total, deviceName: details.deviceName, mode: details.mode ?? 'append',
     message: stale || job.state === 'uncertain' ? 'A previous queue change could not be confirmed. Check Spotify’s Queue before adding more songs.' : undefined };
 }
-export async function addSelection(userId: string, selectionId: string, keepUris?: string[]) {
+export async function addSelection(userId: string, selectionId: string, keepUris?: string[], requestedMode?: 'append' | 'replace', requestedDevice?: string) {
   if (!/^[a-f0-9-]{36}$/i.test(selectionId)) throw new AppError('That selection is no longer available.');
   const existing = await receipt(userId, selectionId); if (existing) return existing;
   const row = await db().prepare('SELECT sealed FROM selections WHERE id = ? AND user_id = ? AND expires_at > ?').bind(selectionId, userId, Date.now()).first<{ sealed: string }>();
@@ -25,21 +26,25 @@ export async function addSelection(userId: string, selectionId: string, keepUris
   const selection = await open<any>(row.sealed, userId);
   const reviewed = reviewedSelection(selection, keepUris), tracks = reviewed.tracks as Song[];
   if (!Array.isArray(tracks) || tracks.length < 1 || tracks.length > 50 || tracks.some(t => !/^spotify:track:[a-zA-Z0-9]{22}$/.test(t.uri))) throw new AppError('The selection is invalid. Nothing was queued.');
+  const mode = requestedMode ?? selection.mode ?? 'replace';
+  if (mode === 'replace') await reviewQueue(userId);
   const id = crypto.randomUUID();
   // A lock never expires by itself: a disconnected request may have reached Spotify.
   // Only a completed/known-failed run or an explicit queue review can release it.
   const locked = await db().prepare('INSERT OR IGNORE INTO queue_locks(user_id, job_id, expires_at) VALUES (?, ?, ?)').bind(userId, id, Date.now() + 90_000).run();
   if (!locked.meta.changes) throw new AppError('Review the previous queue change in Spotify before adding more songs.', 409, 'queue_review');
-  let created = false, writing = false;
+  let created = false, writing = false, accepted = 0;
   try {
     const duplicate = await receipt(userId, selectionId); if (duplicate) return duplicate;
     const credentials = await spotifyAccess(userId);
     if (credentials.subject !== selection.subject) throw new AppError('Spotify account changed. Make a new request.', 409);
-    const state = await spotify(credentials.access, '/me/player');
-    if (state?.device?.id !== selection.deviceId || state.device.is_restricted) throw new AppError('Playback moved to another device. Refresh and submit a new request.', 409, 'spotify_device');
-    const queue = await spotify(credentials.access, '/me/player/queue');
-    const alreadyQueued = [queue?.currently_playing, ...(queue?.queue ?? [])].map(item => song(item)).filter(Boolean) as Song[];
-    if (!selection.repeat && uniqueTracks(tracks, alreadyQueued).length !== tracks.length) throw new AppError('Some reviewed songs are now in Spotify’s queue. Remove those songs from your selection or find a fresh set. Nothing was sent.', 409, 'queue_changed');
+    const device = chooseDevice(availableDevices(await spotify(credentials.access, '/me/player/devices')), requestedDevice || selection.deviceId || '');
+    selection.deviceId = device.id; selection.deviceName = device.name;
+    if (mode === 'append') {
+      const queue = await spotify(credentials.access, '/me/player/queue');
+      const alreadyQueued = [queue?.currently_playing, ...(queue?.queue ?? [])].map(item => song(item)).filter(Boolean) as Song[];
+      if (!selection.repeat && uniqueTracks(tracks, alreadyQueued).length !== tracks.length) throw new AppError('Some reviewed songs are now in Spotify’s queue. Remove those songs from your selection or find a fresh set. Nothing was sent.', 409, 'queue_changed');
+    }
     // Recheck source membership immediately before the first write.
     if (selection.sourceUris?.length || selection.liked || selection.includedUris?.length) {
       const members = async (path: string) => {
@@ -62,25 +67,53 @@ export async function addSelection(userId: string, selectionId: string, keepUris
       }
     }
     if ((await account(userId)).value.spotify?.subject !== credentials.subject) throw new AppError('Spotify disconnected. Nothing was queued.', 409);
-    await db().prepare('INSERT INTO queue_jobs(id, user_id, selection_id, state, count, total, updated_at, sealed) VALUES (?, ?, ?, ?, 0, ?, ?, ?)')
-      .bind(id, userId, selectionId, 'preparing', tracks.length, Date.now(), await seal({ prompt: selection.prompt, requested: selection.count, deviceName: selection.deviceName, selectedIndexes: reviewed.indexes }, userId)).run();
-    created = true;
-    const result = await enqueueSequential(tracks,
-      async (track: Song) => {
-        const current = (await account(userId)).value.spotify;
-        if (!current || current.access !== credentials.access || current.subject !== credentials.subject) throw new AppError('Spotify connection changed. Queueing stopped.', 409);
+    if (mode === 'replace') await preparePlaybackOrder(device.id,
+      () => spotify(credentials.access, '/me/player'),
+      async (setting: string, value: any) => {
         await renewQueueLease(db(), userId, id);
-        writing = true; await spotify(credentials.access, '/me/player/queue?' + new URLSearchParams({ uri: track.uri, device_id: selection.deviceId }), 'POST');
-      },
-      async (checkpoint: { state: string; accepted: number }) => {
-        await renewQueueLease(db(), userId, id);
-        await db().prepare('UPDATE queue_jobs SET state = ?, count = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(checkpoint.state, checkpoint.accepted, Date.now(), id, userId).run();
+        if (setting === 'transfer') await spotify(credentials.access, '/me/player', 'PUT', value);
+        else await spotify(credentials.access, '/me/player/' + setting + '?' + new URLSearchParams({ device_id: device.id, state: String(value.state) }), 'PUT');
       });
+    await db().prepare('INSERT INTO queue_jobs(id, user_id, selection_id, state, count, total, updated_at, sealed) VALUES (?, ?, ?, ?, 0, ?, ?, ?)')
+      .bind(id, userId, selectionId, 'preparing', tracks.length, Date.now(), await seal({ prompt: selection.prompt, requested: selection.count, deviceName: selection.deviceName, mode, selectedIndexes: reviewed.indexes }, userId)).run();
+    created = true;
+    const checkpoint = async (point: { state: string; accepted: number }) => {
+      await renewQueueLease(db(), userId, id);
+      await db().prepare('UPDATE queue_jobs SET state = ?, count = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(point.state, point.accepted, Date.now(), id, userId).run();
+    };
+    const beforeWrite = async () => {
+      const current = (await account(userId)).value.spotify;
+      if (!current || current.access !== credentials.access || current.subject !== credentials.subject) throw new AppError('Spotify connection changed. Playback stopped.', 409);
+      await renewQueueLease(db(), userId, id); writing = true;
+    };
+    const result = mode === 'replace'
+      ? await startSelection(tracks, async (value: object) => {
+        await beforeWrite();
+        await spotify(credentials.access, '/me/player/play?' + new URLSearchParams({ device_id: device.id }), 'PUT', value);
+        accepted = tracks.length;
+      }, checkpoint)
+      : await enqueueSequential(tracks, async (track: Song) => {
+        await beforeWrite();
+        await spotify(credentials.access, '/me/player/queue?' + new URLSearchParams({ uri: track.uri, device_id: device.id }), 'POST');
+        accepted++;
+      }, checkpoint);
     if (result.state !== 'uncertain') await db().prepare('DELETE FROM queue_locks WHERE user_id = ? AND job_id = ?').bind(userId, id).run();
-    return { id, ...result, tracks, requested: selection.count, deviceName: selection.deviceName };
+    let observed: { playbackConfirmed?: boolean; sequenceConfirmed?: boolean } = {};
+    if (mode === 'replace' && result.state === 'complete') {
+      // Playback reads may lag an accepted command. Never resend to fix a lagging read.
+      try {
+        for (let attempt = 0; attempt < 4; attempt++) {
+          const [state, queue] = await Promise.all([spotify(credentials.access, '/me/player'), spotify(credentials.access, '/me/player/queue')]);
+          observed = observeSelection(tracks, song(state?.item), (queue?.queue ?? []).map((t: any) => song(t)).filter(Boolean), state?.is_playing);
+          if (observed.sequenceConfirmed) break;
+          if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 700));
+        }
+      } catch { /* Acceptance stays complete even when observation is unavailable. */ }
+    }
+    return { id, ...result, ...observed, tracks, requested: selection.count, mode, deviceName: selection.deviceName };
   } catch (error) {
     if (created && writing) {
-      await db().prepare('UPDATE queue_jobs SET state = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind('uncertain', Date.now(), id, userId).run();
+      await db().prepare('UPDATE queue_jobs SET state = ?, count = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind('uncertain', accepted, Date.now(), id, userId).run();
       throw new AppError('A queue change could not be confirmed. Check Spotify’s Queue before adding more songs.', 409, 'queue_review');
     }
     throw error;

@@ -1,10 +1,10 @@
 import { env } from 'cloudflare:workers';
 import { getChatGPTUser, chatGPTSignInPath } from '@/app/chatgpt-auth';
 import { AppError, guardOrigin } from './core.mjs';
-import { boundedFetch } from './http.mjs';
+import { boundedFetch, spotifyResponse } from './http.mjs';
 export { boundedFetch };
 
-export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; claudeKey?: string; model?: string; count?: number; provider?: 'chatgpt' | 'claude' | 'spotify' };
+export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; claudeKey?: string; model?: string; count?: number; mode?: 'append' | 'replace'; review?: boolean; provider?: 'chatgpt' | 'claude' | 'spotify' };
 export type Song = { id: string; uri: string; title: string; artist: string; artistNames: string[]; artistIds: string[]; image: string; url: string; source: string };
 export function db() { if (!env.DB) throw new AppError('The service is being prepared. Please try again shortly.', 503); return env.DB; }
 export function origin() { if (!env.APP_ORIGIN) throw new AppError('The service is being prepared.', 503); return env.APP_ORIGIN; }
@@ -67,19 +67,20 @@ export async function spotifyAccess(id: string) {
     await saveAccount(id, { ...record.value, spotify: updated }, record.revision); return updated;
   } finally { await db().prepare('UPDATE accounts SET refresh_until = 0 WHERE user_id = ? AND refresh_until = ?').bind(id, refreshUntil).run(); }
 }
-export async function spotify(token: string, path: string, method = 'GET') {
+export async function spotify(token: string, path: string, method = 'GET', value?: object) {
   // Paths are constructed on the server. No visitor-controlled proxy URLs.
   if (!path.startsWith('/') || path.startsWith('//')) throw new AppError('Invalid music request.');
-  const result = await boundedFetch('https://api.spotify.com/v1' + path, { method, headers: { Authorization: 'Bearer ' + token } });
+  const result = await boundedFetch('https://api.spotify.com/v1' + path, { method, headers: { Authorization: 'Bearer ' + token, ...(value ? { 'Content-Type': 'application/json' } : {}) }, ...(value ? { body: JSON.stringify(value) } : {}) });
+  if (method !== 'GET') console.info(JSON.stringify({ event: 'spotify_write', path: path.split('?')[0], method, status: result.status }));
   if (!result.ok) {
     const wait = Math.min(3600, Math.max(1, Number(result.headers.get('Retry-After')) || 30));
     if (result.status === 429) throw new AppError(`Spotify is busy. Wait ${wait} seconds before trying again.`, 429, 'spotify_rate_limit', wait);
     if (result.status === 401) throw new AppError('Reconnect Spotify in Settings.', 401, 'spotify_connect');
     if (result.status === 403) throw new AppError('Spotify denied access. Check Premium and the developer app’s allowed users.', 403, 'spotify_access');
-    if (result.status === 404) throw new AppError('No active Spotify device. Start a song on your iPhone, then refresh.', 404, 'spotify_device');
+    if (result.status === 404) throw new AppError('Spotify cannot see that device. Open Spotify on your iPhone and refresh devices; starting a song is not required.', 404, 'spotify_device');
     throw new AppError('Spotify could not complete the request. Try again after checking Spotify.', 502, 'spotify_failed');
   }
-  return result.status === 204 ? null : result.json() as Promise<any>;
+  return spotifyResponse(result, method);
 }
 export function song(raw: any, source = 'catalogue'): Song | null {
   raw = raw?.item ?? raw?.track ?? raw;

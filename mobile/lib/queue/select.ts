@@ -48,20 +48,17 @@ async function search(token: string, query: string, offset = 0) {
   const page = await spotify(token, '/search?' + new URLSearchParams({ q: query.slice(0, 200), type: 'track', limit: '10', offset: String(offset) }));
   return (page.tracks?.items ?? []).map((raw: any) => song(raw)).filter(Boolean) as Song[];
 }
-export async function makeSelection(userId: string, prompt: string, requestedCount: number, requestedDevice: string, choices: Record<string, string> = {}) {
+export async function makeSelection(userId: string, prompt: string, requestedCount: number, requestedDevice = '', choices: Record<string, string> = {}, requestedMode: 'append' | 'replace' = 'replace') {
   if (typeof prompt !== 'string' || prompt.trim().length < 2 || prompt.length > 1000 || !Number.isInteger(requestedCount) || requestedCount < 1 || requestedCount > 50) throw new AppError('Describe your music and choose between 1 and 50 songs.');
   let intent: ReturnType<typeof parseIntent>;
-  try { intent = parseIntent(prompt, requestedCount, 50, 'append'); } catch (error: any) { throw new AppError(error.message); }
-  if (intent.mode === 'replace') throw new AppError('Mobile adds to the existing queue. Manage or clear songs in Spotify.');
+  try { intent = parseIntent(prompt, requestedCount, 50, requestedMode); } catch (error: any) { throw new AppError(error.message); }
   if (intent.more) throw new AppError('For this mobile preview, describe the next set of songs in a new request.');
   const record = await account(userId);
   const needsModel = !intent.liked && !intent.history && !intent.inspiration && !intent.playlistNames.length && !intent.playlistUris.length && !intent.referencePlaylistNames.length && !intent.referencePlaylistUris.length && !intent.includedPlaylistNames.length && !intent.includedPlaylistUris.length;
   const provider = requireMusicSource(record.value, needsModel);
   const credentials = await spotifyAccess(userId);
-  const playback = await spotify(credentials.access, '/me/player');
-  const device = playback?.device;
-  if (!device?.id || device.is_restricted || device.id !== requestedDevice) throw new AppError('Your active device changed. Open Spotify on this iPhone and refresh before queueing.', 409, 'spotify_device');
-  const currentQueue = await spotify(credentials.access, '/me/player/queue');
+  // Music discovery is independent of whether a Spotify client is playing.
+  const currentQueue = intent.mode === 'append' ? await spotify(credentials.access, '/me/player/queue').catch((error: any) => { if (error.code === 'spotify_device') return null; throw error; }) : null;
   const queued = [currentQueue?.currently_playing, ...(currentQueue?.queue ?? [])].map(t => song(t)).filter(Boolean) as Song[];
   const groups = new Map<string, Song[]>(); let originals: Song[] = [], references: Song[] = [], sources: Song[][] = [];
   const sourceUris: string[] = [], referenceUris: string[] = [], includedUris: string[] = [];
@@ -143,7 +140,7 @@ export async function makeSelection(userId: string, prompt: string, requestedCou
   if (after.value.spotify?.subject !== credentials.subject || after.value.claudeKey !== record.value.claudeKey || after.value.provider !== record.value.provider) throw new AppError('Your connection changed while selecting songs. Nothing was queued.', 409);
   const id = crypto.randomUUID(), expires = Date.now() + 600_000;
   await db().prepare('DELETE FROM selections WHERE expires_at < ?').bind(Date.now()).run();
-  const value = { tracks: selected, prompt, count: intent.count, subject: credentials.subject, deviceId: device.id, deviceName: device.name, note, familiar, proposed, unmatched, sourceUris, includedUris, liked: intent.liked, repeat: intent.repeat };
+  const value = { tracks: selected, prompt, count: intent.count, subject: credentials.subject, deviceId: requestedDevice, mode: intent.mode, note, familiar, proposed, unmatched, sourceUris, includedUris, liked: intent.liked, repeat: intent.repeat };
   await db().prepare('INSERT INTO selections(id, user_id, sealed, expires_at) VALUES (?, ?, ?, ?)').bind(id, userId, await seal(value, userId), expires).run();
-  return { id, tracks: selected, requested: intent.count, note, familiar, unmatched, deviceName: device.name, expires };
+  return { id, tracks: selected, requested: intent.count, note, familiar, unmatched, mode: intent.mode, expires };
 }

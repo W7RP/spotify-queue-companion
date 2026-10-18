@@ -5,10 +5,20 @@ import { Miniflare } from 'miniflare';
 
 const transport = await readFile(new URL('../lib/queue/http.mjs', import.meta.url), 'utf8');
 const oauth = await readFile(new URL('../lib/queue/spotify-signin.mjs', import.meta.url), 'utf8');
-const script = transport + '\n' + oauth + `
+const core = await readFile(new URL('../lib/queue/core.mjs', import.meta.url), 'utf8');
+const script = core + '\n' + transport + '\n' + oauth + `
 export default { async fetch(request) {
   try {
     const path = new URL(request.url).pathname;
+    if (path === '/append-batch') {
+      const tracks = Array.from({ length: 20 }, (_, i) => ({ uri: 'spotify:track:' + String(i).padStart(22, '0') }));
+      const result = await enqueueSequential(tracks, async track => {
+        const response = await boundedFetch('https://api.spotify.com/v1/me/player/queue?uri=' + track.uri, { method: 'POST' });
+        if (!response.ok) throw new AppError('Spotify rejected the request.', response.status);
+        await spotifyResponse(response, 'POST');
+      }, async () => {});
+      return Response.json(result);
+    }
     if (path === '/oauth') {
       let saved = null;
       await finishSpotifySignIn(new Request('https://queue.example/callback?state=FAKE_STATE&code=FAKE_CODE', { headers: { cookie: 'qc_spotify_oauth=FAKE_BROWSER' } }), {
@@ -75,4 +85,16 @@ test('workerd aborts stalled requests at the configured deadline without retryin
     const response = await worker.dispatchFetch('http://queue.test/slow');
     assert.equal(response.status, 502); assert.equal(calls, 1);
   } finally { await worker.dispose(); }
+});
+
+
+test('real workerd accepts empty 200, 202 and 204 write replies and sends every song once', async () => {
+  for (const status of [200, 202, 204]) {
+    let calls = 0;
+    const worker = new Miniflare({ modules: true, compatibilityDate: '2026-05-15', script, outboundService: async () => { calls++; return new Response(null, { status }); } });
+    try {
+      const result = await (await worker.dispatchFetch('https://queue.test/append-batch')).json();
+      assert.deepEqual(result, { state: 'complete', accepted: 20, total: 20 }); assert.equal(calls, 20);
+    } finally { await worker.dispose(); }
+  }
 });

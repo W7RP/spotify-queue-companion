@@ -1,6 +1,44 @@
 import { test, expect } from '@playwright/test';
-const status = { signedIn: true, spotify: true, claude: true, model: 'claude-test-fixture', count: 15, queueReview: false };
+const status = { signedIn: true, spotify: true, claude: true, model: 'claude-test-fixture', count: 15, mode: 'append', review: true, queueReview: false };
 const track = (n: number) => ({ uri: 'spotify:track:' + String(n).padStart(22, '0'), title: 'Fixture song ' + n, artist: 'Fixture artist ' + n, image: '', url: 'https://open.spotify.com/track/' + String(n).padStart(22, '0') });
+
+test('default flow generates and starts a full selection on a paused device without a review click', async ({ page }) => {
+ let writes = 0, submitted: any;
+ await page.route('**/api/**', async route => {
+  const path = new URL(route.request().url()).pathname;
+  if (path === '/api/queue') { writes++; submitted = route.request().postDataJSON(); }
+  const values: Record<string, unknown> = {
+   '/api/status': { ...status, mode: 'replace', review: false },
+   '/api/playback': { device: { id: 'paused-phone', name: 'iPhone', type: 'Smartphone' }, devices: [{ id: 'paused-phone', name: 'iPhone', type: 'Smartphone' }], playing: writes ? track(5) : null, queue: writes ? [track(6), track(7)] : [], isPlaying: !!writes },
+   '/api/select': { id: 'fixture-selection', tracks: [track(5), track(6), track(7)], requested: 15, mode: 'replace' },
+   '/api/queue': { state: 'complete', accepted: 3, total: 3, mode: 'replace', playbackConfirmed: true, sequenceConfirmed: true, deviceName: 'iPhone' },
+  };
+  await route.fulfill({ json: values[path] ?? {} });
+ });
+ await page.goto('/'); await page.getByLabel('What do you want to hear?').fill('Classic rock hidden gems');
+ await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
+ await expect(page.getByRole('status')).toContainText('Playing your selection on iPhone');
+ expect(writes).toBe(1); expect(submitted).toMatchObject({ mode: 'replace', device: 'paused-phone', keepUris: [track(5).uri, track(6).uri, track(7).uri] });
+ await expect(page.getByRole('region', { name: 'Review selection' })).toHaveCount(0);
+ await expect(page.getByRole('region', { name: 'Your last request' })).toContainText('3 of 3 accepted');
+ expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+ await page.screenshot({ path: 'outputs/play-now-' + test.info().project.name + '.png', fullPage: true });
+});
+
+test('songs generate without a device and remain available for sending after Spotify opens', async ({ page }) => {
+ let generations = 0;
+ await page.route('**/api/**', async route => {
+  const path = new URL(route.request().url()).pathname;
+  if (path === '/api/select') { generations++; return route.fulfill({ json: { id: 'offline-selection', mode: 'replace', tracks: [track(5)], requested: 15 } }); }
+  if (path === '/api/queue') return route.fulfill({ status: 409, json: { error: 'Open Spotify on your iPhone. You do not need to start a song.', code: 'spotify_device' } });
+  await route.fulfill({ json: path === '/api/status' ? { ...status, mode: 'replace', review: false } : { device: null, devices: [], queue: [] } });
+ });
+ await page.goto('/'); await page.getByLabel('What do you want to hear?').fill('Soul music');
+ await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
+ await expect(page.getByRole('alert')).toContainText('do not need to start a song');
+ await expect(page.getByRole('region', { name: 'Review selection' })).toContainText('Fixture song 5'); expect(generations).toBe(1);
+ await expect(page.getByRole('button', { name: 'Play 1 song to Spotify', exact: true })).toBeEnabled();
+});
 test('request adds one selection, reports acceptance and preserves native playback', async ({ page }) => {
  let writes = 0, selections = 0, submitted: any;
  await page.route('**/api/**', async route => {

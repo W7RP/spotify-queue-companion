@@ -7,12 +7,12 @@ An installable web app that sends music requests to the active Spotify queue. Sp
 1. Open [Queue Companion](https://queue-companion-mobile.quirkycoati256.chatgpt.site) in Safari and sign in with the owning ChatGPT account.
 2. In Settings, connect Spotify and choose a Music source. Spotify library can mix named playlists, liked songs and recent plays without an AI key. Claude API enables free-text mood requests using your Anthropic API credits. ChatGPT uses the desktop helper on your paired PC and its existing ChatGPT plan connection. Keep that PC on, awake and online while finding songs; Settings shows whether it is connected. Site sign-in grants app access only, and direct hosted plan inference remains unavailable pending OpenAI access. Spotify Premium and access to the configured Spotify developer app are required. Claude Pro/Max subscriptions do not include API credits.
 3. Use Safari’s Share menu → Add to Home Screen → Open as Web App.
-4. Start a song in Spotify, open Queue Companion, describe the music, choose a count, and tap Find songs. Review the result, remove individual suggestions or Clear selection, then explicitly Append the songs you kept.
-5. Keep Queue Companion open until sending finishes. Your last request shows delivery counts and distinguishes songs visible in the native queue from commands merely accepted by Spotify. Afterward you can close it; playback continues in Spotify.
+4. Open Spotify on your iPhone so it is visible as a Spotify Connect device. Paused is fine. Songs can be generated even when no playback device is available.
+5. Describe your music and tap **Generate & play**. The default **Play now** mode sends the full selection in one playback command and starts from the first song. Play now activates the chosen device if necessary, turns off shuffle and repeat-one, and waits for Spotify to confirm those settings before starting. It replaces the suggested album, playlist or radio context. **Append to queue** keeps the current song and adds to its queue instead.
+6. To triage before sending, turn on **Review before sending** in Settings. Remove unwanted suggestions, then play or append the kept songs. If Spotify was unavailable, the generated selection stays on screen so you can open Spotify, refresh devices and send it without generating again.
+7. After Spotify accepts the selection, Queue Companion can close. The app distinguishes command acceptance from observed playback and next-up order. An uncertain write is never automatically replayed.
 
-Each request appends songs. The public Spotify API has no endpoint to clear, replace or remove individual entries from the native queue. Queue controls links to Spotify’s own editing instructions; it never simulates a native edit. To replace queued songs, clear them in Spotify, then append a reviewed selection here. The displayed device is the target; a device change before sending requires a fresh request. Source membership and visible-queue duplicates are rechecked after review and before sending.
-
-If connecting from ChatGPT’s embedded browser fails, open the site directly in Safari and start a fresh connection there. Sign-in links use top-level navigation. A failed callback reports whether the browser session was lost, the attempt expired, Spotify rejected the code, profile access was denied, or connection storage failed. Diagnostics contain fixed error codes and HTTP status only, without provider credentials or profile data.
+Spotify’s public API cannot delete individual manually queued tracks. Those may remain when a new playback context is started; the app checks the visible order and explains when Spotify still reports a different next-up list. Clear those entries in Spotify’s native Queue if necessary. The API can show only a window of a long queue.
 
 ## Music selection
 
@@ -20,7 +20,7 @@ Free-text requests use one Claude request with reserve suggestions, followed by 
 
 Spotify API data is never sent to Claude. Only the text you type and the requested count enter the model request. Playlist/recent-play discovery instead uses Spotify artist genres locally on the server. Reference recordings are excluded, and an explicit request to include a few playlist originals mixes those in. This preview searches a bounded pool and can return fewer tracks; it does not reproduce every desktop discovery feature.
 
-Direct playlist/liked-song mixes inspect up to 200 available songs per source, with up to six playlists and 200 playlist names. Quote playlist names or paste Spotify playlist links. Ambiguous names require a choice. Mood-filtered library-only requests, conversational “more” follow-ups, complete listening-history counts and queue replacement are currently unsupported and produce an explanation rather than silently falling back to unrelated music. Recently played references use up to 50 recent plays. Spotify developer-mode restrictions can limit which playlists are available.
+Direct playlist/liked-song mixes inspect up to 200 available songs per source, with up to six playlists and 200 playlist names. Quote playlist names or paste Spotify playlist links. Ambiguous names require a choice. Mood-filtered library-only requests, conversational “more” follow-ups, complete listening-history counts and deletion of manually queued songs are currently unsupported and produce an explanation rather than silently falling back to unrelated music. Recently played references use up to 50 recent plays. Spotify developer-mode restrictions can limit which playlists are available.
 
 ## Privacy and queue writes
 
@@ -82,3 +82,9 @@ The helper registers against a single existing site account, then pins that owne
 Only the typed music request, count and offered model reach the PC. It returns bounded title/artist pairs. Spotify account tokens, queue contents, library metadata and artwork never enter the model request. Pending requests and results are encrypted, expire after 100 seconds and are removed after consumption. An atomic one-time claim prevents automatic inference replay after a crash, timeout or uncertain completion; a new user request can try again. Review and Spotify queue writes remain on the site.
 
 After setup: choose **ChatGPT** in Settings, check **Connected through your PC**, start Spotify on the iPhone, then find, review and append songs. Once Spotify accepts them, the page can close and the PC is no longer needed for those queued songs.
+
+## Playback write handling
+
+Player POST/PUT success responses are acknowledgements. Empty 200, 202 and 204 replies are all accepted without trying to parse JSON. Previously an empty non-204 reply could add the first song, fail JSON parsing, record zero accepted and stop the batch. The append pipeline now checkpoints every acknowledged write; Play now submits the whole bounded list in one PUT to `/me/player/play` with `position_ms: 0`. Receipts prevent duplicate sends after reloads. Playback confirmation is read-only and cannot trigger a replay.
+
+Device discovery uses `/me/player/devices`, including paused controllable clients, and rechecks the chosen device immediately before sending. No active song is required for discovery or generation. An expired uncertain append can be superseded by an explicit new Play now request; a still-active operation remains protected by its lease.
