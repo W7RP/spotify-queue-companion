@@ -5,6 +5,22 @@ using System.Text.Json;
 using QueueCompanion;
 
 var store = new Storage();
+if (args.Contains("--configure-mobile-bridge"))
+{
+    var input = await Console.In.ReadLineAsync();
+    if (input == null || input.Length > 12_000) throw new InvalidOperationException("Computer configuration required on stdin.");
+    MobileBridge.Configure(store, JsonSerializer.Deserialize<MobileBridgeConfig>(input, Storage.Json)!);
+    return;
+}
+if (args.Contains("--disable-mobile-bridge")) { store.Delete("mobile-bridge.dat"); return; }
+if (args.Contains("--verify-mobile-bridge"))
+{
+    var reportPath = args.SkipWhile(x => x != "--report").Skip(1).First();
+    bool passed;
+    try { passed = await MobileBridge.Verify(store); } catch { passed = false; }
+    File.WriteAllText(reportPath, JsonSerializer.Serialize(new { passed, at = DateTimeOffset.UtcNow }));
+    Environment.ExitCode = passed ? 0 : 2; return;
+}
 var pairing = store.Read<Pairing>("pairing.json") ?? new Pairing(OAuth.Random()); store.Write("pairing.json", pairing);
 var executable = Environment.ProcessPath!;
 if (OperatingSystem.IsMacOS() && args.Contains("--stop"))
@@ -29,6 +45,7 @@ if (args.Any(x => x.Equals("queue-companion://repair/", StringComparison.Ordinal
 }
 if (args.Contains("--revoke"))
 {
+    store.Delete("mobile-bridge.dat");
     store.Delete("claude-key.dat");
     using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(15) };
     try { await new OAuth(store, client).Disconnect(); } catch { Environment.ExitCode = 2; }
@@ -179,7 +196,10 @@ app.Map("/v1", async context =>
     }
 });
 if (args.Contains("--connect")) app.Lifetime.ApplicationStarted.Register(() => oauth.Start(pairing.Port));
+Task? mobileBridge = null;
+app.Lifetime.ApplicationStarted.Register(() => mobileBridge = MobileBridge.Run(store, oauth, chatGpt, app.Lifetime.ApplicationStopping));
 await app.RunAsync();
+if (mobileBridge != null) { try { await mobileBridge; } catch (OperationCanceledException) { } }
 
 static async Task<JsonElement> Receive(WebSocket ws, CancellationToken ct)
 {

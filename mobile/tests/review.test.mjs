@@ -18,7 +18,7 @@ test('an ambiguous write is unconfirmed rather than incorrectly called not sent'
   assert.deepEqual(deliveryVisibility(tracks, 1, null, 'uncertain').map(r => r.state), ['accepted', 'unconfirmed', 'not_sent', 'not_sent']);
 });
 test('ChatGPT selection never silently uses an existing Claude key', () => {
-  assert.throws(() => requireMusicSource({ provider: 'chatgpt', claudeKey: 'FAKE_KEY' }), e => e.code === 'chatgpt_connect');
+  assert.equal(requireMusicSource({ provider: 'chatgpt', claudeKey: 'FAKE_KEY' }), 'chatgpt');
   assert.throws(() => requireMusicSource({ provider: 'claude' }), e => e.code === 'claude_connect');
   assert.equal(requireMusicSource({ provider: 'claude', claudeKey: 'FAKE_KEY' }), 'claude');
 });

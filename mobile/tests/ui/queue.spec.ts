@@ -54,7 +54,7 @@ test('settings, install sheet and privacy sheet are accessible without saving ke
  await page.route('**/api/**', route => route.fulfill({ json: { ...status, spotify: false, claude: false } }));
  await page.goto('/'); await page.getByRole('button', { name: 'Open account settings' }).click();
  await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
- await expect(page.getByText('ChatGPT · Not connected', { exact: true })).toBeVisible();
+ await expect(page.getByText('ChatGPT · PC not paired', { exact: true })).toBeVisible();
  await expect(page.getByLabel('API key', { exact: true })).toHaveCount(0);
  await expect(page.getByRole('link', { name: 'Connect', exact: true })).toHaveAttribute('target', '_top');
  await page.getByRole('button', { name: /Add to Home Screen/ }).click();
@@ -87,17 +87,32 @@ test('clearing a reviewed selection and opening native queue help never writes t
  await expect(page.getByRole('dialog')).toContainText('Spotify’s public API does not provide'); expect(writes).toBe(0);
 });
 
-test('missing ChatGPT inference access is shown as a selection failure with no append', async ({ page }) => {
+test('an offline PC is shown as a selection failure with no append or Claude fallback', async ({ page }) => {
  let writes = 0;
  await page.route('**/api/**', async route => {
   const path = new URL(route.request().url()).pathname;
   if (path === '/api/queue') writes++;
-  if (path === '/api/select') return route.fulfill({ status: 400, json: { error: 'ChatGPT is not connected for music selection. Nothing was sent to Spotify.', code: 'chatgpt_connect' } });
-  await route.fulfill({ json: path === '/api/status' ? { ...status, claude: false, provider: 'chatgpt' } : { device: { id: 'fixture', name: 'iPhone' }, queue: [] } });
+  if (path === '/api/select') return route.fulfill({ status: 409, json: { error: 'Your PC is offline. Nothing was sent to Spotify.', code: 'pc_offline' } });
+  await route.fulfill({ json: path === '/api/status' ? { ...status, chatgpt: false, provider: 'chatgpt', pc: { paired: true, online: false, connected: false } } : { device: { id: 'fixture', name: 'iPhone' }, queue: [] } });
  });
  await page.goto('/'); await page.getByLabel('What do you want to hear?').fill('Soul music');
  await page.getByRole('button', { name: 'Find songs', exact: true }).click();
  await expect(page.getByRole('alert')).toContainText('Nothing was sent to Spotify'); expect(writes).toBe(0);
+});
+
+test('a connected PC exposes ChatGPT models and keeps the Claude key form hidden', async ({ page }) => {
+ await page.route('**/api/**', async route => {
+  const path = new URL(route.request().url()).pathname;
+  const value = path === '/api/status' ? { ...status, chatgpt: true, provider: 'chatgpt', pc: { paired: true, online: true, connected: true } } : path === '/api/models' ? { models: [{ id: 'fixture-luna', name: 'Fixture ChatGPT model' }] } : { device: null, queue: [] };
+  await route.fulfill({ json: value });
+ });
+ await page.goto('/'); await page.getByRole('button', { name: 'Open account settings' }).click();
+ await expect(page.getByRole('heading', { name: 'ChatGPT · Connected through your PC', exact: true })).toBeVisible();
+ await expect(page.getByLabel('API key', { exact: true })).toHaveCount(0);
+ await expect(page.getByRole('option', { name: 'Fixture ChatGPT model', exact: true })).toBeAttached();
+ await expect(page.getByText('Once songs are added, Spotify keeps playing on your phone. You can close this page.')).toBeVisible();
+ expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+ await page.screenshot({ path: 'outputs/pc-settings-' + test.info().project.name + '.png', fullPage: true });
 });
 
 test('callback errors explain browser-session loss without displaying URL data', async ({ page }) => {

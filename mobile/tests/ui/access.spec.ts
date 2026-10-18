@@ -10,3 +10,12 @@ test('real server denies anonymous private APIs and cross-origin writes', async 
   const denied = await request.post('/api/queue', { headers: { Origin: 'https://untrusted.example' }, data: { selection: 'unknown' } });
   expect(denied.status()).toBe(403);
 });
+
+// A site browser session is not a computer credential.
+test('computer routes reject browser and unauthenticated service requests', async ({ request }) => {
+  for (const path of ['register', 'poll', 'heartbeat', 'complete']) {
+    const result = await request.post('/api/pc/' + path, { data: {} });
+    expect(result.status()).toBe(401);
+    expect(await result.json()).toMatchObject({ code: 'pc_auth' });
+  }
+});

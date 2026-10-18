@@ -13,11 +13,11 @@ export async function user() { const person = await getChatGPTUser(); if (!perso
 export function mutation(request: Request) {
   const expected = process.env.NODE_ENV === 'development' ? new URL(request.url).origin : origin(); guardOrigin(request, expected);
 }
-export async function body(request: Request) {
+export async function body(request: Request, limit = 12_000) {
   if (!request.headers.get('content-type')?.startsWith('application/json')) throw new AppError('Send a JSON request.', 415);
   const reader = request.body?.getReader(); if (!reader) throw new AppError('Send a JSON request.');
   const chunks: Uint8Array[] = []; let size = 0;
-  while (true) { const { done, value } = await reader.read(); if (done) break; size += value.byteLength; if (size > 12_000) { await reader.cancel(); throw new AppError('The request is too large.', 413); } chunks.push(value); }
+  while (true) { const { done, value } = await reader.read(); if (done) break; size += value.byteLength; if (size > limit) { await reader.cancel(); throw new AppError('The request is too large.', 413); } chunks.push(value); }
   const bytes = new Uint8Array(size); let offset = 0; for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
   try { const value = JSON.parse(new TextDecoder().decode(bytes)); if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error(); return value; }
   catch { throw new AppError('Send a valid JSON object.'); }

@@ -66,6 +66,12 @@ The helper uses DPAPI for Anthropic API keys and OpenAI credentials and owner-on
 
 For a pre-existing independently installed Spicetify setup, Queue Companion preserves its existing modules and appearance. The minimal profile applies to installations created by Queue Companion.
 
+## Mobile testing through your PC
+
+The [mobile web app](https://queue-companion-mobile.quirkycoati256.chatgpt.site) can use this Windows helper's existing ChatGPT connection. In the mobile app, select **ChatGPT** and check for **Connected through your PC** in Settings. The paired PC must stay on, awake and online while finding songs. After you review and append them, Spotify keeps playing on your iPhone independently.
+
+The helper polls the private site over outbound HTTPS; no incoming port or tunnel is required. ChatGPT OAuth credentials stay encrypted on the PC, using the same OAuth instance as the desktop extension. A separate protected computer credential is pinned to one site owner. Only your typed request and count go to the model; mobile Spotify metadata stays outside the inference request. This personal testing setup does not provide plan access to other site visitors. See [mobile setup and security](mobile/README.md#pc-bridge-for-personal-testing) for operator setup and disabling the bridge.
+
 ## Troubleshooting
 
 **Spotify could not be located:** use installer 0.1.1 or later. It checks the running app, common folders and Windows installation records. Open Spotify and keep it running, then retry setup from the same Windows account. If needed, choose **Browse for Spotify** and select the installed `Spotify.exe`, rather than the downloaded `SpotifySetup.exe`. Setup validates the app files and remembers this location for repair and the helper's process verification. Store installations remain unverified.

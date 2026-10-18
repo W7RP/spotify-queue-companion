@@ -5,5 +5,6 @@ declare namespace Cloudflare {
     APP_ORIGIN?: string;
     DATA_ENCRYPTION_KEY?: string;
     SPOTIFY_CLIENT_ID?: string;
+    PC_BRIDGE_TOKEN_HASH?: string;
   }
 }

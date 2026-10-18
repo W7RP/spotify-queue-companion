@@ -1,11 +1,11 @@
 # Queue Companion · Mobile preview
 
-An installable web app that sends music requests to the active Spotify queue. Spotify handles playback; no desktop companion needs to run. This deployment is owner-only.
+An installable web app that sends music requests to the active Spotify queue. Spotify handles playback. ChatGPT selection can use a paired Windows PC; Claude API and Spotify-library requests run without it. This deployment is owner-only.
 
 ## On iPhone
 
 1. Open [Queue Companion](https://queue-companion-mobile.quirkycoati256.chatgpt.site) in Safari and sign in with the owning ChatGPT account.
-2. In Settings, connect Spotify and choose a Music source. Spotify library can mix named playlists, liked songs and recent plays without an AI key. Claude API enables free-text mood requests using your Anthropic API credits. ChatGPT site sign-in grants app access only; hosted ChatGPT music selection remains unavailable pending OpenAI access. Spotify Premium and access to the configured Spotify developer app are required. Claude Pro/Max subscriptions do not include API credits.
+2. In Settings, connect Spotify and choose a Music source. Spotify library can mix named playlists, liked songs and recent plays without an AI key. Claude API enables free-text mood requests using your Anthropic API credits. ChatGPT uses the desktop helper on your paired PC and its existing ChatGPT plan connection. Keep that PC on, awake and online while finding songs; Settings shows whether it is connected. Site sign-in grants app access only, and direct hosted plan inference remains unavailable pending OpenAI access. Spotify Premium and access to the configured Spotify developer app are required. Claude Pro/Max subscriptions do not include API credits.
 3. Use Safari’s Share menu → Add to Home Screen → Open as Web App.
 4. Start a song in Spotify, open Queue Companion, describe the music, choose a count, and tap Find songs. Review the result, remove individual suggestions or Clear selection, then explicitly Append the songs you kept.
 5. Keep Queue Companion open until sending finishes. Your last request shows delivery counts and distinguishes songs visible in the native queue from commands merely accepted by Spotify. Afterward you can close it; playback continues in Spotify.
@@ -70,3 +70,15 @@ Browser tests use explicit fixtures at phone, small-phone and desktop sizes. The
 Publish with the Sites skill’s source workflow and private deployment operation. `.openai/hosting.json` is the existing site identity; do not create a duplicate Site. Production runtime secrets and local execution state must never enter Git.
 
 Queue Companion is an independent companion for Spotify and is not affiliated with Spotify or Anthropic.
+
+## PC bridge for personal testing
+
+The paired Windows helper polls this owner-only site over outbound HTTPS. It uses the same OAuth instance as desktop Queue Companion, so rotating ChatGPT credentials stay in DPAPI storage on the PC. There is no tunnel, incoming port, API-key fallback or Spotify playback on the PC. The existing Windows login startup entry starts the helper again after sign-in.
+
+An operator configures `PC_BRIDGE_TOKEN_HASH` as a secret in Sites and sends `{origin, serviceToken, bridgeToken}` to `node ../scripts/configure-mobile-bridge.mjs <absolute-helper-path>` through hidden stdin. `bridgeToken` is a random 32-byte base64url credential; its SHA-256 base64url hash goes in Sites. `serviceToken` is the native Sites service-access credential, restricted to this private site's origin. Never put either token in source, command arguments, logs, browser storage or a URL. Publish the environment revision before restarting the updated helper.
+
+The helper registers against a single existing site account, then pins that owner permanently in D1. It refuses ambiguous initial pairing. Sharing the site later does not give other visitors access to the PC. Deleting saved user data clears pending music jobs but retains the pairing boundary. Removing the local `mobile-bridge.dat` connection (`QueueCompanion.exe --disable-mobile-bridge`) stops polling; desktop ChatGPT remains connected. Uninstall removes both provider credentials and bridge configuration.
+
+Only the typed music request, count and offered model reach the PC. It returns bounded title/artist pairs. Spotify account tokens, queue contents, library metadata and artwork never enter the model request. Pending requests and results are encrypted, expire after 100 seconds and are removed after consumption. An atomic one-time claim prevents automatic inference replay after a crash, timeout or uncertain completion; a new user request can try again. Review and Spotify queue writes remain on the site.
+
+After setup: choose **ChatGPT** in Settings, check **Connected through your PC**, start Spotify on the iPhone, then find, review and append songs. Once Spotify accepts them, the page can close and the PC is no longer needed for those queued songs.

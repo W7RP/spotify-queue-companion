@@ -3,12 +3,14 @@ import { response, user, account, saveAccount, fail, mutation, body, spotifyAcce
 import { AppError } from '@/lib/queue/core.mjs';
 import { makeSelection, claudeModels } from '@/lib/queue/select';
 import { addSelection, receipt, reviewQueue } from '@/lib/queue/commit';
+import { computerEndpoint, computerStatus } from '@/lib/queue/pc';
 export async function GET(request: Request) {
   try {
     const person = await user(), path = new URL(request.url).pathname;
     if (path === '/api/status') {
       const record = await account(person.userId), lock = await db().prepare('SELECT job_id, expires_at FROM queue_locks WHERE user_id = ?').bind(person.userId).first();
-      return response({ signedIn: true, spotify: !!record.value.spotify, claude: !!record.value.claudeKey, provider: record.value.provider ?? (record.value.claudeKey ? 'claude' : 'chatgpt'), chatgpt: false, model: record.value.model ?? '', count: record.value.count ?? 15, spotifyConfigured: !!env.SPOTIFY_CLIENT_ID, queueReview: !!lock, queueBusy: lock ? Number(lock.expires_at) > Date.now() : false });
+      const pc = await computerStatus(person.userId);
+      return response({ signedIn: true, spotify: !!record.value.spotify, claude: !!record.value.claudeKey, provider: record.value.provider ?? (record.value.claudeKey ? 'claude' : 'chatgpt'), chatgpt: pc.connected, pc, model: record.value.model ?? '', count: record.value.count ?? 15, spotifyConfigured: !!env.SPOTIFY_CLIENT_ID, queueReview: !!lock, queueBusy: lock ? Number(lock.expires_at) > Date.now() : false });
     }
     if (path === '/api/playback') {
       const credentials = await spotifyAccess(person.userId);
@@ -16,7 +18,7 @@ export async function GET(request: Request) {
       return response({ device: playback?.device ? { id: playback.device.id, name: playback.device.name, type: playback.device.type, restricted: playback.device.is_restricted } : null,
         playing: song(playback?.item ?? queue?.currently_playing), queue: (queue?.queue ?? []).map((raw: any) => song(raw)).filter(Boolean), isPlaying: playback?.is_playing === true });
     }
-    if (path === '/api/models') { const record = await account(person.userId); return response({ models: record.value.claudeKey ? await claudeModels(record.value.claudeKey) : [] }); }
+    if (path === '/api/models') { const record = await account(person.userId); return response({ models: record.value.provider === 'chatgpt' || !record.value.provider && !record.value.claudeKey ? (await computerStatus(person.userId)).models : record.value.provider !== 'spotify' && record.value.claudeKey ? await claudeModels(record.value.claudeKey) : [] }); }
     if (path === '/api/requests') {
       const result = await db().prepare('SELECT id, state, count, total, updated_at, sealed FROM queue_jobs WHERE user_id = ? ORDER BY updated_at DESC LIMIT 20').bind(person.userId).all();
       return response({ requests: await Promise.all(result.results.map(async (r: any) => ({ id: r.id, state: r.state, accepted: r.count, total: r.total, at: r.updated_at, ...await open<object>(r.sealed, person.userId) }))) });
@@ -30,6 +32,7 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   try {
+    if (new URL(request.url).pathname.startsWith('/api/pc/')) return await computerEndpoint(request);
     mutation(request); const person = await user(), input = await body(request), path = new URL(request.url).pathname;
     if (path === '/api/settings') {
       const record = await account(person.userId);
@@ -68,7 +71,7 @@ export async function POST(request: Request) {
       // No operation can be resurrected by a pending token/model response after deletion.
       const lock = await db().prepare('SELECT expires_at FROM queue_locks WHERE user_id = ?').bind(person.userId).first<{ expires_at: number }>();
       if (lock && lock.expires_at > Date.now()) throw new AppError('Wait for the current queue change before removing saved data.', 409);
-      await db().batch(['accounts', 'oauth_attempts', 'selections', 'queue_jobs', 'queue_locks'].map(table => db().prepare('DELETE FROM ' + table + ' WHERE user_id = ?').bind(person.userId)));
+      await db().batch(['accounts', 'oauth_attempts', 'selections', 'queue_jobs', 'queue_locks', 'pc_requests'].map(table => db().prepare('DELETE FROM ' + table + ' WHERE user_id = ?').bind(person.userId)));
       return response({ erased: true });
     }
     return response({ error: 'Not found.' }, 404);

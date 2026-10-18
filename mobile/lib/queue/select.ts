@@ -1,6 +1,7 @@
 import { AppError, uniqueTracks, spreadArtists, parseSuggestions, exactMatch, normalize } from './core.mjs';
 import { parseIntent, balancedMix, playlistMatches, type Playlist } from './domain';
 import { requireMusicSource } from './review.mjs';
+import { proposeOnComputer } from './pc';
 import { account, spotifyAccess, spotify, song, db, seal, boundedFetch, type Song } from './server';
 
 export async function claudeModels(key: string) {
@@ -55,7 +56,7 @@ export async function makeSelection(userId: string, prompt: string, requestedCou
   if (intent.more) throw new AppError('For this mobile preview, describe the next set of songs in a new request.');
   const record = await account(userId);
   const needsModel = !intent.liked && !intent.history && !intent.inspiration && !intent.playlistNames.length && !intent.playlistUris.length && !intent.referencePlaylistNames.length && !intent.referencePlaylistUris.length && !intent.includedPlaylistNames.length && !intent.includedPlaylistUris.length;
-  requireMusicSource(record.value, needsModel);
+  const provider = requireMusicSource(record.value, needsModel);
   const credentials = await spotifyAccess(userId);
   const playback = await spotify(credentials.access, '/me/player');
   const device = playback?.device;
@@ -118,11 +119,15 @@ export async function makeSelection(userId: string, prompt: string, requestedCou
     }
     note = 'Matched locally using Spotify’s available artist genres; reference songs were excluded. Spotify library data was not sent to Claude.';
   } else if (!selected.length && !intent.history) {
-    note = 'Selected using Claude API. Review these songs before adding to Spotify.';
-    if (!record.value.claudeKey) throw new AppError('Connect your Claude API key in Settings to request music.', 400, 'claude_connect');
-    const available = await claudeModels(record.value.claudeKey), model = available.find((m: any) => m.id === record.value.model)?.id ?? available[0]?.id;
-    if (!model) throw new AppError('No available Claude model was found for this key.');
-    const suggestions = await propose(record.value.claudeKey, model, prompt, intent.count + Math.min(25, Math.ceil(intent.count / 2))) as { title: string; artist: string }[];
+    note = provider === 'chatgpt' ? 'Selected using ChatGPT through your PC. Review these songs before adding to Spotify.' : 'Selected using Claude API. Review these songs before adding to Spotify.';
+    let suggestions: { title: string; artist: string }[];
+    if (provider === 'chatgpt') suggestions = await proposeOnComputer(userId, prompt, intent.count, record.value.model);
+    else {
+      if (!record.value.claudeKey) throw new AppError('Connect your Claude API key in Settings to request music.', 400, 'claude_connect');
+      const available = await claudeModels(record.value.claudeKey), model = available.find((m: any) => m.id === record.value.model)?.id ?? available[0]?.id;
+      if (!model) throw new AppError('No available Claude model was found for this key.');
+      suggestions = await propose(record.value.claudeKey, model, prompt, intent.count + Math.min(25, Math.ceil(intent.count / 2)));
+    }
     proposed = suggestions.length;
     for (let offset = 0; offset < suggestions.length && selected.length < intent.count; offset += 5) {
       const resolved = await parallel(suggestions.slice(offset, offset + 5), 5, async suggestion => {

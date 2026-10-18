@@ -14,7 +14,7 @@ export function reviewedSelection(selection, keepUris) {
 export function requireMusicSource(account, needsModel = true) {
   const provider = account.provider ?? (account.claudeKey ? 'claude' : 'chatgpt');
   if (!needsModel) return provider;
-  if (provider === 'chatgpt') throw new AppError('ChatGPT is not connected for music selection. Site sign-in does not grant ChatGPT plan usage. Choose another music source in Settings. Nothing was sent to Spotify.', 400, 'chatgpt_connect');
+  if (provider === 'chatgpt') return provider; // The PC bridge checks its pinned owner and live connection server-side.
   if (provider === 'spotify') throw new AppError('Spotify library mode supports playlists, liked songs and recent plays. Quote a playlist name or request a recent-play mix. Nothing was sent to Spotify.', 400, 'library_request');
   if (provider !== 'claude' || !account.claudeKey) throw new AppError('Connect the selected Claude API source in Settings. Nothing was sent to Spotify.', 400, 'claude_connect');
   return provider;

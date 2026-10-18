@@ -5,4 +5,5 @@
   <ItemGroup><Compile Include="../../helper/SelectionRules.cs" Link="SelectionRules.cs" /><Compile Include="../../helper/ClaudeProvider.cs" Link="ClaudeProvider.cs" /></ItemGroup>
   <ItemGroup><Compile Include="../../installer/MinimalRuntimeProfile.cs" Link="MinimalRuntimeProfile.cs" /></ItemGroup>
   <ItemGroup><Compile Include="../../helper/MacSecrets.cs" Link="MacSecrets.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../../helper/MobileBridge.cs" Link="MobileBridge.cs" /></ItemGroup>
 </Project>

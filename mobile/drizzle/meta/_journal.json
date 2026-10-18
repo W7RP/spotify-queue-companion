@@ -8,6 +8,13 @@
       "when": 1792343720691,
       "tag": "0000_low_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792357194871,
+      "tag": "0001_optimal_drax",
+      "breakpoints": true
     }
   ]
 }

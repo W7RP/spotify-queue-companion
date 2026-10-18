@@ -30,6 +30,16 @@ async Task<Selection> Select(string stream, bool restricted = true, HttpStatusCo
 }
 try
 {
+    await Test("mobile bridge configuration rejects redirects and unrelated sites and protects credentials", () => {
+        foreach (var origin in new[] { "http://queue.chatgpt.site", "https://queue.chatgpt.site/redirect", "https://queue.chatgpt.site?redirect=x", "https://queue.chatgpt.site.attacker.invalid", "https://user:pass@queue.chatgpt.site" }) {
+            try { MobileBridge.Configure(store, new(origin, "FAKE_SERVICE_TOKEN_FOR_TEST_ONLY", new string('x', 43))); throw new Exception("Unsafe origin accepted."); }
+            catch (InvalidOperationException) { }
+        }
+        MobileBridge.Configure(store, new("https://queue.chatgpt.site", "FAKE_SERVICE_TOKEN_FOR_TEST_ONLY", new string('x', 43)));
+        Assert(!Encoding.UTF8.GetString(File.ReadAllBytes(Path.Combine(root, "mobile-bridge.dat"))).Contains("FAKE_SERVICE"), "Computer credential stored in plaintext.");
+        Assert(store.ReadSecret<MobileBridgeConfig>("mobile-bridge.dat")!.Origin == "https://queue.chatgpt.site", "Computer configuration did not round-trip.");
+        store.Delete("mobile-bridge.dat"); return Task.CompletedTask;
+    });
     await Test("custom Spotify detection skips stale defaults and rejects Store aliases",()=>{
         var custom=Path.Combine(root,"Music Apps","Spotify","Spotify.exe");var data=Path.GetDirectoryName(custom)!;
         var stale=Path.Combine(root,"missing","Spotify.exe");var storeAlias=Path.Combine(root,"Microsoft","WindowsApps","Spotify.exe");
