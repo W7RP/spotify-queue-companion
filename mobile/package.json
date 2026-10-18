@@ -12,7 +12,7 @@
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "test": "node --test tests/core.test.mjs tests/lease.test.mjs tests/spotify-signin.test.mjs",
+    "test": "node --test tests/core.test.mjs tests/lease.test.mjs tests/spotify-signin.test.mjs tests/http-runtime.test.mjs",
     "test:ui": "playwright test",
     "typecheck": "tsc --noEmit"
   },
@@ -56,6 +56,7 @@
     "eslint": "9.39.4",
     "eslint-config-next": "16.3.4",
     "json-rpc-2.0": "1.7.1",
+    "miniflare": "4.20260515.0",
     "raw-body": "3.0.2",
     "react-server-dom-webpack": "19.2.6",
     "tailwindcss": "4.2.1",

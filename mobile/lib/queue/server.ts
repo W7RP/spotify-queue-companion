@@ -1,6 +1,8 @@
 import { env } from 'cloudflare:workers';
 import { getChatGPTUser, chatGPTSignInPath } from '@/app/chatgpt-auth';
 import { AppError, guardOrigin } from './core.mjs';
+import { boundedFetch } from './http.mjs';
+export { boundedFetch };
 
 export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; claudeKey?: string; model?: string; count?: number };
 export type Song = { id: string; uri: string; title: string; artist: string; artistNames: string[]; artistIds: string[]; image: string; url: string; source: string };
@@ -49,9 +51,6 @@ export async function saveAccount(id: string, value: Account, revision: number) 
 }
 export function random() { return bytesToBase64(crypto.getRandomValues(new Uint8Array(32))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', ''); }
 export async function hash(value: string) { return bytesToBase64(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', ''); }
-export async function boundedFetch(url: string, init: RequestInit = {}, timeout = 15_000) {
-  return fetch(url, { ...init, redirect: 'error', signal: AbortSignal.timeout(timeout) });
-}
 export async function spotifyAccess(id: string) {
   const record = await account(id); const credentials = record.value.spotify;
   if (!credentials) throw new AppError('Connect Spotify in Settings.', 401, 'spotify_connect');

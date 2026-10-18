@@ -65,7 +65,7 @@ npm run test:ui
 npm run build
 ```
 
-Browser tests use explicit fixtures at phone, small-phone and desktop sizes. They exercise a single successful batch, interrupted-write recovery, settings, privacy dialogs, focus and browser-storage behavior. They require a running local preview and Microsoft Edge; change the Playwright browser channel for another environment. Provider sign-in, a real Claude inference and native Spotify queue changes still require live account testing. Never treat fixture tests as live integration verification.
+Browser tests use explicit fixtures at phone, small-phone and desktop sizes. They exercise a single successful batch, interrupted-write recovery, settings, privacy dialogs, focus and browser-storage behavior. They require a running local preview and Microsoft Edge; change the Playwright browser channel for another environment. Transport tests run the actual HTTP helper and callback flow in Miniflare/workerd with in-memory provider responses, including redirect rejection and timeout behavior. Provider sign-in, a real Claude inference and native Spotify queue changes still require live account testing. Never treat fixture tests as live integration verification.
 
 Publish with the Sites skill’s source workflow and private deployment operation. `.openai/hosting.json` is the existing site identity; do not create a duplicate Site. Production runtime secrets and local execution state must never enter Git.
 
