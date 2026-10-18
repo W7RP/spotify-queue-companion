@@ -12,6 +12,8 @@ An installable web app that sends music requests to the active Spotify queue. Sp
 
 Each request appends songs. It does not replace or clear the native queue. The displayed device is the target; a device change before sending requires a fresh request.
 
+If connecting from ChatGPT’s embedded browser fails, open the site directly in Safari and start a fresh connection there. Sign-in links use top-level navigation. A failed callback reports whether the browser session was lost, the attempt expired, Spotify rejected the code, profile access was denied, or connection storage failed. Diagnostics contain fixed error codes and HTTP status only, without provider credentials or profile data.
+
 ## Music selection
 
 Free-text requests use one Claude request with reserve suggestions, followed by exact Spotify catalogue matching. Unavailable tracks, unmatched suggestions, recording duplicates and songs already in the visible queue can reduce the count. The app reports the number actually sent.

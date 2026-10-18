@@ -46,6 +46,7 @@ test('settings, install sheet and privacy sheet are accessible without saving ke
  await page.route('**/api/**', route => route.fulfill({ json: { ...status, spotify: false, claude: false } }));
  await page.goto('/'); await page.getByRole('button', { name: 'Open account settings' }).click();
  await expect(page.getByRole('heading', { name: 'Settings', exact: true })).toBeVisible();
+ await expect(page.getByRole('link', { name: 'Connect', exact: true })).toHaveAttribute('target', '_top');
  await page.getByRole('button', { name: /Add to Home Screen/ }).click();
  await expect(page.getByRole('dialog')).toContainText('Open as Web App');
  await page.keyboard.press('Escape'); await expect(page.getByRole('dialog')).toHaveCount(0);
@@ -56,4 +57,12 @@ test('settings, install sheet and privacy sheet are accessible without saving ke
  expect(await page.evaluate(() => JSON.stringify({ ...localStorage, ...sessionStorage }))).not.toContain('FAKE_UI_KEY_DO_NOT_SEND');
  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
  await page.screenshot({ path: 'outputs/settings-' + test.info().project.name + '.png', fullPage: true });
+});
+
+test('callback errors explain browser-session loss without displaying URL data', async ({ page }) => {
+ await page.route('**/api/**', route => route.fulfill({ json: { ...status, spotify: false, claude: false } }));
+ await page.goto('/?connection=failed&reason=browser_session&code=FAKE_CALLBACK_SECRET');
+ await expect(page.getByRole('alert')).toContainText('directly in Safari');
+ await expect(page).toHaveURL('http://127.0.0.1:5173/');
+ await expect(page.locator('body')).not.toContainText('FAKE_CALLBACK_SECRET');
 });
