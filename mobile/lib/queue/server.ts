@@ -4,7 +4,7 @@ import { AppError, guardOrigin } from './core.mjs';
 import { boundedFetch } from './http.mjs';
 export { boundedFetch };
 
-export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; claudeKey?: string; model?: string; count?: number };
+export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; claudeKey?: string; model?: string; count?: number; provider?: 'chatgpt' | 'claude' | 'spotify' };
 export type Song = { id: string; uri: string; title: string; artist: string; artistNames: string[]; artistIds: string[]; image: string; url: string; source: string };
 export function db() { if (!env.DB) throw new AppError('The service is being prepared. Please try again shortly.', 503); return env.DB; }
 export function origin() { if (!env.APP_ORIGIN) throw new AppError('The service is being prepared.', 503); return env.APP_ORIGIN; }

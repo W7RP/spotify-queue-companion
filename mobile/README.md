@@ -5,12 +5,12 @@ An installable web app that sends music requests to the active Spotify queue. Sp
 ## On iPhone
 
 1. Open [Queue Companion](https://queue-companion-mobile.quirkycoati256.chatgpt.site) in Safari and sign in with the owning ChatGPT account.
-2. In Settings, connect Spotify and enter your Anthropic API key. Spotify Premium and access to the configured Spotify developer app are required. Claude Pro/Max subscriptions do not include API credits.
+2. In Settings, connect Spotify and choose a Music source. Spotify library can mix named playlists, liked songs and recent plays without an AI key. Claude API enables free-text mood requests using your Anthropic API credits. ChatGPT site sign-in grants app access only; hosted ChatGPT music selection remains unavailable pending OpenAI access. Spotify Premium and access to the configured Spotify developer app are required. Claude Pro/Max subscriptions do not include API credits.
 3. Use Safari’s Share menu → Add to Home Screen → Open as Web App.
-4. Start a song in Spotify, open Queue Companion, describe the music, choose a count, and tap Add to queue.
-5. Keep Queue Companion open until sending finishes. Afterward you can close it; playback continues in Spotify.
+4. Start a song in Spotify, open Queue Companion, describe the music, choose a count, and tap Find songs. Review the result, remove individual suggestions or Clear selection, then explicitly Append the songs you kept.
+5. Keep Queue Companion open until sending finishes. Your last request shows delivery counts and distinguishes songs visible in the native queue from commands merely accepted by Spotify. Afterward you can close it; playback continues in Spotify.
 
-Each request appends songs. It does not replace or clear the native queue. The displayed device is the target; a device change before sending requires a fresh request.
+Each request appends songs. The public Spotify API has no endpoint to clear, replace or remove individual entries from the native queue. Queue controls links to Spotify’s own editing instructions; it never simulates a native edit. To replace queued songs, clear them in Spotify, then append a reviewed selection here. The displayed device is the target; a device change before sending requires a fresh request. Source membership and visible-queue duplicates are rechecked after review and before sending.
 
 If connecting from ChatGPT’s embedded browser fails, open the site directly in Safari and start a fresh connection there. Sign-in links use top-level navigation. A failed callback reports whether the browser session was lost, the attempt expired, Spotify rejected the code, profile access was denied, or connection storage failed. Diagnostics contain fixed error codes and HTTP status only, without provider credentials or profile data.
 
@@ -28,7 +28,7 @@ Direct playlist/liked-song mixes inspect up to 200 available songs per source, w
 - Spotify uses authorization-code PKCE with short-lived, single-use, browser- and visitor-bound state. No Spotify Client Secret is required.
 - API keys, Spotify tokens, pending selections and request details use AES-GCM encryption with visitor-bound authentication. The encryption key is a hosted runtime secret, excluded from source.
 - APIs require a trusted signed-in visitor, mutations require the configured Origin, and database lookups are scoped to that visitor.
-- The browser stores a draft and an opaque pending-selection identifier in session storage. Provider credentials are not returned to browser storage. The service worker caches only app icons.
+- The browser stores a draft and opaque pending/last-selection identifiers in session storage. A reopened app reads a delivery receipt without replaying the append. Recent receipt song details remain available only while the associated selection is valid. Provider credentials are not returned to browser storage. The service worker caches only app icons.
 - Pending selections become unavailable after ten minutes and expired rows are removed during later selections. Request history contains the typed prompt and delivery counts, with the latest 20 shown. Settings → Privacy and saved data removes stored connections, selections and history. Spotify authorization can also be revoked from your Spotify account.
 - Queue writes are sequential, recorded before sending, and deduplicated by selection. Network errors and server errors stop the batch without retrying uncertain writes. Reopening reads a receipt; it never replays a queue request. An uncertain batch requires an explicit queue review before another batch can start.
 - “Sent to Spotify” means the queue API accepted the command. It does not claim that Spotify has already played the song or independently verify every entry beyond Spotify’s visible queue window.

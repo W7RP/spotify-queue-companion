@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const person = await user(), path = new URL(request.url).pathname;
     if (path === '/api/status') {
       const record = await account(person.userId), lock = await db().prepare('SELECT job_id, expires_at FROM queue_locks WHERE user_id = ?').bind(person.userId).first();
-      return response({ signedIn: true, spotify: !!record.value.spotify, claude: !!record.value.claudeKey, model: record.value.model ?? '', count: record.value.count ?? 15, spotifyConfigured: !!env.SPOTIFY_CLIENT_ID, queueReview: !!lock, queueBusy: lock ? Number(lock.expires_at) > Date.now() : false });
+      return response({ signedIn: true, spotify: !!record.value.spotify, claude: !!record.value.claudeKey, provider: record.value.provider ?? (record.value.claudeKey ? 'claude' : 'chatgpt'), chatgpt: false, model: record.value.model ?? '', count: record.value.count ?? 15, spotifyConfigured: !!env.SPOTIFY_CLIENT_ID, queueReview: !!lock, queueBusy: lock ? Number(lock.expires_at) > Date.now() : false });
     }
     if (path === '/api/playback') {
       const credentials = await spotifyAccess(person.userId);
@@ -34,13 +34,14 @@ export async function POST(request: Request) {
     if (path === '/api/settings') {
       const record = await account(person.userId);
       if (!Number.isInteger(input.count) || input.count < 1 || input.count > 50 || typeof input.model !== 'string' || input.model.length > 120) throw new AppError('Choose a valid count and model.');
-      await saveAccount(person.userId, { ...record.value, count: input.count, model: input.model }, record.revision); return response({ saved: true });
+      if (input.provider !== undefined && !['chatgpt', 'claude', 'spotify'].includes(input.provider)) throw new AppError('Choose a valid music source.');
+      await saveAccount(person.userId, { ...record.value, count: input.count, model: input.model, ...(input.provider !== undefined ? { provider: input.provider } : {}) }, record.revision); return response({ saved: true });
     }
     if (path === '/api/claude/connect') {
       if (typeof input.key !== 'string' || input.key.length < 20 || input.key.length > 500 || /\s/.test(input.key)) throw new AppError('Enter a valid Claude API key.');
       const record = await account(person.userId), models = await claudeModels(input.key);
       if (!models.length) throw new AppError('No available models were found for that key.');
-      await saveAccount(person.userId, { ...record.value, claudeKey: input.key, model: models[0].id }, record.revision);
+      await saveAccount(person.userId, { ...record.value, claudeKey: input.key, model: models[0].id, provider: 'claude' }, record.revision);
       return response({ connected: true, models });
     }
     if (path === '/api/disconnect') {
@@ -58,7 +59,10 @@ export async function POST(request: Request) {
       try { return response(await makeSelection(person.userId, input.prompt, input.count, input.device, input.choices)); }
       catch (error: any) { if (error instanceof AppError && error.code === 'playlist_choice') return response({ error: error.message, code: error.code, choice: (error as any).choice }, 409); throw error; }
     }
-    if (path === '/api/queue') return response(await addSelection(person.userId, input.selection));
+    if (path === '/api/queue') {
+      if (input.mode !== undefined && input.mode !== 'append') throw new AppError('Spotify’s API cannot replace or clear the native queue. Use Spotify’s Queue to edit existing songs.', 400, 'queue_capability');
+      return response(await addSelection(person.userId, input.selection, input.keepUris));
+    }
     if (path === '/api/review') { await reviewQueue(person.userId); return response({ reviewed: true }); }
     if (path === '/api/erase') {
       // No operation can be resurrected by a pending token/model response after deletion.

@@ -1,5 +1,6 @@
 import { AppError, uniqueTracks, spreadArtists, parseSuggestions, exactMatch, normalize } from './core.mjs';
 import { parseIntent, balancedMix, playlistMatches, type Playlist } from './domain';
+import { requireMusicSource } from './review.mjs';
 import { account, spotifyAccess, spotify, song, db, seal, boundedFetch, type Song } from './server';
 
 export async function claudeModels(key: string) {
@@ -52,7 +53,10 @@ export async function makeSelection(userId: string, prompt: string, requestedCou
   try { intent = parseIntent(prompt, requestedCount, 50, 'append'); } catch (error: any) { throw new AppError(error.message); }
   if (intent.mode === 'replace') throw new AppError('Mobile adds to the existing queue. Manage or clear songs in Spotify.');
   if (intent.more) throw new AppError('For this mobile preview, describe the next set of songs in a new request.');
-  const record = await account(userId), credentials = await spotifyAccess(userId);
+  const record = await account(userId);
+  const needsModel = !intent.liked && !intent.history && !intent.inspiration && !intent.playlistNames.length && !intent.playlistUris.length && !intent.referencePlaylistNames.length && !intent.referencePlaylistUris.length && !intent.includedPlaylistNames.length && !intent.includedPlaylistUris.length;
+  requireMusicSource(record.value, needsModel);
+  const credentials = await spotifyAccess(userId);
   const playback = await spotify(credentials.access, '/me/player');
   const device = playback?.device;
   if (!device?.id || device.is_restricted || device.id !== requestedDevice) throw new AppError('Your active device changed. Open Spotify on this iPhone and refresh before queueing.', 409, 'spotify_device');
@@ -114,6 +118,7 @@ export async function makeSelection(userId: string, prompt: string, requestedCou
     }
     note = 'Matched locally using Spotify’s available artist genres; reference songs were excluded. Spotify library data was not sent to Claude.';
   } else if (!selected.length && !intent.history) {
+    note = 'Selected using Claude API. Review these songs before adding to Spotify.';
     if (!record.value.claudeKey) throw new AppError('Connect your Claude API key in Settings to request music.', 400, 'claude_connect');
     const available = await claudeModels(record.value.claudeKey), model = available.find((m: any) => m.id === record.value.model)?.id ?? available[0]?.id;
     if (!model) throw new AppError('No available Claude model was found for this key.');
@@ -130,10 +135,10 @@ export async function makeSelection(userId: string, prompt: string, requestedCou
   }
   if (!selected.length) throw new AppError('No matching, playable songs were found. Try a broader request.');
   const after = await account(userId);
-  if (after.value.spotify?.subject !== credentials.subject || after.value.claudeKey !== record.value.claudeKey) throw new AppError('Your connection changed while selecting songs. Nothing was queued.', 409);
+  if (after.value.spotify?.subject !== credentials.subject || after.value.claudeKey !== record.value.claudeKey || after.value.provider !== record.value.provider) throw new AppError('Your connection changed while selecting songs. Nothing was queued.', 409);
   const id = crypto.randomUUID(), expires = Date.now() + 600_000;
   await db().prepare('DELETE FROM selections WHERE expires_at < ?').bind(Date.now()).run();
-  const value = { tracks: selected, prompt, count: intent.count, subject: credentials.subject, deviceId: device.id, deviceName: device.name, note, familiar, proposed, unmatched, sourceUris, includedUris, liked: intent.liked };
+  const value = { tracks: selected, prompt, count: intent.count, subject: credentials.subject, deviceId: device.id, deviceName: device.name, note, familiar, proposed, unmatched, sourceUris, includedUris, liked: intent.liked, repeat: intent.repeat };
   await db().prepare('INSERT INTO selections(id, user_id, sealed, expires_at) VALUES (?, ?, ?, ?)').bind(id, userId, await seal(value, userId), expires).run();
   return { id, tracks: selected, requested: intent.count, note, familiar, unmatched, deviceName: device.name, expires };
 }
