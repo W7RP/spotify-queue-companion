@@ -58,8 +58,13 @@ They must be cleared in Spotify's native **Next in queue** section. Play now
 creates no manual entries, so subsequent Play now requests do not require this
 cleanup unless another client or an Append operation has added manual entries.
 
-The user was asked to clear the five Append-test entries for the final clean-order
-observation. This document does not claim that step is complete or that public
-Spotify APIs provide native manual queue deletion.
+The user cleared the five manual test entries. A fresh live ChatGPT request then
+passed the complete clean-queue check: **20 of 20 accepted**, **Moonchild — Rory
+Gallagher** (selection index 0) observed playing, and all nineteen remaining
+selected songs independently visible in their generated order, beginning with
+**The Nile Song — Pink Floyd**. No old manual or suggested-context songs remained
+in the visible list. The page reported playing on iPhone and that it could close.
+This confirms the normal default flow on the physical iPhone; it does not imply
+that public Spotify APIs provide native manual queue deletion.
 
 Final functional Site source: `3f0b29a3929c06f8a1cf3add05e2101a7d071f31`.
