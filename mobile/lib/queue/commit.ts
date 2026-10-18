@@ -1,4 +1,5 @@
 import { AppError, enqueueSequential } from './core.mjs';
+import { renewQueueLease, releaseReviewedLease } from './lease.mjs';
 import { db, open, seal, spotifyAccess, spotify, account, type Song } from './server';
 
 async function getJob(userId: string, selectionId: string) {
@@ -59,9 +60,11 @@ export async function addSelection(userId: string, selectionId: string) {
       async (track: Song) => {
         const current = (await account(userId)).value.spotify;
         if (!current || current.access !== credentials.access || current.subject !== credentials.subject) throw new AppError('Spotify connection changed. Queueing stopped.', 409);
+        await renewQueueLease(db(), userId, id);
         writing = true; await spotify(credentials.access, '/me/player/queue?' + new URLSearchParams({ uri: track.uri, device_id: selection.deviceId }), 'POST');
       },
       async (checkpoint: { state: string; accepted: number }) => {
+        await renewQueueLease(db(), userId, id);
         await db().prepare('UPDATE queue_jobs SET state = ?, count = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(checkpoint.state, checkpoint.accepted, Date.now(), id, userId).run();
       });
     if (result.state !== 'uncertain') await db().prepare('DELETE FROM queue_locks WHERE user_id = ? AND job_id = ?').bind(userId, id).run();
@@ -77,9 +80,7 @@ export async function addSelection(userId: string, selectionId: string) {
   }
 }
 export async function reviewQueue(userId: string) {
-  const lock = await db().prepare('SELECT job_id, expires_at FROM queue_locks WHERE user_id = ?').bind(userId).first<{ job_id: string; expires_at: number }>();
+  const lock = await releaseReviewedLease(db(), userId);
   if (!lock) return;
-  if (lock.expires_at > Date.now()) throw new AppError('The current queue change may still be running. Wait before reviewing it.', 409);
   await db().prepare('UPDATE queue_jobs SET state = ? WHERE id = ? AND user_id = ? AND state != ?').bind('reviewed', lock.job_id, userId, 'complete').run();
-  await db().prepare('DELETE FROM queue_locks WHERE user_id = ? AND job_id = ?').bind(userId, lock.job_id).run();
 }
