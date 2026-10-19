@@ -26,6 +26,17 @@ static class ClaudeTests
         async Task Test(string name, Func<Task> body) { await body(); passed++; Console.WriteLine("PASS Claude " + name); }
         async Task Reject(Func<Task> body, string expected) { try { await body(); } catch (InvalidOperationException e) { Assert(e.Message.Contains(expected) && !e.Message.Contains(Key), "Wrong or unsafe error: " + e.Message); return; } throw new Exception("Operation unexpectedly succeeded."); }
         void Credentials() => store.WriteSecret("claude-key.dat", new ClaudeCredential(Key));
+        await Test("structured Haiku combines low effort with its schema and returns a brief",async()=>{
+            Credentials();var posts=0;var brief=new MusicBrief("discovery",[],[],"rock","","","balanced",-1,[]);
+            using var client=new HttpClient(new FakeHandler(async request=>{
+                if(request.Method==HttpMethod.Get)return Response("{\"data\":[{\"id\":\"claude-haiku-5-5\",\"display_name\":\"Haiku\"}],\"has_more\":false}");
+                posts++;using var body=JsonDocument.Parse(await request.Content!.ReadAsStringAsync());var output=body.RootElement.GetProperty("output_config");
+                Assert(output.GetProperty("effort").GetString()=="low"&&output.GetProperty("format").GetProperty("type").GetString()=="json_schema","Schema and effort did not coexist.");
+                return Response(Stream(JsonSerializer.Serialize(new{ids=Array.Empty<string>(),suggestions=new[]{new SongSuggestion("Song","Artist")},brief},Storage.Json)));
+            }));
+            var selected=await new ClaudeProvider(store,client).Select(new Generation("mellow rock",1,[],false,Structured:true),null,default);
+            Assert(posts==1&&selected.Brief?.Genre=="rock","Brief lost or extra inference made.");
+        });
         await Test("API contract, one bounded inference, available-model preference and usage", async () => {
             var gets = 0; var posts = 0;
             using var client = new HttpClient(new FakeHandler(async request => {

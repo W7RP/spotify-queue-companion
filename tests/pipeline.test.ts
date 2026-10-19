@@ -18,6 +18,29 @@ test('a second generation cancels the first before mutation',async()=>{let call=
 const discoveryPrompt='classic rock hits, but not the most listened to. find me hidden gems';
 const fifty={...preferences,length:50};
 const suggestions=(count:number)=>Array.from({length:count},(_,i)=>({title:String(i+1),artist:'Artist'}));
+const structuredBrief={kind:'discovery',referenceArtists:[],excludedArtists:[],genre:'rock',mood:'',era:'',discovery:'balanced',referenceCount:-1,excludedVersions:[]};
+test('one targeted refill preserves accepted songs, excludes old proposals and commits only once',async()=>{
+  const first=[{title:'Good',artist:'A'},{title:'Missing',artist:'B'}];
+  const f=fixture({search:async()=>[],generate:async data=>{
+    if(data.refillCount){assert.equal(data.count,3);assert.equal(data.refillCount,2);assert.deepEqual(data.avoid,first);assert.deepEqual(data.brief,structuredBrief);assert.deepEqual(data.candidates,[]);assert.deepEqual(data.seeds,[]);assert.deepEqual(data.previous,[]);return {ids:[],suggestions:[first[0],{title:'Extra one',artist:'C'},{title:'Extra two',artist:'D'}],brief:structuredBrief,generationMs:1};}
+    return {ids:[],suggestions:first,brief:structuredBrief,generationMs:1};
+  },resolve:async(title,artist)=>title==='Missing'?null:{...t(title==='Good'?100:title==='Extra one'?101:102,'catalogue'),title,artist}});
+  const result=await f.pipeline.run('mellow rock',{...preferences,length:3});
+  assert.equal(result.count,3);assert.equal(f.requests.length,2);assert.equal(f.writes.length,1);assert(f.writes[0].some(song=>song.title==='Good'));
+});
+test('an exhausted refill returns an honest partial selection without a third inference',async()=>{
+  const f=fixture({search:async()=>[],generate:async()=>({ids:[],suggestions:[{title:'Good',artist:'A'}],brief:structuredBrief,generationMs:1}),resolve:async()=>({...t(100,'catalogue'),title:'Good',artist:'A'})});
+  const result=await f.pipeline.run('mellow rock',{...preferences,length:3});assert.equal(result.count,1);assert.equal(f.requests.length,2);assert.equal(f.writes.length,1);
+});
+test('malformed refill IDs, changed briefs and canceled refill calls cannot write a queue',async()=>{
+  for(const failure of ['id','brief','cancel']){
+    const f=fixture({search:async()=>[],generate:async data=>{
+      if(data.refillCount){if(failure==='cancel')throw new DOMException('Cancelled','AbortError');return {ids:failure==='id'?['unknown']:[],suggestions:[],brief:failure==='brief'?{...structuredBrief,mood:'changed'}:structuredBrief,generationMs:1};}
+      return {ids:[],suggestions:[{title:'Good',artist:'A'}],brief:structuredBrief,generationMs:1};
+    },resolve:async()=>({...t(100,'catalogue'),title:'Good',artist:'A'})});
+    await assert.rejects(f.pipeline.run('mellow rock',{...preferences,length:3}));assert.equal(f.writes.length,0);assert.equal(f.requests.length,2);
+  }
+});
 
 test('artist similarity consumes reserves after an overrepresented candidate block, starts elsewhere and retains a familiar minority',async()=>{
   const band=Array.from({length:8},(_,i)=>({...t(i+100,'catalogue'),artist:'Pearl Jam'}));

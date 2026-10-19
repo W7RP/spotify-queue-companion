@@ -59,6 +59,18 @@ static class SelectionTests
             var legacy = JsonSerializer.Deserialize<Generation>("{\"prompt\":\"Hidden gems\",\"count\":1,\"candidates\":[],\"restricted\":false}", Storage.Json)!;
             Assert(legacy.Reserve == 0, "Legacy request changed.");
         });
+        Test("structured results require a bounded brief and a refill retains the original target", () => {
+            var brief = new MusicBrief("similarity", ["Artist"], [], "rock", "", "", "balanced", -1, []);
+            var structured = request with { Structured = true, Brief = brief };
+            Reject(structured, "{\"ids\":[],\"suggestions\":[]}");
+            var answer = JsonSerializer.Serialize(new { ids = Array.Empty<string>(), suggestions = new[] { new SongSuggestion("New", "Other") }, brief }, Storage.Json);
+            Assert(SelectionRules.Parse(answer, structured, 1).Brief?.Kind == "similarity", "Lost brief.");
+            var refill = structured with { Count = 10, RefillCount = 2, Reserve = 1, Avoid = [new SongSuggestion("Already proposed", "Artist")] };
+            using var compact = JsonDocument.Parse(SelectionRules.Compact(refill));
+            Assert(compact.RootElement.GetProperty("count").GetInt32() == 10 && compact.RootElement.GetProperty("selectionLimit").GetInt32() == 3, "Refill changed target or budget.");
+            Assert(SelectionRules.InstructionsFor(refill).Contains("only refill attempt"), "Refill instructions missing.");
+            Reject(refill with { Restricted = true, Reserve = 0 }); Reject(refill with { Brief = null }); Reject(refill with { RefillCount = 11 });
+        });
         Test("playlist blends preserve separate familiar and discovery portions", () => {
             var blend = new Generation("Songs like my playlist, including one original", 3, [track], false, Reserve: 2, Seeds: [new SongSuggestion("Seed", "Artist")], PlaylistCount: 1, PlaylistIds: ["c0"]);
             using var compact = JsonDocument.Parse(SelectionRules.Compact(blend));

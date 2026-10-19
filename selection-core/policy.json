@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "defaults": {
     "artistShareDivisor": 5,
     "minimumOtherArtistSongs": 2
@@ -26,5 +26,10 @@
         "claude-haiku-5-5"
       ]
     }
+  },
+  "refill": {
+    "maxAttempts": 1,
+    "deadlineMs": 60000,
+    "maxAvoid": 75
   }
 }

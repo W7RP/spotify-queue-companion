@@ -1,11 +1,11 @@
 import { env } from 'cloudflare:workers';
 import { db, seal, open, hash, random, body, response } from './server';
 import { AppError } from './core.mjs';
-import { fastModel } from './curation';
+import { fastModel, validateMusicBrief, type MusicBrief } from './curation';
 import { bindComputer, claimMusicJob, finishMusicJob, musicProposals } from './pc-jobs.mjs';
 
 type Bridge = { user_id: string; seen_at: number; ready: number; models: string };
-type MusicRequest = { prompt: string; count: number; reserve: number; model?: string };
+type MusicRequest = { prompt: string; count: number; reserve: number; model?: string; structured?: boolean; avoid?: {title:string;artist:string}[]; refillCount?: number; brief?: MusicBrief };
 export async function computerStatus(owner: string) {
   const row = await db().prepare('SELECT user_id, seen_at, ready, models FROM pc_bridge WHERE id = 1 AND user_id = ?').bind(owner).first<Bridge>();
   const online = !!row && row.seen_at > Date.now() - 45_000;
@@ -26,7 +26,7 @@ export async function computerEndpoint(request: Request) {
   // Operator diagnostic: one fixed music request, no Spotify reads or writes.
   if (path === '/api/pc/verify') {
     const songs = await proposeOnComputer(owner, 'Select one mellow song for work. Return a real released song.', 1);
-    return response({ passed: songs.length > 0, suggestions: songs.length });
+    return response({ passed: songs.songs.length > 0, suggestions: songs.songs.length });
   }
   if (path === '/api/pc/poll' || path === '/api/pc/heartbeat') {
     if (typeof input.ready !== 'boolean' || !Array.isArray(input.models) || input.models.length > 100 || input.models.some((m: any) => typeof m.id !== 'string' || !/^[a-zA-Z0-9._:-]{1,120}$/.test(m.id) || typeof m.name !== 'string' || m.name.length > 120)) throw new AppError('Invalid computer status.');
@@ -41,21 +41,26 @@ export async function computerEndpoint(request: Request) {
     const job = await db().prepare("SELECT sealed FROM pc_requests WHERE id = ? AND user_id = ? AND claim = ? AND state = 'running' AND expires_at > ?").bind(input.id, owner, input.claim, now).first<{ sealed: string }>();
     if (!job) throw new AppError('This music request has expired or finished.', 409, 'pc_expired');
     const original = await open<MusicRequest>(job.sealed, owner);
-    const value = input.ok ? { songs: musicProposals(input.songs, original.count + original.reserve) } : { error: 'The PC could not finish music selection. Check the ChatGPT connection and plan usage in desktop Queue Companion, then try a fresh request.' };
-    const result = await finishMusicJob(db(), owner, input.id, input.claim, await seal(value, owner), input.ok ? 'complete' : 'failed', now);
+    let state:'complete'|'failed'=input.ok?'complete':'failed';
+    let value:object={error:'The PC could not finish music selection. Check the ChatGPT connection and plan usage in desktop Queue Companion, then try a fresh request.'};
+    if(input.ok) {
+      try {value={songs:musicProposals(input.songs,(original.refillCount||original.count)+original.reserve),brief:validateMusicBrief(input.brief,original.prompt,original.count)};}
+      catch {state='failed';value={error:'The PC returned an invalid music brief or song list. Update desktop Queue Companion, then try a fresh request. Nothing was queued.'};}
+    }
+    const result = await finishMusicJob(db(), owner, input.id, input.claim, await seal(value, owner), state, now);
     if (!result.meta.changes) throw new AppError('This music request has expired or finished.', 409);
     return response({ saved: true });
   }
   throw new AppError('Not found.', 404);
 }
-export async function proposeOnComputer(owner: string, prompt: string, count: number, model?: string) {
+export async function proposeOnComputer(owner: string, prompt: string, count: number, model?: string, refill?: {avoid:{title:string;artist:string}[]; refillCount:number; brief:MusicBrief}) {
   const status = await computerStatus(owner);
   if (!status.connected) throw new AppError(status.online ? 'Reconnect ChatGPT in desktop Queue Companion, then refresh here.' : 'Your PC is offline. Keep it on, awake and connected to the internet, then refresh here.', 409, 'pc_offline');
-  const id = crypto.randomUUID(), expires = Date.now() + 100_000;
+  const id = crypto.randomUUID(), expires = Date.now() + (refill ? 25_000 : 100_000);
   const chosen = fastModel(status.models, 'chatgpt', model);
   if (!chosen) throw new AppError('No ChatGPT models are available on your PC.', 409, 'chatgpt_connect');
   await db().prepare('DELETE FROM pc_requests WHERE user_id = ? AND expires_at < ?').bind(owner, Date.now()).run();
-  const input = { prompt, count, reserve: Math.min(25, Math.ceil(count / 2)), model: chosen };
+  const input = { prompt, count, reserve: Math.min(25, Math.ceil((refill?.refillCount || count) / 2)), model: chosen, structured: true, ...(refill ?? {}) };
   const inserted = await db().prepare("INSERT OR IGNORE INTO pc_requests(id, user_id, state, sealed, expires_at) VALUES (?, ?, 'pending', ?, ?)").bind(id, owner, await seal(input, owner), expires).run();
   if (!inserted.meta.changes) throw new AppError('Your PC is already selecting songs. Wait for that request to finish.', 409, 'pc_busy');
   try {
@@ -63,7 +68,7 @@ export async function proposeOnComputer(owner: string, prompt: string, count: nu
       const row = await db().prepare('SELECT state, result FROM pc_requests WHERE id = ? AND user_id = ?').bind(id, owner).first<{ state: string; result: string }>();
       if (!row) throw new AppError('This music request was cancelled. Try a fresh request.', 409);
       if (row.state === 'failed') throw new AppError((await open<{ error: string }>(row.result, owner)).error, 503, 'chatgpt_failed');
-      if (row.state === 'complete') return musicProposals((await open<{ songs: unknown }>(row.result, owner)).songs, count + input.reserve) as { title: string; artist: string }[];
+      if (row.state === 'complete') { const result = await open<{songs:unknown;brief:unknown}>(row.result, owner); return {songs:musicProposals(result.songs,(refill?.refillCount || count)+input.reserve) as {title:string;artist:string}[],brief:validateMusicBrief(result.brief,prompt,count),model:chosen}; }
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     throw new AppError('The PC did not finish in time. Nothing was queued. Check the PC before trying a fresh request.', 504, 'pc_timeout');

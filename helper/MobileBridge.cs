@@ -78,11 +78,15 @@ public static class MobileBridge
                             var count = job.GetProperty("count").GetInt32();
                             var reserve = job.GetProperty("reserve").GetInt32();
                             var model = job.GetProperty("model").GetString();
-                            if (!models.Any(m => m.Slug == model) || count is < 1 or > 50 || reserve != Math.Min(25, (int)Math.Ceiling(count / 2d)) || job.GetProperty("expires").GetInt64() < DateTimeOffset.UtcNow.AddSeconds(5).ToUnixTimeMilliseconds()) throw new InvalidOperationException("Invalid or expired music request.");
-                            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(stopping); timeout.CancelAfter(TimeSpan.FromSeconds(65));
-                            var selected = await provider.Select(new Generation(prompt, count, [], false, Reserve: reserve), model, timeout.Token);
+                            var structured = job.TryGetProperty("structured", out var st) && st.GetBoolean();
+                            var refill = job.TryGetProperty("refillCount", out var rf) ? rf.GetInt32() : 0;
+                            var avoid = job.TryGetProperty("avoid", out var av) ? JsonSerializer.Deserialize<SongSuggestion[]>(av, Storage.Json) : null;
+                            var brief = job.TryGetProperty("brief", out var br) ? JsonSerializer.Deserialize<MusicBrief>(br, Storage.Json) : null;
+                            if (!models.Any(m => m.Slug == model) || count is < 1 or > 50 || reserve != Math.Min(25, (int)Math.Ceiling((refill > 0 ? refill : count) / 2d)) || job.GetProperty("expires").GetInt64() < DateTimeOffset.UtcNow.AddSeconds(5).ToUnixTimeMilliseconds()) throw new InvalidOperationException("Invalid or expired music request.");
+                            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(stopping); timeout.CancelAfter(TimeSpan.FromSeconds(refill > 0 ? 20 : 65));
+                            var selected = await provider.Select(new Generation(prompt, count, [], false, Reserve: reserve, Structured: structured, Avoid: avoid, RefillCount: refill, Brief: brief), model, timeout.Token);
                             if (selected.Ids.Length != 0 || selected.Suggestions?.Length is not > 0) throw new InvalidOperationException("No song suggestions returned.");
-                            result = new { id = job.GetProperty("id").GetString(), claim = job.GetProperty("claim").GetString(), ok = true, songs = selected.Suggestions };
+                            result = new { id = job.GetProperty("id").GetString(), claim = job.GetProperty("claim").GetString(), ok = true, songs = selected.Suggestions, brief = selected.Brief };
                         }
                         catch (Exception) when (!stopping.IsCancellationRequested)
                         {

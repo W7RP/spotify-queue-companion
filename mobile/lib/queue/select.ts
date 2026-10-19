@@ -1,5 +1,5 @@
 import { AppError, uniqueTracks, spreadArtists, parseSuggestions, exactMatch, normalize } from './core.mjs';
-import { mobileInstructions, selectionBrief, curateArtists, fastModel, claudeRequestOptions } from './curation';
+import { mobileInstructions, selectionBrief, curateArtists, fastModel, claudeRequestOptions, mobileResponseSchema, validateMusicBrief, canRefill, type MusicBrief } from './curation';
 import { parseIntent, balancedMix, playlistMatches, type Playlist } from './domain';
 import { requireMusicSource } from './review.mjs';
 import { proposeOnComputer } from './pc';
@@ -12,18 +12,23 @@ export async function claudeModels(key: string) {
   const value = await result.json() as any;
   return (value.data ?? []).filter((m: any) => typeof m.id === 'string' && m.id.startsWith('claude-') && m.lifecycle !== 'retired').map((m: any) => ({ id: m.id as string, name: String(m.display_name ?? m.id) }));
 }
-async function propose(key: string, model: string, prompt: string, count: number) {
+async function propose(key: string, model: string, prompt: string, count: number, refill?: {avoid:{title:string;artist:string}[];refillCount:number;brief:MusicBrief}) {
+  const budget = (refill?.refillCount || count) + Math.min(25,Math.ceil((refill?.refillCount || count)/2));
   // Deliberate one-way boundary: only user-authored text reaches the model.
   // No Spotify API results, playlists, listening history, art or tokens are sent.
   const response = await boundedFetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({
-    model, max_tokens: Math.min(6500, 500 + count * 95), system: mobileInstructions,
-    messages: [{ role: 'user', content: JSON.stringify({ request: prompt, songs: count }) }] ,
-    ...claudeRequestOptions(model),
-    }), }, 40_000);
+    model, max_tokens: Math.min(6500, 750 + budget * 95), system: mobileInstructions,
+    messages: [{ role: 'user', content: JSON.stringify({ request: prompt, count, selectionLimit: budget, ...(refill ?? {}) }) }] ,
+    ...claudeRequestOptions(model,true,mobileResponseSchema),
+    }), }, refill ? 20_000 : 40_000);
   if (!response.ok) throw new AppError(response.status === 429 ? 'Claude’s API limit was reached. Wait before trying again.' : 'Claude could not finish this request. Check your API key and credits.', response.status === 429 ? 429 : 503, 'claude_unavailable');
   const result = await response.json() as any;
   if (result.stop_reason !== 'end_turn' || !Array.isArray(result.content) || result.content.some((c: any) => !['text', 'thinking', 'redacted_thinking'].includes(c.type))) throw new AppError('Claude did not finish the song list. Nothing was queued.', 502);
-  return parseSuggestions(result.content.filter((c: any) => c.type === 'text').map((c: any) => c.text).join(''), count);
+  const text = result.content.filter((c: any) => c.type === 'text').map((c: any) => c.text).join('');
+  const songs = parseSuggestions(text,budget) as {title:string;artist:string}[];
+  const value = JSON.parse(text.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,''));
+  let brief:MusicBrief;try{brief=validateMusicBrief(value.brief,prompt,count);}catch{throw new AppError('The music request could not be interpreted reliably. Try a clearer request. Nothing was queued.',502,'music_brief');}
+  return {songs,brief,model};
 }
 async function parallel<T, R>(values: T[], concurrency: number, callback: (value: T) => Promise<R>) {
   const output: R[] = new Array(values.length); let next = 0;
@@ -120,27 +125,40 @@ export async function makeSelection(userId: string, prompt: string, requestedCou
     note = 'Matched locally using Spotify’s available artist genres; reference songs were excluded. Spotify library data was not sent to Claude.';
   } else if (!selected.length && !intent.history) {
     note = provider === 'chatgpt' ? 'Selected using ChatGPT through your PC. Review these songs before adding to Spotify.' : 'Selected using Claude API. Review these songs before adding to Spotify.';
-    let suggestions: { title: string; artist: string }[];
-    if (provider === 'chatgpt') suggestions = await proposeOnComputer(userId, prompt, intent.count, record.value.model);
-    else {
-      if (!record.value.claudeKey) throw new AppError('Connect your Claude API key in Settings to request music.', 400, 'claude_connect');
-      const available = await claudeModels(record.value.claudeKey), model = fastModel(available, 'claude', record.value.model);
-      if (!model) throw new AppError('No available Claude model was found for this key.');
-      suggestions = await propose(record.value.claudeKey, model, prompt, intent.count + Math.min(25, Math.ceil(intent.count / 2)));
+    const selectingAt=Date.now();
+    let chosenModel=record.value.model;
+    if(provider==='claude') {
+      if(!record.value.claudeKey)throw new AppError('Connect your Claude API key in Settings to request music.',400,'claude_connect');
+      chosenModel=fastModel(await claudeModels(record.value.claudeKey),'claude',chosenModel);
+      if(!chosenModel)throw new AppError('No available Claude model was found for this key.');
     }
-    proposed = suggestions.length;
-    const brief = selectionBrief(prompt, intent.count);
-    let resolvedPool: Song[] = [];
-    for (let offset = 0; offset < suggestions.length && selected.length < intent.count; offset += 5) {
-      const resolved = await parallel(suggestions.slice(offset, offset + 5), 5, async suggestion => {
-        const found = await search(credentials.access, `track:${JSON.stringify(suggestion.title)} artist:${JSON.stringify(suggestion.artist)}`);
-        return found.find(track => normalize(track.title) === normalize(suggestion.title) && exactMatch(track, suggestion)) ?? found.find(track => exactMatch(track, suggestion)) ?? null;
-      });
-      unmatched += resolved.filter(track => !track).length;
-      resolvedPool = uniqueTracks([...resolvedPool, ...resolved.filter(Boolean) as Song[]], intent.repeat ? [] : queued);
-      selected = curateArtists(resolvedPool, brief);
+    const fetchProposals=(refill?:{avoid:{title:string;artist:string}[];refillCount:number;brief:MusicBrief})=>provider==='chatgpt'
+      ?proposeOnComputer(userId,prompt,intent.count,chosenModel,refill)
+      :propose(record.value.claudeKey!,chosenModel!,prompt,intent.count,refill);
+    const proposal=await fetchProposals();chosenModel=proposal.model;
+    const brief=selectionBrief(prompt,intent.count,proposal.brief);
+    let resolvedPool:Song[]=[];
+    const resolveProposals=async(suggestions:{title:string;artist:string}[])=>{
+      proposed+=suggestions.length;
+      for(let offset=0;offset<suggestions.length&&selected.length<intent.count;offset+=5) {
+        const resolved=await parallel(suggestions.slice(offset,offset+5),5,async suggestion=>{
+          const found=await search(credentials.access,`track:${JSON.stringify(suggestion.title)} artist:${JSON.stringify(suggestion.artist)}`);
+          return found.find(track=>normalize(track.title)===normalize(suggestion.title)&&exactMatch(track,suggestion))??found.find(track=>exactMatch(track,suggestion))??null;
+        });
+        unmatched+=resolved.filter(track=>!track).length;
+        resolvedPool=uniqueTracks([...resolvedPool,...resolved.filter(Boolean) as Song[]],intent.repeat?[]:queued);
+        selected=curateArtists(resolvedPool,brief);
+      }
+    };
+    await resolveProposals(proposal.songs);
+    if(canRefill(selected.length,intent.count,selectingAt)) {
+      const refill=await fetchProposals({avoid:proposal.songs.slice(0,75),refillCount:intent.count-selected.length,brief:proposal.brief});
+      if(JSON.stringify(refill.brief)!==JSON.stringify(proposal.brief))throw new AppError('The refill changed the musical request. Nothing was queued.',502);
+      const previous=new Set(proposal.songs.map(s=>normalize(s.title)+'|'+normalize(s.artist)));
+      await resolveProposals(refill.songs.filter(s=>!previous.has(normalize(s.title)+'|'+normalize(s.artist))));
+      note+=' One refill was used to replace rejected choices.';
     }
-    if (brief.balance && selected.length < intent.count) note += ' The selection was kept varied rather than filled with repeated artists.';
+    if(brief.balance&&selected.length<intent.count)note+=' The selection was kept varied rather than filled with repeated artists.';
   }
   if (!selected.length) throw new AppError('No matching, playable songs were found. Try a broader request.');
   const after = await account(userId);

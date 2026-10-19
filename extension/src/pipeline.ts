@@ -2,7 +2,7 @@ import {balancedMix,parseIntent,playlistMatches,validateSelection,type Playlist,
 import {Spotify} from './spotify';import {Helper} from './ipc';import {QueueWriter} from './queue';
 import {shortfallReason,type SelectionDiagnostics} from './selection';
 import {primaryArtist,songKey,songKeys,spread,tasteSeeds,uniqueMusic} from './music';
-import {selectionBrief,curateArtists,isReferenceArtist} from './curation';
+import {selectionBrief,curateArtists,isReferenceArtist,allowedByBrief,canRefill} from './curation';
 export interface Preferences {length:number;cap:number;mode:Mode;model?:string;history:boolean;provider?:'claude'|'chatgpt';claudeModel?:string}
 export class Pipeline {
   private generation?:AbortController;private mutation=false;private previous:Track[]=[];private previousReferences:Track[]=[];private previousAccount='';private previousSources:{liked:boolean;playlists:string[]}={liked:false,playlists:[]};
@@ -11,7 +11,7 @@ export class Pipeline {
     if(this.mutation)throw Error('Finishing the current queue change. Please wait.');
     this.generation?.abort();const abort=new AbortController();this.generation=abort;const signal=abort.signal;
     const check=()=>{if(signal.aborted)throw new DOMException('Cancelled','AbortError');};
-    const intent=parseIntent(prompt,settings.length,settings.cap,settings.mode);const start=performance.now();this.activity('Selecting songs…');
+    const intent=parseIntent(prompt,settings.length,settings.cap,settings.mode);const start=performance.now(),selectingAt=Date.now();let finalBrief:ReturnType<typeof selectionBrief>|undefined;this.activity('Selecting songs…');
     const initial=await this.spotify.snapshot();if(!initial.local)throw Error('Choose this computer in Spotify’s device menu before queueing.');
     const account=initial.account;if(this.previousAccount!==account){this.previous=[];this.previousReferences=[];this.previousSources={liked:false,playlists:[]};this.previousAccount=account;}
     if(intent.more&&!this.previous.length)throw Error('Make a selection first, then ask for more like it.');
@@ -120,21 +120,16 @@ export class Pipeline {
         const compact=candidates.map((t,i)=>({...t,id:'c'+i}));
         const reserve=sourceSet?0:Math.min(25,Math.ceil(intent.count/2));
         this.activity('Choosing matching songs…');
-        const response=await this.helper.request('generate',{prompt:intent.prompt,count:intent.count,reserve,candidates:compact,restricted:!!sourceSet,previous:intent.more?this.previous.slice(-10).map(t=>({title:t.title,artist:t.artist})):[],seeds:seeds.map(t=>({title:t.title,artist:primaryArtist(t)})),playlistCount:intent.playlistCount,playlistIds:compact.filter(t=>originalUris.has(t.uri)).map(t=>t.id)},signal);generationMs=response.generationMs;
+        const request={prompt:intent.prompt,count:intent.count,reserve,candidates:compact,restricted:!!sourceSet,previous:intent.more?this.previous.slice(-10).map(t=>({title:t.title,artist:t.artist})):[],seeds:seeds.map(t=>({title:t.title,artist:primaryArtist(t)})),playlistCount:intent.playlistCount,playlistIds:compact.filter(t=>originalUris.has(t.uri)).map(t=>t.id),structured:true};
+        const response=await this.helper.request('generate',request,signal);generationMs=response.generationMs;
         const resolvingAt=performance.now();
-        const suggestions=response.suggestions??[];selection.proposed=response.ids.length+suggestions.length;
-        selection.invalid=response.rejectedSuggestions??0;selection.truncated=response.extraChoices??0;
-        if(selection.proposed>intent.count+reserve)throw Error('Selection exceeded the bounded selection limit.');
-        if(sourceSet&&suggestions.length)throw Error('Selection left the requested source. Nothing was queued.');
-        const proposed:Track[]=response.ids.map((id:string)=>{const index=compact.findIndex(c=>c.id===id);if(index<0)throw Error('Invalid model track selection.');return candidates[index];});
-        // Validate all model IDs, including unused reserves, before taking the queue target.
-        if(proposed.length)validateSelection(proposed,sourceSet,intent.count+reserve,true);
         const acceptedUris=new Set<string>(),acceptedSongs=new Set<string>();
-        const brief=selectionBrief(intent.prompt,intent.count);
+        const brief=selectionBrief(intent.prompt,intent.count,response.brief);finalBrief=brief;
         const balanceNamedArtist=!sourceSet&&!seeds.length&&!intent.playlistCount&&brief.balance;
         const artistCounts=new Map<string,number>();let referenceCount=0;
         const accept=(t:Track|null,fromId=false)=>{
           if(!t){selection.unmatched++;return;}
+          if(!allowedByBrief(t,brief))return;
           const keys=songKeys(t);
           const original=intent.playlistCount>0&&originalUris.has(t.uri);
           if(intent.playlistCount){
@@ -145,21 +140,51 @@ export class Pipeline {
           if(!intent.repeat&&(original?hardExcluded(t):excluded(t))){selection.previous++;return;}
           const artist=primaryArtist(t).normalize('NFKD').toLocaleLowerCase().replace(/\p{M}/gu,'');
           const reference=isReferenceArtist(t,brief);
+          if(brief.explicitCount!==null&&(reference?referenceCount>=brief.referenceLimit:tracks.length-referenceCount>=intent.count-brief.explicitCount))return;
           if(balanceNamedArtist&&(reference?referenceCount>=brief.referenceLimit:(artistCounts.get(artist)??0)>=brief.artistLimit)){selection.diversity=(selection.diversity??0)+1;return;}
           if(tracks.length<intent.count){tracks.push(t);if(original)originalSelected++;acceptedUris.add(t.uri);for(const key of keys)acceptedSongs.add(key);artistCounts.set(artist,(artistCounts.get(artist)??0)+1);if(reference)referenceCount++;}
         };
+        const seenProposals=new Set<string>();
+        const consume=async(answer:any,limit:number,allowIds=true)=>{
+          const suggestions=answer.suggestions??[];
+          if(!Array.isArray(answer.ids)||!Array.isArray(suggestions)||answer.ids.length+suggestions.length>limit)throw Error('Selection exceeded the bounded selection limit.');
+          if(!allowIds&&answer.ids.length)throw Error('Invalid model track selection in refill.');
+          selection.proposed+=answer.ids.length+suggestions.length;
+          selection.invalid+=answer.rejectedSuggestions??0;selection.truncated+=answer.extraChoices??0;
+          if(sourceSet&&suggestions.length)throw Error('Selection left the requested source. Nothing was queued.');
+          const proposed:Track[]=answer.ids.map((id:string)=>{const index=compact.findIndex(c=>c.id===id);if(index<0)throw Error('Invalid model track selection.');return candidates[index];});
+          if(proposed.length)validateSelection(proposed,sourceSet,limit,true);
         for(const t of proposed){if(tracks.length===intent.count)break;accept(t,true);}
         const suggestedKeys=new Set<string>();const pending:any[]=[];
-        for(const song of suggestions){const key=songKey(song);if(!intent.repeat&&(suggestedKeys.has(key)||acceptedSongs.has(key))){selection.duplicates++;continue;}if(intent.playlistCount&&referenceSongs.has(key)||!intent.repeat&&excludedSongs.has(key)){selection.previous++;continue;}suggestedKeys.add(key);pending.push(song);}
+        for(const song of suggestions){const key=songKey(song);if(seenProposals.has(key)){selection.duplicates++;continue;}if(!intent.repeat&&(suggestedKeys.has(key)||acceptedSongs.has(key))){selection.duplicates++;continue;}if(intent.playlistCount&&referenceSongs.has(key)||!intent.repeat&&excludedSongs.has(key)){selection.previous++;continue;}suggestedKeys.add(key);pending.push(song);}
         for(let i=0;i<pending.length&&tracks.length<intent.count&&(!intent.playlistCount||tracks.length-originalSelected<intent.count-intent.playlistCount);i+=10){
           check();const resolved=await Promise.all(pending.slice(i,i+10).map(song=>this.spotify.resolve(song.title,song.artist)));check();
           for(const t of resolved){if(tracks.length===intent.count)break;accept(t);}
+        }
+          for(const song of suggestions)seenProposals.add(songKey(song));
+        };
+        await consume(response,intent.count+reserve);
+        if(response.brief&&canRefill(tracks.length,intent.count,selectingAt,!sourceSet&&!intent.playlistCount)) {
+          check();this.activity('Finding a few more matching songs…');
+          const missing=intent.count-tracks.length,extraReserve=Math.min(25,Math.ceil(missing/2));
+          const timeout=new AbortController();const cancel=()=>timeout.abort();signal.addEventListener('abort',cancel,{once:true});
+          const timer=setTimeout(()=>timeout.abort(),20_000);
+          let refill:any;
+          // A refill receives user text and earlier model output only. Candidate
+          // metadata, Spotify history and catalogue matches do not leave here.
+          try {refill=await this.helper.request('generate',{...request,candidates:[],previous:[],seeds:[],playlistIds:[],reserve:extraReserve,refillCount:missing,brief:response.brief,avoid:(response.suggestions??[]).slice(0,75),excludeIds:[]},timeout.signal);}
+          finally{clearTimeout(timer);signal.removeEventListener('abort',cancel);}
+          check();
+          const refillBrief=selectionBrief(intent.prompt,intent.count,refill.brief);
+          if(JSON.stringify(refillBrief.music)!==JSON.stringify(brief.music))throw Error('The refill changed the musical request. Nothing was queued.');
+          generationMs+=refill.generationMs;
+          await consume(refill,missing+extraReserve,false);
         }
         if(groups.length>1){const selected=new Set(tracks.map(t=>t.uri));const mixed=balancedMix(groups.map(g=>g.filter(t=>selected.has(t.uri))),200,intent.repeat);tracks=intent.repeat?mixed.slice(0,intent.count):uniqueMusic(mixed,intent.count);}
         resolutionMs=Math.round(performance.now()-resolvingAt);
       }
     }
-    if(!sourceSet&&!seeds.length&&!intent.playlistCount&&!intent.history)tracks=curateArtists(tracks,selectionBrief(intent.prompt,intent.count));
+    if(!sourceSet&&!seeds.length&&!intent.playlistCount&&!intent.history)tracks=curateArtists(tracks,finalBrief??selectionBrief(intent.prompt,intent.count));
     if(seeds.length&&!sourceSet){
       const artists=new Map<string,Track[]>();for(const track of tracks){const artist=primaryArtist(track);const group=artists.get(artist)??[];group.push(track);artists.set(artist,group);}
       tracks=balancedMix([...artists.values()],intent.count,intent.repeat);

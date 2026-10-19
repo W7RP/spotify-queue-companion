@@ -8,13 +8,15 @@ const rows=JSON.parse(readFileSync(input,'utf8').replace(/^\uFEFF/,''));
 const key=(s:string)=>s.normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
 for(const row of rows) {
   const spec=cases.find((item:any)=>item.prompt===row.prompt), count=row.count??spec?.count??15;
+  if(row.error){console.log(JSON.stringify({stage:row.stage,provider:row.provider,model:row.model,prompt:row.prompt,violations:['provider failure'],humanReviewRequired:true}));continue;}
   if(!Array.isArray(row.songs)||row.songs.length>100||row.songs.some((song:any)=>typeof song?.title!=='string'||typeof song?.artist!=='string'))throw Error('Invalid proposal result.');
   const seen=new Set<string>(), proposals=row.songs.filter((song:any)=>{const id=key(song.title)+'|'+key(song.artist);if(seen.has(id))return false;seen.add(id);return true;});
-  let selected:typeof proposals=[];
-  for(let end=5;selected.length<count&&end<proposals.length+5;end+=5)selected=curateArtists(proposals.slice(0,end),selectionBrief(row.prompt,count));
+  let selected:typeof proposals=[],briefError='';
+  try {const brief=selectionBrief(row.prompt,count,row.brief??undefined);for(let end=5;selected.length<count&&end<proposals.length+5;end+=5)selected=curateArtists(proposals.slice(0,end),brief);}
+  catch{briefError='invalid or ungrounded brief';}
   const reference=(song:any)=>(spec?.references??[]).some((artist:string)=>key(artist)===key(song.artist));
   const artistCounts=new Map<string,number>();for(const song of selected)artistCounts.set(key(song.artist),(artistCounts.get(key(song.artist))??0)+1);
-  const violations:string[]=[];
+  const violations:string[]=briefError?[briefError]:[];
   if(selected.length<count)violations.push('short selection');
   if(spec?.kind==='similarity') {
     if(selected[0]&&reference(selected[0]))violations.push('reference artist opens');
@@ -23,5 +25,5 @@ for(const row of rows) {
   if(spec?.kind==='artist-only'&&selected.some(song=>!spec.allowed.some((artist:string)=>key(artist)===key(song.artist))))violations.push('outside artist-only restriction');
   if(spec?.kind==='exclude'&&selected.some(song=>spec.excluded.some((artist:string)=>key(artist)===key(song.artist))))violations.push('excluded artist present');
   if(spec?.kind==='allocation'&&selected.filter(reference).length!==spec.referenceCount)violations.push('explicit artist allocation missed');
-  console.log(JSON.stringify({provider:row.provider,model:row.model,prompt:row.prompt,generationMs:row.generationMs,proposed:row.songs.length,selected:selected.length,artists:artistCounts.size,referenceSongs:selected.filter(reference).length,adjacentArtistPairs:selected.slice(1).filter((song,i)=>key(song.artist)===key(selected[i].artist)).length,violations,humanReviewRequired:true,catalogMatchesVerified:false}));
+  console.log(JSON.stringify({stage:row.stage,provider:row.provider,model:row.model,prompt:row.prompt,generationMs:row.generationMs,proposed:row.songs.length,selected:selected.length,artists:artistCounts.size,referenceSongs:selected.filter(reference).length,adjacentArtistPairs:selected.slice(1).filter((song,i)=>key(song.artist)===key(selected[i].artist)).length,violations,humanReviewRequired:true,catalogMatchesVerified:false}));
 }

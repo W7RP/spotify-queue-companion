@@ -565,7 +565,7 @@
   // src/curation.ts
   var selectionPolicy = {
     "schemaVersion": 1,
-    "version": "1.0.0",
+    "version": "1.1.0",
     "defaults": {
       "artistShareDivisor": 5,
       "minimumOtherArtistSongs": 2
@@ -591,48 +591,72 @@
           "claude-haiku-5-5"
         ]
       }
+    },
+    "refill": {
+      "maxAttempts": 1,
+      "deadlineMs": 6e4,
+      "maxAvoid": 75
     }
   };
   var words = (text) => text.normalize("NFKD").replace(new RegExp("\\p{M}", "gu"), "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
   var artistKey = (track) => words(track.artistNames?.[0] ?? track.artist);
-  function selectionBrief(prompt, count) {
+  function validateMusicBrief(value, prompt, count) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) throw Error("The music brief could not be read. Nothing was queued.");
+    const b = value;
+    const names = (v) => Array.isArray(v) && v.length <= 6 && v.every((s) => typeof s === "string" && !!s.trim() && s.length <= 120 && !/[\u0000-\u001f]/.test(s));
+    if (!["similarity", "artist-only", "discovery"].includes(b.kind) || !names(b.referenceArtists) || !names(b.excludedArtists) || !["balanced", "deep-cuts", "new-artists", "familiar"].includes(b.discovery) || !Number.isInteger(b.referenceCount) || b.referenceCount < -1 || b.referenceCount > count || !Array.isArray(b.excludedVersions) || b.excludedVersions.length > 4 || b.excludedVersions.some((v) => !["live", "acoustic", "remix", "cover"].includes(v)) || [b.genre, b.mood, b.era].some((s) => typeof s !== "string" || s.length > 200 || /[\u0000-\u001f]/.test(s))) throw Error("The music brief exceeded selection limits. Nothing was queued.");
+    const text = " " + words(prompt) + " ";
+    if ([...b.referenceArtists, ...b.excludedArtists].some((a) => !text.includes(" " + words(a) + " "))) throw Error("The music brief introduced an artist restriction that was not requested. Nothing was queued.");
+    if (b.kind === "artist-only" && (!b.referenceArtists.length || !b.referenceArtists.some((a) => {
+      const name = words(a);
+      return ["only ", "only songs by ", "only music by ", "only tracks by ", "exclusively ", "exclusively by ", "songs by ", "music by ", "tracks by ", "nothing but "].some((prefix) => text.includes(" " + prefix + name + " "));
+    }))) throw Error("The music brief changed an inspiration into an artist-only request. Nothing was queued.");
+    if (b.excludedArtists.length && !/\b(?:no|not|without|avoid|exclude|excluding|except|none)\b/.test(words(prompt))) throw Error("The music brief invented an artist exclusion. Nothing was queued.");
+    return { kind: b.kind, referenceArtists: [...new Set(b.referenceArtists.map((a) => a.trim()))], excludedArtists: [...new Set(b.excludedArtists.map((a) => a.trim()))], genre: b.genre, mood: b.mood, era: b.era, discovery: b.discovery, referenceCount: b.referenceCount, excludedVersions: [...new Set(b.excludedVersions)] };
+  }
+  function selectionBrief(prompt, count, modelBrief) {
+    const music = modelBrief == null ? null : validateMusicBrief(modelBrief, prompt, count);
     const text = words(prompt);
     const similarity = /\b(?:like|similar to|similar music to|inspired by|in the style of|sounds like)\b/.test(text);
     const referenceText = text.split(/\b(?:similar to|similar music to|inspired by|in the style of|sounds like|like)\b/).slice(1).map((part) => part.split(/\b(?:but|without|except|excluding|only|include|including)\b/)[0].trim()).filter(Boolean);
     const narrow = text.match(/\b(?:only|exclusively|nothing but|all by)\s+(?:(?:songs?|tracks?|music)\s+)?(?:(?:by|from)\s+)?(.+)/)?.[1];
     const artistOnly = !!narrow && (/^(?:them|that band|that artist)\b/.test(narrow) || referenceText.some((part) => (" " + narrow + " ").includes(" " + part + " ")));
     const allocation = artistOnly || /\b(?:mostly|mainly|more (?:of|from)|half|percent|equal|evenly|\d+\s+(?:songs?|tracks?)\s+(?:by|from)|include|including|mix in)\b/.test(text) || /\d\s*%/.test(prompt);
+    const explicitCount = music && music.referenceCount >= 0 ? music.referenceCount : null;
     return {
-      similarity,
-      balance: similarity && !allocation,
-      referenceText,
+      similarity: music ? music.kind === "similarity" : similarity,
+      balance: music ? music.kind === "similarity" && explicitCount === null : similarity && !allocation,
+      referenceText: music ? music.referenceArtists.map(words) : referenceText,
       count,
-      referenceLimit: Math.min(count - 1, Math.max(1, Math.floor(count / selectionPolicy.defaults.artistShareDivisor))),
+      music,
+      explicitCount,
+      referenceLimit: explicitCount ?? Math.min(count - 1, Math.max(1, Math.floor(count / selectionPolicy.defaults.artistShareDivisor))),
       artistLimit: Math.max(selectionPolicy.defaults.minimumOtherArtistSongs, Math.ceil(count / selectionPolicy.defaults.artistShareDivisor))
     };
   }
   function isReferenceArtist(track, brief) {
     return (track.artistNames?.length ? track.artistNames : [track.artist]).some((name) => {
       const key = words(name);
-      return !!key && brief.referenceText.some((part) => (" " + part + " ").includes(" " + key + " "));
+      return !!key && (brief.music ? brief.referenceText.includes(key) : brief.referenceText.some((part) => (" " + part + " ").includes(" " + key + " ")));
     });
   }
   function curateArtists(tracks, brief, restricted = false) {
     if (restricted) return tracks.slice(0, brief.count);
     const references = [], others = [], totals = /* @__PURE__ */ new Map();
     for (const track of tracks) {
+      if (!allowedByBrief(track, brief)) continue;
       const reference = isReferenceArtist(track, brief), key = artistKey(track);
-      if (brief.balance && (reference ? references.length >= brief.referenceLimit : (totals.get(key) ?? 0) >= brief.artistLimit)) continue;
+      if (reference && (brief.balance || brief.explicitCount !== null) && references.length >= brief.referenceLimit || !reference && brief.balance && (totals.get(key) ?? 0) >= brief.artistLimit) continue;
       totals.set(key, (totals.get(key) ?? 0) + 1);
       (reference ? references : others).push(track);
     }
     if (brief.balance && !others.length) return [];
-    const referenceCount = brief.balance ? Math.min(references.length, brief.count - 1) : Math.min(references.length, brief.count);
+    const referenceCount = brief.balance ? Math.min(references.length, brief.count - 1) : Math.min(references.length, brief.explicitCount ?? brief.count);
     const familiar = references.slice(0, referenceCount);
     const remaining = others.slice();
     const ordered = [];
     let previous = "";
-    while (ordered.length < brief.count - familiar.length && remaining.length) {
+    while (ordered.length < brief.count - (brief.explicitCount ?? familiar.length) && remaining.length) {
       let index = remaining.findIndex((track2) => artistKey(track2) !== previous);
       if (index < 0) index = 0;
       const [track] = remaining.splice(index, 1);
@@ -647,6 +671,17 @@
       while (at < familiar.length && Math.floor((i + 1) * familiar.length / ordered.length) > at) result.push(familiar[at++]);
     }
     return result.slice(0, brief.count);
+  }
+  function allowedByBrief(track, brief) {
+    const artists = (track.artistNames?.length ? track.artistNames : [track.artist]).map(words), music = brief.music;
+    if (!music) return true;
+    if (music.excludedArtists.some((a) => artists.includes(words(a)))) return false;
+    if (music.kind === "artist-only" && !music.referenceArtists.some((a) => artists.includes(words(a)))) return false;
+    const rawTitle = track.title ?? "";
+    return !music.excludedVersions.some((v) => v === "live" ? /(?:[-–—(\[]\s*[^)\]]*\blive\b)|\blive (?:at|from|in|version|recording)\b/i.test(rawTitle) : new RegExp("[-\u2013\u2014(\\[]\\s*[^)\\]]*\\b" + v + "\\b", "i").test(rawTitle));
+  }
+  function canRefill(selected, target, started, eligible = true) {
+    return eligible && selected < target && Date.now() - started < selectionPolicy.refill.deadlineMs;
   }
 
   // src/pipeline.ts
@@ -674,7 +709,8 @@
         if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
       };
       const intent = parseIntent(prompt, settings.length, settings.cap, settings.mode);
-      const start2 = performance.now();
+      const start2 = performance.now(), selectingAt = Date.now();
+      let finalBrief;
       this.activity("Selecting songs\u2026");
       const initial = await this.spotify.snapshot();
       if (!initial.local) throw Error("Choose this computer in Spotify\u2019s device menu before queueing.");
@@ -841,23 +877,13 @@
           const compact = candidates.map((t, i) => ({ ...t, id: "c" + i }));
           const reserve = sourceSet ? 0 : Math.min(25, Math.ceil(intent.count / 2));
           this.activity("Choosing matching songs\u2026");
-          const response = await this.helper.request("generate", { prompt: intent.prompt, count: intent.count, reserve, candidates: compact, restricted: !!sourceSet, previous: intent.more ? this.previous.slice(-10).map((t) => ({ title: t.title, artist: t.artist })) : [], seeds: seeds.map((t) => ({ title: t.title, artist: primaryArtist(t) })), playlistCount: intent.playlistCount, playlistIds: compact.filter((t) => originalUris.has(t.uri)).map((t) => t.id) }, signal);
+          const request = { prompt: intent.prompt, count: intent.count, reserve, candidates: compact, restricted: !!sourceSet, previous: intent.more ? this.previous.slice(-10).map((t) => ({ title: t.title, artist: t.artist })) : [], seeds: seeds.map((t) => ({ title: t.title, artist: primaryArtist(t) })), playlistCount: intent.playlistCount, playlistIds: compact.filter((t) => originalUris.has(t.uri)).map((t) => t.id), structured: true };
+          const response = await this.helper.request("generate", request, signal);
           generationMs = response.generationMs;
           const resolvingAt = performance.now();
-          const suggestions = response.suggestions ?? [];
-          selection.proposed = response.ids.length + suggestions.length;
-          selection.invalid = response.rejectedSuggestions ?? 0;
-          selection.truncated = response.extraChoices ?? 0;
-          if (selection.proposed > intent.count + reserve) throw Error("Selection exceeded the bounded selection limit.");
-          if (sourceSet && suggestions.length) throw Error("Selection left the requested source. Nothing was queued.");
-          const proposed = response.ids.map((id) => {
-            const index = compact.findIndex((c) => c.id === id);
-            if (index < 0) throw Error("Invalid model track selection.");
-            return candidates[index];
-          });
-          if (proposed.length) validateSelection(proposed, sourceSet, intent.count + reserve, true);
           const acceptedUris = /* @__PURE__ */ new Set(), acceptedSongs = /* @__PURE__ */ new Set();
-          const brief = selectionBrief(intent.prompt, intent.count);
+          const brief = selectionBrief(intent.prompt, intent.count, response.brief);
+          finalBrief = brief;
           const balanceNamedArtist = !sourceSet && !seeds.length && !intent.playlistCount && brief.balance;
           const artistCounts = /* @__PURE__ */ new Map();
           let referenceCount = 0;
@@ -866,6 +892,7 @@
               selection.unmatched++;
               return;
             }
+            if (!allowedByBrief(t, brief)) return;
             const keys = songKeys(t);
             const original = intent.playlistCount > 0 && originalUris.has(t.uri);
             if (intent.playlistCount) {
@@ -882,6 +909,7 @@
             }
             const artist = primaryArtist(t).normalize("NFKD").toLocaleLowerCase().replace(new RegExp("\\p{M}", "gu"), "");
             const reference = isReferenceArtist(t, brief);
+            if (brief.explicitCount !== null && (reference ? referenceCount >= brief.referenceLimit : tracks.length - referenceCount >= intent.count - brief.explicitCount)) return;
             if (balanceNamedArtist && (reference ? referenceCount >= brief.referenceLimit : (artistCounts.get(artist) ?? 0) >= brief.artistLimit)) {
               selection.diversity = (selection.diversity ?? 0) + 1;
               return;
@@ -895,33 +923,76 @@
               if (reference) referenceCount++;
             }
           };
-          for (const t of proposed) {
-            if (tracks.length === intent.count) break;
-            accept(t, true);
-          }
-          const suggestedKeys = /* @__PURE__ */ new Set();
-          const pending = [];
-          for (const song of suggestions) {
-            const key = songKey(song);
-            if (!intent.repeat && (suggestedKeys.has(key) || acceptedSongs.has(key))) {
-              selection.duplicates++;
-              continue;
-            }
-            if (intent.playlistCount && referenceSongs.has(key) || !intent.repeat && excludedSongs.has(key)) {
-              selection.previous++;
-              continue;
-            }
-            suggestedKeys.add(key);
-            pending.push(song);
-          }
-          for (let i = 0; i < pending.length && tracks.length < intent.count && (!intent.playlistCount || tracks.length - originalSelected < intent.count - intent.playlistCount); i += 10) {
-            check();
-            const resolved = await Promise.all(pending.slice(i, i + 10).map((song) => this.spotify.resolve(song.title, song.artist)));
-            check();
-            for (const t of resolved) {
+          const seenProposals = /* @__PURE__ */ new Set();
+          const consume = async (answer, limit, allowIds = true) => {
+            const suggestions = answer.suggestions ?? [];
+            if (!Array.isArray(answer.ids) || !Array.isArray(suggestions) || answer.ids.length + suggestions.length > limit) throw Error("Selection exceeded the bounded selection limit.");
+            if (!allowIds && answer.ids.length) throw Error("Invalid model track selection in refill.");
+            selection.proposed += answer.ids.length + suggestions.length;
+            selection.invalid += answer.rejectedSuggestions ?? 0;
+            selection.truncated += answer.extraChoices ?? 0;
+            if (sourceSet && suggestions.length) throw Error("Selection left the requested source. Nothing was queued.");
+            const proposed = answer.ids.map((id) => {
+              const index = compact.findIndex((c) => c.id === id);
+              if (index < 0) throw Error("Invalid model track selection.");
+              return candidates[index];
+            });
+            if (proposed.length) validateSelection(proposed, sourceSet, limit, true);
+            for (const t of proposed) {
               if (tracks.length === intent.count) break;
-              accept(t);
+              accept(t, true);
             }
+            const suggestedKeys = /* @__PURE__ */ new Set();
+            const pending = [];
+            for (const song of suggestions) {
+              const key = songKey(song);
+              if (seenProposals.has(key)) {
+                selection.duplicates++;
+                continue;
+              }
+              if (!intent.repeat && (suggestedKeys.has(key) || acceptedSongs.has(key))) {
+                selection.duplicates++;
+                continue;
+              }
+              if (intent.playlistCount && referenceSongs.has(key) || !intent.repeat && excludedSongs.has(key)) {
+                selection.previous++;
+                continue;
+              }
+              suggestedKeys.add(key);
+              pending.push(song);
+            }
+            for (let i = 0; i < pending.length && tracks.length < intent.count && (!intent.playlistCount || tracks.length - originalSelected < intent.count - intent.playlistCount); i += 10) {
+              check();
+              const resolved = await Promise.all(pending.slice(i, i + 10).map((song) => this.spotify.resolve(song.title, song.artist)));
+              check();
+              for (const t of resolved) {
+                if (tracks.length === intent.count) break;
+                accept(t);
+              }
+            }
+            for (const song of suggestions) seenProposals.add(songKey(song));
+          };
+          await consume(response, intent.count + reserve);
+          if (response.brief && canRefill(tracks.length, intent.count, selectingAt, !sourceSet && !intent.playlistCount)) {
+            check();
+            this.activity("Finding a few more matching songs\u2026");
+            const missing = intent.count - tracks.length, extraReserve = Math.min(25, Math.ceil(missing / 2));
+            const timeout = new AbortController();
+            const cancel = () => timeout.abort();
+            signal.addEventListener("abort", cancel, { once: true });
+            const timer = setTimeout(() => timeout.abort(), 2e4);
+            let refill;
+            try {
+              refill = await this.helper.request("generate", { ...request, candidates: [], previous: [], seeds: [], playlistIds: [], reserve: extraReserve, refillCount: missing, brief: response.brief, avoid: (response.suggestions ?? []).slice(0, 75), excludeIds: [] }, timeout.signal);
+            } finally {
+              clearTimeout(timer);
+              signal.removeEventListener("abort", cancel);
+            }
+            check();
+            const refillBrief = selectionBrief(intent.prompt, intent.count, refill.brief);
+            if (JSON.stringify(refillBrief.music) !== JSON.stringify(brief.music)) throw Error("The refill changed the musical request. Nothing was queued.");
+            generationMs += refill.generationMs;
+            await consume(refill, missing + extraReserve, false);
           }
           if (groups.length > 1) {
             const selected = new Set(tracks.map((t) => t.uri));
@@ -931,7 +1002,7 @@
           resolutionMs = Math.round(performance.now() - resolvingAt);
         }
       }
-      if (!sourceSet && !seeds.length && !intent.playlistCount && !intent.history) tracks = curateArtists(tracks, selectionBrief(intent.prompt, intent.count));
+      if (!sourceSet && !seeds.length && !intent.playlistCount && !intent.history) tracks = curateArtists(tracks, finalBrief ?? selectionBrief(intent.prompt, intent.count));
       if (seeds.length && !sourceSet) {
         const artists = /* @__PURE__ */ new Map();
         for (const track of tracks) {

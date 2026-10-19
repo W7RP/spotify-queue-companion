@@ -1,0 +1,71 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "similarity",
+        "artist-only",
+        "discovery"
+      ]
+    },
+    "referenceArtists": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "excludedArtists": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "genre": {
+      "type": "string"
+    },
+    "mood": {
+      "type": "string"
+    },
+    "era": {
+      "type": "string"
+    },
+    "discovery": {
+      "type": "string",
+      "enum": [
+        "balanced",
+        "deep-cuts",
+        "new-artists",
+        "familiar"
+      ]
+    },
+    "referenceCount": {
+      "type": "integer",
+      "description": "-1 for default; otherwise explicitly requested number from reference artists in the final queue."
+    },
+    "excludedVersions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "live",
+          "acoustic",
+          "remix",
+          "cover"
+        ]
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "referenceArtists",
+    "excludedArtists",
+    "genre",
+    "mood",
+    "era",
+    "discovery",
+    "referenceCount",
+    "excludedVersions"
+  ]
+}

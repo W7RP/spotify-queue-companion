@@ -1,0 +1,3350 @@
+[
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs like Pearl Jam",
+    "count": 10,
+    "generationMs": 5573,
+    "songs": [
+      {
+        "title": "Nearly Lost You",
+        "artist": "Screaming Trees"
+      },
+      {
+        "title": "Plush",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Violet",
+        "artist": "Hole"
+      },
+      {
+        "title": "Far Behind",
+        "artist": "Candlebox"
+      },
+      {
+        "title": "Wake Up",
+        "artist": "Mad Season"
+      },
+      {
+        "title": "Outshined",
+        "artist": "Soundgarden"
+      },
+      {
+        "title": "Machinehead",
+        "artist": "Bush"
+      },
+      {
+        "title": "Cumbersome",
+        "artist": "Seven Mary Three"
+      },
+      {
+        "title": "River of Deceit",
+        "artist": "Mad Season"
+      },
+      {
+        "title": "Shine",
+        "artist": "Collective Soul"
+      },
+      {
+        "title": "Hunger Strike",
+        "artist": "Temple of the Dog"
+      },
+      {
+        "title": "Possum Kingdom",
+        "artist": "Toadies"
+      },
+      {
+        "title": "Seether",
+        "artist": "Veruca Salt"
+      },
+      {
+        "title": "Low",
+        "artist": "Cracker"
+      },
+      {
+        "title": "Stars",
+        "artist": "Hum"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Pearl Jam"
+      ],
+      "excludedArtists": [],
+      "genre": "grunge",
+      "mood": "raw, earnest, anthemic",
+      "era": "1990s",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs like Breaking Benjamin",
+    "count": 10,
+    "generationMs": 5860,
+    "songs": [
+      {
+        "title": "The Red",
+        "artist": "Chevelle"
+      },
+      {
+        "title": "Fine Again",
+        "artist": "Seether"
+      },
+      {
+        "title": "The Diary of Jane",
+        "artist": "Breaking Benjamin"
+      },
+      {
+        "title": "I Hate Everything About You",
+        "artist": "Three Days Grace"
+      },
+      {
+        "title": "Cold",
+        "artist": "Crossfade"
+      },
+      {
+        "title": "Through Glass",
+        "artist": "Stone Sour"
+      },
+      {
+        "title": "Numb",
+        "artist": "Linkin Park"
+      },
+      {
+        "title": "Letting You",
+        "artist": "Earshot"
+      },
+      {
+        "title": "Face to the Floor",
+        "artist": "Chevelle"
+      },
+      {
+        "title": "Animal I Have Become",
+        "artist": "Three Days Grace"
+      },
+      {
+        "title": "So Cold",
+        "artist": "Breaking Benjamin"
+      },
+      {
+        "title": "Remedy",
+        "artist": "Seether"
+      },
+      {
+        "title": "Stupify",
+        "artist": "Disturbed"
+      },
+      {
+        "title": "Blow Me Away",
+        "artist": "Breaking Benjamin"
+      },
+      {
+        "title": "The Way I Am",
+        "artist": "Staind"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Breaking Benjamin"
+      ],
+      "excludedArtists": [],
+      "genre": "alternative metal",
+      "mood": "melodic, heavy, emotionally intense",
+      "era": "unspecified",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs similar to Soundgarden and Alice in Chains",
+    "count": 20,
+    "generationMs": 8624,
+    "songs": [
+      {
+        "title": "Plush",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Nearly Lost You",
+        "artist": "Screaming Trees"
+      },
+      {
+        "title": "Seether",
+        "artist": "Veruca Salt"
+      },
+      {
+        "title": "Violet",
+        "artist": "Hole"
+      },
+      {
+        "title": "Cumbersome",
+        "artist": "Seven Mary Three"
+      },
+      {
+        "title": "River of Deceit",
+        "artist": "Mad Season"
+      },
+      {
+        "title": "Creep",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Stars",
+        "artist": "Hum"
+      },
+      {
+        "title": "Touch, Peel and Stand",
+        "artist": "Days of the New"
+      },
+      {
+        "title": "Would?",
+        "artist": "Alice in Chains"
+      },
+      {
+        "title": "Down in a Hole",
+        "artist": "Alice in Chains"
+      },
+      {
+        "title": "Interstate Love Song",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Far Behind",
+        "artist": "Candlebox"
+      },
+      {
+        "title": "Comedown",
+        "artist": "Bush"
+      },
+      {
+        "title": "Possum Kingdom",
+        "artist": "Toadies"
+      },
+      {
+        "title": "Shine",
+        "artist": "Collective Soul"
+      },
+      {
+        "title": "Doll Parts",
+        "artist": "Hole"
+      },
+      {
+        "title": "The Freshmen",
+        "artist": "The Verve Pipe"
+      },
+      {
+        "title": "Bound for the Floor",
+        "artist": "Local H"
+      },
+      {
+        "title": "Sober",
+        "artist": "Tool"
+      },
+      {
+        "title": "Hunger Strike",
+        "artist": "Temple of the Dog"
+      },
+      {
+        "title": "Outshined",
+        "artist": "Soundgarden"
+      },
+      {
+        "title": "Angry Chair",
+        "artist": "Alice in Chains"
+      },
+      {
+        "title": "Plowed",
+        "artist": "Sponge"
+      },
+      {
+        "title": "Machinehead",
+        "artist": "Bush"
+      },
+      {
+        "title": "Hey Man Nice Shot",
+        "artist": "Filter"
+      },
+      {
+        "title": "Vasoline",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Black Hole Sun",
+        "artist": "Soundgarden"
+      },
+      {
+        "title": "The Day I Tried to Live",
+        "artist": "Soundgarden"
+      },
+      {
+        "title": "Man in the Box",
+        "artist": "Alice in Chains"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Soundgarden",
+        "Alice in Chains"
+      ],
+      "excludedArtists": [],
+      "genre": "grunge",
+      "mood": "",
+      "era": "1990s",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "music in the style of Sade for a quiet evening",
+    "count": 15,
+    "generationMs": 8368,
+    "songs": [
+      {
+        "title": "The Sweetest Taboo",
+        "artist": "Sade"
+      },
+      {
+        "title": "No Ordinary Love",
+        "artist": "Sade"
+      },
+      {
+        "title": "Love\u0027s Theme",
+        "artist": "Barry White"
+      },
+      {
+        "title": "The Look of Love",
+        "artist": "Dusty Springfield"
+      },
+      {
+        "title": "Mystery",
+        "artist": "Anita Baker"
+      },
+      {
+        "title": "Sweet Love",
+        "artist": "Anita Baker"
+      },
+      {
+        "title": "For You",
+        "artist": "Kenny Lattimore"
+      },
+      {
+        "title": "Feel Like Makin\u0027 Love",
+        "artist": "Roberta Flack"
+      },
+      {
+        "title": "Woman in Chains",
+        "artist": "Tears for Fears"
+      },
+      {
+        "title": "La Isla Bonita",
+        "artist": "Madonna"
+      },
+      {
+        "title": "Slow Jam",
+        "artist": "Midnight Star"
+      },
+      {
+        "title": "Turn Your Love Around",
+        "artist": "George Benson"
+      },
+      {
+        "title": "Come Away with Me",
+        "artist": "Norah Jones"
+      },
+      {
+        "title": "Nothing Can Come Between Us",
+        "artist": "Sade"
+      },
+      {
+        "title": "Cherish the Day",
+        "artist": "Sade"
+      },
+      {
+        "title": "Love Is Stronger Than Pride",
+        "artist": "Sade"
+      },
+      {
+        "title": "Tadow",
+        "artist": "Masego"
+      },
+      {
+        "title": "Brown Sugar",
+        "artist": "D\u0027Angelo"
+      },
+      {
+        "title": "Golden",
+        "artist": "Jill Scott"
+      },
+      {
+        "title": "Be Thankful for What You Got",
+        "artist": "William DeVaughn"
+      },
+      {
+        "title": "Love T.K.O.",
+        "artist": "Teddy Pendergrass"
+      },
+      {
+        "title": "The Makings of You",
+        "artist": "Curtis Mayfield"
+      },
+      {
+        "title": "Sweetest Thing",
+        "artist": "U2"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Sade"
+      ],
+      "excludedArtists": [],
+      "genre": "smooth soul, quiet storm, sophisti-pop",
+      "mood": "quiet, intimate evening",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "one song like Radiohead",
+    "count": 1,
+    "generationMs": 2835,
+    "songs": [
+      {
+        "title": "The Heinrich Maneuver",
+        "artist": "Interpol"
+      },
+      {
+        "title": "Obstacle 1",
+        "artist": "Interpol"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Radiohead"
+      ],
+      "excludedArtists": [],
+      "genre": "alternative rock",
+      "mood": "",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs like AC/DC",
+    "count": 10,
+    "generationMs": 6457,
+    "songs": [
+      {
+        "title": "Highway Star",
+        "artist": "Deep Purple"
+      },
+      {
+        "title": "Hair of the Dog",
+        "artist": "Nazareth"
+      },
+      {
+        "title": "Rock and Roll, Hoochie Koo",
+        "artist": "Rick Derringer"
+      },
+      {
+        "title": "Stranglehold",
+        "artist": "Ted Nugent"
+      },
+      {
+        "title": "Can\u0027t Get Enough",
+        "artist": "Bad Company"
+      },
+      {
+        "title": "Mississippi Queen",
+        "artist": "Mountain"
+      },
+      {
+        "title": "Runnin\u0027 with the Devil",
+        "artist": "Van Halen"
+      },
+      {
+        "title": "Whiskey in the Jar",
+        "artist": "Thin Lizzy"
+      },
+      {
+        "title": "Hellraiser",
+        "artist": "Mot\u00F6rhead"
+      },
+      {
+        "title": "Back on the Road Again",
+        "artist": "REO Speedwagon"
+      },
+      {
+        "title": "Let It Ride",
+        "artist": "Bachman-Turner Overdrive"
+      },
+      {
+        "title": "Rock Candy",
+        "artist": "Montrose"
+      },
+      {
+        "title": "I Wanna Be Somebody",
+        "artist": "W.A.S.P."
+      },
+      {
+        "title": "Hot and Nasty",
+        "artist": "Black Oak Arkansas"
+      },
+      {
+        "title": "The Boys Are Back in Town",
+        "artist": "Thin Lizzy"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "AC/DC"
+      ],
+      "excludedArtists": [],
+      "genre": "hard rock",
+      "mood": "energetic, riff-driven",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs like The Cure, but no songs by The Cure",
+    "count": 20,
+    "generationMs": 9959,
+    "songs": [
+      {
+        "title": "A Forest",
+        "artist": "The Church"
+      },
+      {
+        "title": "Spellbound",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "Cities in Dust",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "The Killing Moon",
+        "artist": "Echo \u0026 the Bunnymen"
+      },
+      {
+        "title": "Lips Like Sugar",
+        "artist": "Echo \u0026 the Bunnymen"
+      },
+      {
+        "title": "Love Will Tear Us Apart",
+        "artist": "Joy Division"
+      },
+      {
+        "title": "Atmosphere",
+        "artist": "Joy Division"
+      },
+      {
+        "title": "She\u0027s in Parties",
+        "artist": "Bauhaus"
+      },
+      {
+        "title": "All We Ever Wanted Was Everything",
+        "artist": "Bauhaus"
+      },
+      {
+        "title": "Christine",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "The Cutter",
+        "artist": "Echo \u0026 the Bunnymen"
+      },
+      {
+        "title": "Cuts You Up",
+        "artist": "Peter Murphy"
+      },
+      {
+        "title": "A Strange Day",
+        "artist": "The Chameleons"
+      },
+      {
+        "title": "Swamp Thing",
+        "artist": "The Chameleons"
+      },
+      {
+        "title": "I Melt with You",
+        "artist": "Modern English"
+      },
+      {
+        "title": "The Ghost in You",
+        "artist": "The Psychedelic Furs"
+      },
+      {
+        "title": "Pretty in Pink",
+        "artist": "The Psychedelic Furs"
+      },
+      {
+        "title": "She\u0027s Lost Control",
+        "artist": "Joy Division"
+      },
+      {
+        "title": "Marian",
+        "artist": "The Sisters of Mercy"
+      },
+      {
+        "title": "Temple of Love",
+        "artist": "The Sisters of Mercy"
+      },
+      {
+        "title": "A Night Like This",
+        "artist": "The Smashing Pumpkins"
+      },
+      {
+        "title": "Pale Shelter",
+        "artist": "Tears for Fears"
+      },
+      {
+        "title": "The Killing Jar",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "How Soon Is Now?",
+        "artist": "The Smiths"
+      },
+      {
+        "title": "The Hanging Garden",
+        "artist": "The Cure"
+      },
+      {
+        "title": "Just Like Heaven",
+        "artist": "The Cure"
+      },
+      {
+        "title": "Shadowplay",
+        "artist": "Joy Division"
+      },
+      {
+        "title": "The Lovecats",
+        "artist": "The Cure"
+      },
+      {
+        "title": "Christine",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "Avalanche",
+        "artist": "The Chameleons"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "The Cure"
+      ],
+      "excludedArtists": [
+        "The Cure"
+      ],
+      "genre": "alternative rock, post-punk, gothic rock",
+      "mood": "moody, atmospheric",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": 0,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "only songs by Pearl Jam",
+    "count": 10,
+    "generationMs": 5691,
+    "songs": [
+      {
+        "title": "Release",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "In My Tree",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Present Tense",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Off He Goes",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "State of Love and Trust",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Immortality",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Given to Fly",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Corduroy",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Nothingman",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Dissident",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Rearviewmirror",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Elderly Woman Behind the Counter in a Small Town",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Black",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Alive",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Yellow Ledbetter",
+        "artist": "Pearl Jam"
+      }
+    ],
+    "brief": {
+      "kind": "artist-only",
+      "referenceArtists": [
+        "Pearl Jam"
+      ],
+      "excludedArtists": [],
+      "genre": "",
+      "mood": "",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs by Deftones",
+    "count": 15,
+    "generationMs": 7242,
+    "songs": [
+      {
+        "title": "Be Quiet and Drive (Far Away)",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Digital Bath",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Change (In the House of Flies)",
+        "artist": "Deftones"
+      },
+      {
+        "title": "My Own Summer (Shove It)",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Minerva",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Cherry Waves",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Knife Prty",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Rosemary",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Sextape",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Tempest",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Hexagram",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Passenger",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Diamond Eyes",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Mascara",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Around the Fur",
+        "artist": "Deftones"
+      },
+      {
+        "title": "You\u0027ve Seen the Butcher",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Beware",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Rocket Skates",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Lhabia",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Bored",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Digital Bath",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Root",
+        "artist": "Deftones"
+      },
+      {
+        "title": "Entombed",
+        "artist": "Deftones"
+      }
+    ],
+    "brief": {
+      "kind": "artist-only",
+      "referenceArtists": [
+        "Deftones"
+      ],
+      "excludedArtists": [],
+      "genre": "",
+      "mood": "",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "music like Fleetwood Mac but exclusively by Fleetwood Mac",
+    "count": 10,
+    "generationMs": 5547,
+    "songs": [
+      {
+        "title": "The Chain",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Dreams",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Rhiannon",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Go Your Own Way",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Landslide",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "You Make Loving Fun",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Sara",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Gypsy",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Silver Springs",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Tusk",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Gold Dust Woman",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Everywhere",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Never Going Back Again",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Second Hand News",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Big Love",
+        "artist": "Fleetwood Mac"
+      }
+    ],
+    "brief": {
+      "kind": "artist-only",
+      "referenceArtists": [
+        "Fleetwood Mac"
+      ],
+      "excludedArtists": [],
+      "genre": "",
+      "mood": "",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs like Pearl Jam, half by Pearl Jam and half other artists",
+    "count": 20,
+    "generationMs": 12925,
+    "songs": [
+      {
+        "title": "River of Deceit",
+        "artist": "Mad Season"
+      },
+      {
+        "title": "Corduroy",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Nearly Lost You",
+        "artist": "Screaming Trees"
+      },
+      {
+        "title": "In My Tree",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Plush",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Dissident",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Would?",
+        "artist": "Alice in Chains"
+      },
+      {
+        "title": "State of Love and Trust",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Outshined",
+        "artist": "Soundgarden"
+      },
+      {
+        "title": "Present Tense",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Violet",
+        "artist": "Hole"
+      },
+      {
+        "title": "Rearviewmirror",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "The One I Love",
+        "artist": "R.E.M."
+      },
+      {
+        "title": "Nothingman",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Cumbersome",
+        "artist": "Seven Mary Three"
+      },
+      {
+        "title": "Hail, Hail",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Sour Girl",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Given to Fly",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Far Behind",
+        "artist": "Candlebox"
+      },
+      {
+        "title": "Who You Are",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "I Stay Away",
+        "artist": "Alice in Chains"
+      },
+      {
+        "title": "Breath",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Black Hole Sun",
+        "artist": "Soundgarden"
+      },
+      {
+        "title": "In Hiding",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Dollar Bill",
+        "artist": "Screaming Trees"
+      },
+      {
+        "title": "Once",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Slaves \u0026 Bulldozers",
+        "artist": "Soundgarden"
+      },
+      {
+        "title": "Garden",
+        "artist": "Pearl Jam"
+      },
+      {
+        "title": "Soma",
+        "artist": "The Smashing Pumpkins"
+      },
+      {
+        "title": "Off He Goes",
+        "artist": "Pearl Jam"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Pearl Jam"
+      ],
+      "excludedArtists": [],
+      "genre": "grunge and alternative rock",
+      "mood": "",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": 10,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs like Nirvana, include more of their own songs",
+    "count": 15,
+    "generationMs": 7271,
+    "songs": [
+      {
+        "title": "Nearly Lost You",
+        "artist": "Screaming Trees"
+      },
+      {
+        "title": "Seether",
+        "artist": "Veruca Salt"
+      },
+      {
+        "title": "Violet",
+        "artist": "Hole"
+      },
+      {
+        "title": "Touch Me I\u0027m Sick",
+        "artist": "Mudhoney"
+      },
+      {
+        "title": "Drown",
+        "artist": "The Smashing Pumpkins"
+      },
+      {
+        "title": "Would?",
+        "artist": "Alice In Chains"
+      },
+      {
+        "title": "Shine",
+        "artist": "Collective Soul"
+      },
+      {
+        "title": "Cumbersome",
+        "artist": "Seven Mary Three"
+      },
+      {
+        "title": "Plush",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Far Behind",
+        "artist": "Candlebox"
+      },
+      {
+        "title": "In Bloom",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Drain You",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Lounge Act",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Scentless Apprentice",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "On a Plain",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Frances Farmer Will Have Her Revenge on Seattle",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Breed",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Serve the Servants",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Aneurysm",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Negative Creep",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "About a Girl",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Sliver",
+        "artist": "Nirvana"
+      },
+      {
+        "title": "Heart-Shaped Box",
+        "artist": "Nirvana"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Nirvana"
+      ],
+      "excludedArtists": [],
+      "genre": "grunge, alternative rock",
+      "mood": "",
+      "era": "1990s",
+      "discovery": "balanced",
+      "referenceCount": 6,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "classic rock hits, but not the most listened to. find me hidden gems",
+    "count": 10,
+    "generationMs": 7129,
+    "songs": [
+      {
+        "title": "The Green Manalishi (With the Two Prong Crown)",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Bad Motor Scooter",
+        "artist": "Montrose"
+      },
+      {
+        "title": "Suffragette City",
+        "artist": "David Bowie"
+      },
+      {
+        "title": "The Wanton Song",
+        "artist": "Led Zeppelin"
+      },
+      {
+        "title": "No Matter What",
+        "artist": "Badfinger"
+      },
+      {
+        "title": "Down by the River",
+        "artist": "Neil Young"
+      },
+      {
+        "title": "The Rocker",
+        "artist": "Thin Lizzy"
+      },
+      {
+        "title": "Rock and Roll, Hoochie Koo",
+        "artist": "Rick Derringer"
+      },
+      {
+        "title": "I Got the Fire",
+        "artist": "Montrose"
+      },
+      {
+        "title": "Can You See Me",
+        "artist": "The Jimi Hendrix Experience"
+      },
+      {
+        "title": "Mississippi Queen",
+        "artist": "Mountain"
+      },
+      {
+        "title": "Stone Cold Fever",
+        "artist": "Humble Pie"
+      },
+      {
+        "title": "Voodoo Chile (Slight Return)",
+        "artist": "The Jimi Hendrix Experience"
+      },
+      {
+        "title": "Riff Raff",
+        "artist": "AC/DC"
+      },
+      {
+        "title": "In the Light",
+        "artist": "Led Zeppelin"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "classic rock",
+      "mood": "energetic, memorable",
+      "era": "classic rock era",
+      "discovery": "deep-cuts",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "obscure 90s shoegaze, no live versions or covers",
+    "count": 25,
+    "generationMs": 11230,
+    "songs": [
+      {
+        "title": "Dreams Burn Down",
+        "artist": "Ride"
+      },
+      {
+        "title": "De-Luxe",
+        "artist": "Lush"
+      },
+      {
+        "title": "When the Sun Hits",
+        "artist": "Slowdive"
+      },
+      {
+        "title": "Catch the Breeze",
+        "artist": "Slowdive"
+      },
+      {
+        "title": "Drive Blind",
+        "artist": "Ride"
+      },
+      {
+        "title": "In a Hole",
+        "artist": "My Bloody Valentine"
+      },
+      {
+        "title": "Cupid Come",
+        "artist": "My Bloody Valentine"
+      },
+      {
+        "title": "Second Skin",
+        "artist": "The Chameleons"
+      },
+      {
+        "title": "Celestial",
+        "artist": "The Sundays"
+      },
+      {
+        "title": "The Drowners",
+        "artist": "Suede"
+      },
+      {
+        "title": "I Feel Free",
+        "artist": "Curve"
+      },
+      {
+        "title": "Coast Is Clear",
+        "artist": "Swervedriver"
+      },
+      {
+        "title": "Duel",
+        "artist": "Swervedriver"
+      },
+      {
+        "title": "Hunted By A Freak",
+        "artist": "Mogwai"
+      },
+      {
+        "title": "Souvlaki Space Station",
+        "artist": "Slowdive"
+      },
+      {
+        "title": "For Love",
+        "artist": "Lush"
+      },
+      {
+        "title": "Tremolo Song",
+        "artist": "Lush"
+      },
+      {
+        "title": "In the Kingdom #19",
+        "artist": "Lush"
+      },
+      {
+        "title": "Alison",
+        "artist": "Slowdive"
+      },
+      {
+        "title": "Sometimes",
+        "artist": "My Bloody Valentine"
+      },
+      {
+        "title": "Losing Today",
+        "artist": "Slowdive"
+      },
+      {
+        "title": "She Calls",
+        "artist": "The Boo Radleys"
+      },
+      {
+        "title": "Everything\u0027s Alright Forever",
+        "artist": "The Boo Radleys"
+      },
+      {
+        "title": "Giant Steps",
+        "artist": "The Boo Radleys"
+      },
+      {
+        "title": "Acheron",
+        "artist": "The Verve"
+      },
+      {
+        "title": "Blue",
+        "artist": "The Verve"
+      },
+      {
+        "title": "Slide Away",
+        "artist": "The Verve"
+      },
+      {
+        "title": "The Finest Kiss",
+        "artist": "The Boo Radleys"
+      },
+      {
+        "title": "Blowin\u0027 Cool",
+        "artist": "Swervedriver"
+      },
+      {
+        "title": "Chrome Waves",
+        "artist": "Ride"
+      },
+      {
+        "title": "Brighter",
+        "artist": "Lush"
+      },
+      {
+        "title": "Lovelife",
+        "artist": "Lush"
+      },
+      {
+        "title": "Starlust",
+        "artist": "The Verve"
+      },
+      {
+        "title": "Leave Them All Behind",
+        "artist": "Ride"
+      },
+      {
+        "title": "Twisterella",
+        "artist": "Ride"
+      },
+      {
+        "title": "Vapour Trail",
+        "artist": "Ride"
+      },
+      {
+        "title": "Machine Gun",
+        "artist": "Slowdive"
+      },
+      {
+        "title": "Soon",
+        "artist": "My Bloody Valentine"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "shoegaze",
+      "mood": "",
+      "era": "1990s",
+      "discovery": "deep-cuts",
+      "referenceCount": -1,
+      "excludedVersions": [
+        "live",
+        "cover"
+      ]
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "warm instrumental soul for cooking, no vocals",
+    "count": 15,
+    "generationMs": 8611,
+    "songs": [
+      {
+        "title": "T.R.O.Y. (They Reminisce Over You) (Instrumental)",
+        "artist": "Pete Rock \u0026 C.L. Smooth"
+      },
+      {
+        "title": "Summer Madness",
+        "artist": "Kool \u0026 the Gang"
+      },
+      {
+        "title": "Mister Magic",
+        "artist": "Grover Washington, Jr."
+      },
+      {
+        "title": "The Payback",
+        "artist": "James Brown"
+      },
+      {
+        "title": "Foots",
+        "artist": "Sly \u0026 the Family Stone"
+      },
+      {
+        "title": "Use Me (Instrumental)",
+        "artist": "Bill Withers"
+      },
+      {
+        "title": "Cissy Strut",
+        "artist": "The Meters"
+      },
+      {
+        "title": "Soulful Strut",
+        "artist": "Young-Holt Unlimited"
+      },
+      {
+        "title": "The Champ",
+        "artist": "The Mohawks"
+      },
+      {
+        "title": "Theme from Shaft",
+        "artist": "Isaac Hayes"
+      },
+      {
+        "title": "Hot Pants Road",
+        "artist": "The J.B.\u0027s"
+      },
+      {
+        "title": "Harlem River Drive",
+        "artist": "Harlem River Drive"
+      },
+      {
+        "title": "More Bounce to the Ounce",
+        "artist": "Zapp"
+      },
+      {
+        "title": "Lujon",
+        "artist": "Henry Mancini"
+      },
+      {
+        "title": "Les Fleur",
+        "artist": "Minnie Riperton"
+      },
+      {
+        "title": "Ain\u0027t No Sunshine (Instrumental)",
+        "artist": "Booker T. \u0026 the M.G.\u0027s"
+      },
+      {
+        "title": "Tighten Up",
+        "artist": "Archie Bell \u0026 The Drells"
+      },
+      {
+        "title": "Chicken Grease",
+        "artist": "D\u0027Angelo"
+      },
+      {
+        "title": "Rudy\u0027s Way",
+        "artist": "Roy Ayers"
+      },
+      {
+        "title": "The Creator Has a Master Plan (Peace)",
+        "artist": "Pharoah Sanders"
+      },
+      {
+        "title": "Think (About It)",
+        "artist": "Lyn Collins"
+      },
+      {
+        "title": "Love\u0027s Theme",
+        "artist": "The Love Unlimited Orchestra"
+      },
+      {
+        "title": "The Look of Love",
+        "artist": "Isaac Hayes"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "instrumental soul",
+      "mood": "warm, relaxed; suitable for cooking",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "melodic heavy music without screaming",
+    "count": 20,
+    "generationMs": 9194,
+    "songs": [
+      {
+        "title": "The End of Heartache",
+        "artist": "Killswitch Engage"
+      },
+      {
+        "title": "My Curse",
+        "artist": "Killswitch Engage"
+      },
+      {
+        "title": "A Tout le Monde",
+        "artist": "Megadeth"
+      },
+      {
+        "title": "The Day That Never Comes",
+        "artist": "Metallica"
+      },
+      {
+        "title": "Still Loving You",
+        "artist": "Scorpions"
+      },
+      {
+        "title": "Holy Diver",
+        "artist": "Dio"
+      },
+      {
+        "title": "The Sound of Muzak",
+        "artist": "Porcupine Tree"
+      },
+      {
+        "title": "Jambi",
+        "artist": "Tool"
+      },
+      {
+        "title": "The Wreckage of My Flesh",
+        "artist": "Nevermore"
+      },
+      {
+        "title": "The Heart Collector",
+        "artist": "Nevermore"
+      },
+      {
+        "title": "Blood and Thunder",
+        "artist": "Mastodon"
+      },
+      {
+        "title": "Oblivion",
+        "artist": "Mastodon"
+      },
+      {
+        "title": "The Last in Line",
+        "artist": "Dio"
+      },
+      {
+        "title": "The Great Southern Trendkill",
+        "artist": "Pantera"
+      },
+      {
+        "title": "The Gift of Guilt",
+        "artist": "Gojira"
+      },
+      {
+        "title": "Flying Whales",
+        "artist": "Gojira"
+      },
+      {
+        "title": "The Drapery Falls",
+        "artist": "Opeth"
+      },
+      {
+        "title": "Deliverance",
+        "artist": "Opeth"
+      },
+      {
+        "title": "The Jester Race",
+        "artist": "In Flames"
+      },
+      {
+        "title": "Only for the Weak",
+        "artist": "In Flames"
+      },
+      {
+        "title": "Straws Pulled at Random",
+        "artist": "Meshuggah"
+      },
+      {
+        "title": "Bleed",
+        "artist": "Meshuggah"
+      },
+      {
+        "title": "Schism",
+        "artist": "Tool"
+      },
+      {
+        "title": "Blackwater Park",
+        "artist": "Opeth"
+      },
+      {
+        "title": "Aerials",
+        "artist": "System Of A Down"
+      },
+      {
+        "title": "The Unforgiven",
+        "artist": "Metallica"
+      },
+      {
+        "title": "The Stage",
+        "artist": "Avenged Sevenfold"
+      },
+      {
+        "title": "Buried Alive",
+        "artist": "Avenged Sevenfold"
+      },
+      {
+        "title": "The Philosopher",
+        "artist": "Death"
+      },
+      {
+        "title": "Voice of the Soul",
+        "artist": "Death"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "melodic heavy music",
+      "mood": "heavy, melodic; no screaming",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "French electronic music for a late-night drive, avoid the obvious hits",
+    "count": 20,
+    "generationMs": 9517,
+    "songs": [
+      {
+        "title": "La femme d\u2019argent",
+        "artist": "Air"
+      },
+      {
+        "title": "Le voyage de P\u00E9n\u00E9lope",
+        "artist": "Air"
+      },
+      {
+        "title": "Sexy Boy",
+        "artist": "Air"
+      },
+      {
+        "title": "L\u2019Autre Valse d\u2019Am\u00E9lie",
+        "artist": "Yann Tiersen"
+      },
+      {
+        "title": "Comptine d\u2019un autre \u00E9t\u00E9, l\u2019apr\u00E8s-midi",
+        "artist": "Yann Tiersen"
+      },
+      {
+        "title": "La Ritournelle",
+        "artist": "S\u00E9bastien Tellier"
+      },
+      {
+        "title": "Kilometer",
+        "artist": "S\u00E9bastien Tellier"
+      },
+      {
+        "title": "A Real Hero",
+        "artist": "College"
+      },
+      {
+        "title": "Teenage Color",
+        "artist": "College"
+      },
+      {
+        "title": "Les Djinns",
+        "artist": "\u4F5C\u66F2\u8005? "
+      },
+      {
+        "title": "Music Sounds Better with You",
+        "artist": "Stardust"
+      },
+      {
+        "title": "Super Discount",
+        "artist": "\u00C9tienne de Cr\u00E9cy"
+      },
+      {
+        "title": "Prix Choc",
+        "artist": "\u00C9tienne de Cr\u00E9cy"
+      },
+      {
+        "title": "La Baie",
+        "artist": "P\u00E9p\u00E9 Bradock"
+      },
+      {
+        "title": "Deep Burnt",
+        "artist": "P\u00E9p\u00E9 Bradock"
+      },
+      {
+        "title": "La Gifle",
+        "artist": "M83"
+      },
+      {
+        "title": "Lower Your Eyelids to Die with the Sun",
+        "artist": "M83"
+      },
+      {
+        "title": "Lone Digger",
+        "artist": "Caravan Palace"
+      },
+      {
+        "title": "Minuit",
+        "artist": "Carte Blanche"
+      },
+      {
+        "title": "Nightcall",
+        "artist": "Kavinsky"
+      },
+      {
+        "title": "Losing My Edge",
+        "artist": "LCD Soundsystem"
+      },
+      {
+        "title": "You Are My High",
+        "artist": "Demon"
+      },
+      {
+        "title": "Les Fleurs",
+        "artist": "Mr Flash"
+      },
+      {
+        "title": "Amour",
+        "artist": "SebastiAn"
+      },
+      {
+        "title": "Motorcycle, I Love You",
+        "artist": "Mylo"
+      },
+      {
+        "title": "D.A.N.C.E.",
+        "artist": "Justice"
+      },
+      {
+        "title": "Genesis",
+        "artist": "Justice"
+      },
+      {
+        "title": "Ritournelle",
+        "artist": "Lifelike"
+      },
+      {
+        "title": "L\u0027amour et la violence",
+        "artist": "TALISCO"
+      },
+      {
+        "title": "The Bay",
+        "artist": "Metronomy"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "French electronic music",
+      "mood": "late-night drive",
+      "era": "",
+      "discovery": "deep-cuts",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "70s funk and modern neo-soul, mix both evenly",
+    "count": 20,
+    "generationMs": 9281,
+    "songs": [
+      {
+        "title": "Give Up the Funk (Tear the Roof off the Sucker)",
+        "artist": "Parliament"
+      },
+      {
+        "title": "The Payback",
+        "artist": "James Brown"
+      },
+      {
+        "title": "Flash Light",
+        "artist": "Parliament"
+      },
+      {
+        "title": "Pick Up the Pieces",
+        "artist": "Average White Band"
+      },
+      {
+        "title": "Get Up Offa That Thing",
+        "artist": "James Brown"
+      },
+      {
+        "title": "Tell Me Something Good",
+        "artist": "Rufus"
+      },
+      {
+        "title": "Use Me",
+        "artist": "Bill Withers"
+      },
+      {
+        "title": "Superstition",
+        "artist": "Stevie Wonder"
+      },
+      {
+        "title": "Fire",
+        "artist": "Ohio Players"
+      },
+      {
+        "title": "Shining Star",
+        "artist": "Earth, Wind \u0026 Fire"
+      },
+      {
+        "title": "Tighten Up",
+        "artist": "The Bamboos"
+      },
+      {
+        "title": "Tadow",
+        "artist": "Masego, FKJ"
+      },
+      {
+        "title": "Come Down",
+        "artist": "Anderson .Paak"
+      },
+      {
+        "title": "Get You",
+        "artist": "Daniel Caesar"
+      },
+      {
+        "title": "Cranes in the Sky",
+        "artist": "Solange"
+      },
+      {
+        "title": "Redbone",
+        "artist": "Childish Gambino"
+      },
+      {
+        "title": "Damage",
+        "artist": "H.E.R."
+      },
+      {
+        "title": "Golden",
+        "artist": "Jill Scott"
+      },
+      {
+        "title": "The Bird",
+        "artist": "Anderson .Paak"
+      },
+      {
+        "title": "Lite Weight",
+        "artist": "Anderson .Paak"
+      },
+      {
+        "title": "Stay Flo",
+        "artist": "Solange"
+      },
+      {
+        "title": "Coffee",
+        "artist": "Miguel"
+      },
+      {
+        "title": "Them Changes",
+        "artist": "Thundercat"
+      },
+      {
+        "title": "On \u0026 On",
+        "artist": "Erykah Badu"
+      },
+      {
+        "title": "Dang!",
+        "artist": "Mac Miller, Anderson .Paak"
+      },
+      {
+        "title": "Lady",
+        "artist": "D\u0027Angelo"
+      },
+      {
+        "title": "Brown Sugar",
+        "artist": "D\u0027Angelo"
+      },
+      {
+        "title": "Come Over",
+        "artist": "The Internet"
+      },
+      {
+        "title": "Cranes in the Sky",
+        "artist": "Solange"
+      },
+      {
+        "title": "Couldn\u0027t Love You More",
+        "artist": "John Scofield, Marsha Ambrosius"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "70s funk and modern neo-soul, mixed evenly",
+      "mood": "",
+      "era": "1970s funk and modern neo-soul",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "upbeat indie for running, no sad ballads",
+    "count": 30,
+    "generationMs": 13221,
+    "songs": [
+      {
+        "title": "My Number",
+        "artist": "Foals"
+      },
+      {
+        "title": "Electric Feel",
+        "artist": "MGMT"
+      },
+      {
+        "title": "1901",
+        "artist": "Phoenix"
+      },
+      {
+        "title": "Lisztomania",
+        "artist": "Phoenix"
+      },
+      {
+        "title": "Tongue Tied",
+        "artist": "Grouplove"
+      },
+      {
+        "title": "Walking on a Dream",
+        "artist": "Empire of the Sun"
+      },
+      {
+        "title": "Mountain Sound",
+        "artist": "Of Monsters and Men"
+      },
+      {
+        "title": "A-Punk",
+        "artist": "Vampire Weekend"
+      },
+      {
+        "title": "Diane Young",
+        "artist": "Vampire Weekend"
+      },
+      {
+        "title": "The Underdog",
+        "artist": "Spoon"
+      },
+      {
+        "title": "The Heinrich Maneuver",
+        "artist": "Interpol"
+      },
+      {
+        "title": "Take a Walk",
+        "artist": "Passion Pit"
+      },
+      {
+        "title": "Sleepyhead",
+        "artist": "Passion Pit"
+      },
+      {
+        "title": "Pumped Up Kicks",
+        "artist": "Foster the People"
+      },
+      {
+        "title": "Houdini",
+        "artist": "Foster the People"
+      },
+      {
+        "title": "Best Friend",
+        "artist": "Foster the People"
+      },
+      {
+        "title": "Geronimo",
+        "artist": "Sheppard"
+      },
+      {
+        "title": "Shut Up and Dance",
+        "artist": "WALK THE MOON"
+      },
+      {
+        "title": "Anna Sun",
+        "artist": "WALK THE MOON"
+      },
+      {
+        "title": "What You Know",
+        "artist": "Two Door Cinema Club"
+      },
+      {
+        "title": "Undercover Martyn",
+        "artist": "Two Door Cinema Club"
+      },
+      {
+        "title": "I Can Talk",
+        "artist": "Two Door Cinema Club"
+      },
+      {
+        "title": "Cough Syrup",
+        "artist": "Young the Giant"
+      },
+      {
+        "title": "My Body",
+        "artist": "Young the Giant"
+      },
+      {
+        "title": "Sweet Disposition",
+        "artist": "The Temper Trap"
+      },
+      {
+        "title": "The Reeling",
+        "artist": "Passion Pit"
+      },
+      {
+        "title": "The Walker",
+        "artist": "Fitz and The Tantrums"
+      },
+      {
+        "title": "Helena Beat",
+        "artist": "Foster the People"
+      },
+      {
+        "title": "Keep Your Head Up",
+        "artist": "Ben Howard"
+      },
+      {
+        "title": "Anna Molly",
+        "artist": "Incubus"
+      },
+      {
+        "title": "What I Like About You",
+        "artist": "The Romantics"
+      },
+      {
+        "title": "All These Things That I\u0027ve Done",
+        "artist": "The Killers"
+      },
+      {
+        "title": "Mountain at My Gates",
+        "artist": "Foals"
+      },
+      {
+        "title": "No You Girls",
+        "artist": "Franz Ferdinand"
+      },
+      {
+        "title": "Take Me Out",
+        "artist": "Franz Ferdinand"
+      },
+      {
+        "title": "Chelsea Dagger",
+        "artist": "The Fratellis"
+      },
+      {
+        "title": "Banquet",
+        "artist": "Bloc Party"
+      },
+      {
+        "title": "Ready to Start",
+        "artist": "Arcade Fire"
+      },
+      {
+        "title": "Don\u0027t Swallow the Cap",
+        "artist": "The National"
+      },
+      {
+        "title": "Everywhere",
+        "artist": "Fleetwood Mac"
+      },
+      {
+        "title": "Let\u0027s Go Surfing",
+        "artist": "The Drums"
+      },
+      {
+        "title": "Young Blood",
+        "artist": "The Naked and Famous"
+      },
+      {
+        "title": "Dancing on My Own",
+        "artist": "Robyn"
+      },
+      {
+        "title": "Shine a Light",
+        "artist": "BANNERS"
+      },
+      {
+        "title": "Seventeen",
+        "artist": "Sharon Van Etten"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "upbeat indie",
+      "mood": "energetic, uplifting; no sad ballads",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "ambient for reading, no lyrics or sudden loud changes",
+    "count": 25,
+    "generationMs": 11712,
+    "songs": [
+      {
+        "title": "An Ending (Ascent)",
+        "artist": "Brian Eno"
+      },
+      {
+        "title": "1/1",
+        "artist": "Brian Eno"
+      },
+      {
+        "title": "By This River",
+        "artist": "Brian Eno"
+      },
+      {
+        "title": "La femme d\u0027argent",
+        "artist": "Air"
+      },
+      {
+        "title": "Near Light",
+        "artist": "\u00D3lafur Arnalds"
+      },
+      {
+        "title": "Saman",
+        "artist": "\u00D3lafur Arnalds"
+      },
+      {
+        "title": "Says",
+        "artist": "Nils Frahm"
+      },
+      {
+        "title": "Ambre",
+        "artist": "Nils Frahm"
+      },
+      {
+        "title": "We Move Lightly",
+        "artist": "Dustin O\u0027Halloran"
+      },
+      {
+        "title": "First Breath After Coma",
+        "artist": "Explosions in the Sky"
+      },
+      {
+        "title": "A Walk",
+        "artist": "Tycho"
+      },
+      {
+        "title": "Dayvan Cowboy",
+        "artist": "Boards of Canada"
+      },
+      {
+        "title": "Rhubarb",
+        "artist": "Aphex Twin"
+      },
+      {
+        "title": "Avril 14th",
+        "artist": "Aphex Twin"
+      },
+      {
+        "title": "Two Thousand and Seventeen",
+        "artist": "Four Tet"
+      },
+      {
+        "title": "Open Eye Signal",
+        "artist": "Jon Hopkins"
+      },
+      {
+        "title": "Abandon Window",
+        "artist": "Jon Hopkins"
+      },
+      {
+        "title": "Music for Airports - 1/2",
+        "artist": "Brian Eno"
+      },
+      {
+        "title": "Says",
+        "artist": "Nils Frahm"
+      },
+      {
+        "title": "Weightless",
+        "artist": "Marconi Union"
+      },
+      {
+        "title": "The Blue Notebooks",
+        "artist": "Max Richter"
+      },
+      {
+        "title": "Written on the Sky",
+        "artist": "Max Richter"
+      },
+      {
+        "title": "Aerial Boundaries",
+        "artist": "Michael Hedges"
+      },
+      {
+        "title": "The Mighty Rio Grande",
+        "artist": "This Will Destroy You"
+      },
+      {
+        "title": "The Tired Sounds of Stars of the Lid",
+        "artist": "Stars of the Lid"
+      },
+      {
+        "title": "Requiem for Dying Mothers, Pt. 2",
+        "artist": "Stars of the Lid"
+      },
+      {
+        "title": "Cirrus",
+        "artist": "Bonobo"
+      },
+      {
+        "title": "Dream 3 (in the midst of my life)",
+        "artist": "Max Richter"
+      },
+      {
+        "title": "Your Hand in Mine",
+        "artist": "Explosions in the Sky"
+      },
+      {
+        "title": "Kettering",
+        "artist": "The Antlers"
+      },
+      {
+        "title": "Tears in the Typing Pool",
+        "artist": "Broadcast"
+      },
+      {
+        "title": "The Pearl",
+        "artist": "Harold Budd"
+      },
+      {
+        "title": "First Snow",
+        "artist": "Emancipator"
+      },
+      {
+        "title": "Austere",
+        "artist": "The xx"
+      },
+      {
+        "title": "Lichen",
+        "artist": "Aphex Twin"
+      },
+      {
+        "title": "The Big Ship",
+        "artist": "Brian Eno"
+      },
+      {
+        "title": "Stillness",
+        "artist": "Hammock"
+      },
+      {
+        "title": "Quiet Friend",
+        "artist": "Nala Sinephro"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "ambient",
+      "mood": "calm, unobtrusive, suitable for reading; no lyrics or sudden loud changes",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "classic country with storytelling, no modern country pop",
+    "count": 20,
+    "generationMs": 10672,
+    "songs": [
+      {
+        "title": "El Paso",
+        "artist": "Marty Robbins"
+      },
+      {
+        "title": "The Ballad of Ira Hayes",
+        "artist": "Johnny Cash"
+      },
+      {
+        "title": "Harper Valley P.T.A.",
+        "artist": "Jeannie C. Riley"
+      },
+      {
+        "title": "Ode to Billie Joe",
+        "artist": "Bobbie Gentry"
+      },
+      {
+        "title": "The Carroll County Accident",
+        "artist": "Porter Wagoner"
+      },
+      {
+        "title": "The Night the Lights Went Out in Georgia",
+        "artist": "Vicki Lawrence"
+      },
+      {
+        "title": "The Baron",
+        "artist": "Johnny Cash"
+      },
+      {
+        "title": "A Boy Named Sue",
+        "artist": "Johnny Cash"
+      },
+      {
+        "title": "The Thunder Rolls",
+        "artist": "Garth Brooks"
+      },
+      {
+        "title": "Fancy",
+        "artist": "Reba McEntire"
+      },
+      {
+        "title": "The Grand Tour",
+        "artist": "George Jones"
+      },
+      {
+        "title": "He Stopped Loving Her Today",
+        "artist": "George Jones"
+      },
+      {
+        "title": "The Gambler",
+        "artist": "Kenny Rogers"
+      },
+      {
+        "title": "Coat of Many Colors",
+        "artist": "Dolly Parton"
+      },
+      {
+        "title": "The Chokin\u0027 Kind",
+        "artist": "Joe Simon"
+      },
+      {
+        "title": "The Streets of Baltimore",
+        "artist": "Bobby Bare"
+      },
+      {
+        "title": "The Night They Drove Old Dixie Down",
+        "artist": "Joan Baez"
+      },
+      {
+        "title": "Coward of the County",
+        "artist": "Kenny Rogers"
+      },
+      {
+        "title": "The Winner",
+        "artist": "Bobby Bare"
+      },
+      {
+        "title": "Pancho and Lefty",
+        "artist": "Townes Van Zandt"
+      },
+      {
+        "title": "Tecumseh Valley",
+        "artist": "Townes Van Zandt"
+      },
+      {
+        "title": "The Ballad of Lucy Jordan",
+        "artist": "Marianne Faithfull"
+      },
+      {
+        "title": "Long Black Veil",
+        "artist": "Lefty Frizzell"
+      },
+      {
+        "title": "The Banks of the Ohio",
+        "artist": "Billie Jo Spears"
+      },
+      {
+        "title": "D-I-V-O-R-C-E",
+        "artist": "Tammy Wynette"
+      },
+      {
+        "title": "Okie from Muskogee",
+        "artist": "Merle Haggard"
+      },
+      {
+        "title": "The Ballad of Davy Crockett",
+        "artist": "Tennessee Ernie Ford"
+      },
+      {
+        "title": "Teddy Bear",
+        "artist": "Red Sovine"
+      },
+      {
+        "title": "Wreck of the Old \u002797",
+        "artist": "Johnny Cash"
+      },
+      {
+        "title": "The Legend of John Henry\u0027s Hammer",
+        "artist": "Johnny Cash"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "classic country",
+      "mood": "storytelling",
+      "era": "classic",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "Spanish-language alternative rock, different artists",
+    "count": 20,
+    "generationMs": 9893,
+    "songs": [
+      {
+        "title": "La chispa adecuada",
+        "artist": "H\u00E9roes del Silencio"
+      },
+      {
+        "title": "Florecita rockera",
+        "artist": "Aterciopelados"
+      },
+      {
+        "title": "El duelo",
+        "artist": "La Ley"
+      },
+      {
+        "title": "Lucha de gigantes",
+        "artist": "Nacha Pop"
+      },
+      {
+        "title": "De m\u00FAsica ligera",
+        "artist": "Soda Stereo"
+      },
+      {
+        "title": "Bolero falaz",
+        "artist": "Aterciopelados"
+      },
+      {
+        "title": "Entre dos tierras",
+        "artist": "H\u00E9roes del Silencio"
+      },
+      {
+        "title": "Tren al sur",
+        "artist": "Los Prisioneros"
+      },
+      {
+        "title": "Afuera",
+        "artist": "Caifanes"
+      },
+      {
+        "title": "La c\u00E9lula que explota",
+        "artist": "Caifanes"
+      },
+      {
+        "title": "Viento",
+        "artist": "Caifanes"
+      },
+      {
+        "title": "En la ciudad de la furia",
+        "artist": "Soda Stereo"
+      },
+      {
+        "title": "Cuando pase el temblor",
+        "artist": "Soda Stereo"
+      },
+      {
+        "title": "El estuche",
+        "artist": "Aterciopelados"
+      },
+      {
+        "title": "El loco",
+        "artist": "Babas\u00F3nicos"
+      },
+      {
+        "title": "Irresponsables",
+        "artist": "Babas\u00F3nicos"
+      },
+      {
+        "title": "No me destruyas",
+        "artist": "Zo\u00E9"
+      },
+      {
+        "title": "V\u00EDa L\u00E1ctea",
+        "artist": "Zo\u00E9"
+      },
+      {
+        "title": "Espiral",
+        "artist": "Porter"
+      },
+      {
+        "title": "Eres",
+        "artist": "Caf\u00E9 Tacvba"
+      },
+      {
+        "title": "Las flores",
+        "artist": "Caf\u00E9 Tacvba"
+      },
+      {
+        "title": "Chilanga banda",
+        "artist": "Caf\u00E9 Tacvba"
+      },
+      {
+        "title": "D\u00EDa cero",
+        "artist": "La Ley"
+      },
+      {
+        "title": "El baile y el sal\u00F3n",
+        "artist": "Caf\u00E9 Tacvba"
+      },
+      {
+        "title": "T\u00E9 para tres",
+        "artist": "Soda Stereo"
+      },
+      {
+        "title": "Mariposa tecknicolor",
+        "artist": "Fito P\u00E1ez"
+      },
+      {
+        "title": "El revelde",
+        "artist": "La Renga"
+      },
+      {
+        "title": "Jijiji",
+        "artist": "Patricio Rey y sus Redonditos de Ricota"
+      },
+      {
+        "title": "A rodar mi vida",
+        "artist": "Fito P\u00E1ez"
+      },
+      {
+        "title": "La ingrata",
+        "artist": "Caf\u00E9 Tacvba"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "Spanish-language alternative rock",
+      "mood": "",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "jazz that is accessible but not elevator music",
+    "count": 15,
+    "generationMs": 6276,
+    "songs": [
+      {
+        "title": "Cantaloupe Island",
+        "artist": "Herbie Hancock"
+      },
+      {
+        "title": "Moanin\u0027",
+        "artist": "Art Blakey \u0026 The Jazz Messengers"
+      },
+      {
+        "title": "Song for My Father",
+        "artist": "Horace Silver"
+      },
+      {
+        "title": "So What",
+        "artist": "Miles Davis"
+      },
+      {
+        "title": "Take Five",
+        "artist": "The Dave Brubeck Quartet"
+      },
+      {
+        "title": "Mercy, Mercy, Mercy",
+        "artist": "Cannonball Adderley"
+      },
+      {
+        "title": "Watermelon Man",
+        "artist": "Herbie Hancock"
+      },
+      {
+        "title": "The Sidewinder",
+        "artist": "Lee Morgan"
+      },
+      {
+        "title": "Work Song",
+        "artist": "Nat Adderley"
+      },
+      {
+        "title": "Stolen Moments",
+        "artist": "Oliver Nelson"
+      },
+      {
+        "title": "Blue Rondo \u00E0 la Turk",
+        "artist": "The Dave Brubeck Quartet"
+      },
+      {
+        "title": "Chameleon",
+        "artist": "Herbie Hancock"
+      },
+      {
+        "title": "Red Clay",
+        "artist": "Freddie Hubbard"
+      },
+      {
+        "title": "Compared to What",
+        "artist": "Les McCann \u0026 Eddie Harris"
+      },
+      {
+        "title": "Spain",
+        "artist": "Chick Corea"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "jazz",
+      "mood": "engaging, approachable, not bland or background-like",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "give me 50 post-punk hidden gems from the 1980s",
+    "count": 50,
+    "generationMs": 21214,
+    "songs": [
+      {
+        "title": "The New Stone Age",
+        "artist": "The Fall"
+      },
+      {
+        "title": "Leave the Capitol",
+        "artist": "The Fall"
+      },
+      {
+        "title": "I Am Damo Suzuki",
+        "artist": "The Fall"
+      },
+      {
+        "title": "The Classical",
+        "artist": "The Fall"
+      },
+      {
+        "title": "The Light Pours Out of Me",
+        "artist": "Magazine"
+      },
+      {
+        "title": "Permafrost",
+        "artist": "Magazine"
+      },
+      {
+        "title": "A Song from Under the Floorboards",
+        "artist": "Magazine"
+      },
+      {
+        "title": "Thank You (Falettinme Be Mice Elf Agin)",
+        "artist": "Magazine"
+      },
+      {
+        "title": "The Light of the World",
+        "artist": "The Icicle Works"
+      },
+      {
+        "title": "Birds Fly (Whisper to a Scream)",
+        "artist": "The Icicle Works"
+      },
+      {
+        "title": "The Cutter",
+        "artist": "Echo \u0026 the Bunnymen"
+      },
+      {
+        "title": "The Back of Love",
+        "artist": "Echo \u0026 the Bunnymen"
+      },
+      {
+        "title": "Nocturnal Me",
+        "artist": "Echo \u0026 the Bunnymen"
+      },
+      {
+        "title": "The Killing Moon",
+        "artist": "Echo \u0026 the Bunnymen"
+      },
+      {
+        "title": "The Figurehead",
+        "artist": "The Cure"
+      },
+      {
+        "title": "The Hanging Garden",
+        "artist": "The Cure"
+      },
+      {
+        "title": "Siamese Twins",
+        "artist": "The Cure"
+      },
+      {
+        "title": "The Snakepit",
+        "artist": "The Cure"
+      },
+      {
+        "title": "Faith",
+        "artist": "The Cure"
+      },
+      {
+        "title": "The Eternal",
+        "artist": "Joy Division"
+      },
+      {
+        "title": "Decades",
+        "artist": "Joy Division"
+      },
+      {
+        "title": "Twenty Four Hours",
+        "artist": "Joy Division"
+      },
+      {
+        "title": "The Atrocity Exhibition",
+        "artist": "Joy Division"
+      },
+      {
+        "title": "The Him",
+        "artist": "New Order"
+      },
+      {
+        "title": "Ultraviolence",
+        "artist": "New Order"
+      },
+      {
+        "title": "Your Silent Face",
+        "artist": "New Order"
+      },
+      {
+        "title": "In a Lonely Place",
+        "artist": "New Order"
+      },
+      {
+        "title": "The Great Curve",
+        "artist": "Talking Heads"
+      },
+      {
+        "title": "The Overload",
+        "artist": "Talking Heads"
+      },
+      {
+        "title": "Drugs",
+        "artist": "Talking Heads"
+      },
+      {
+        "title": "The Empty Page",
+        "artist": "The Chameleons"
+      },
+      {
+        "title": "Second Skin",
+        "artist": "The Chameleons"
+      },
+      {
+        "title": "Swamp Thing",
+        "artist": "The Chameleons"
+      },
+      {
+        "title": "A Person Isn\u0027t Safe Anywhere These Days",
+        "artist": "The Chameleons"
+      },
+      {
+        "title": "The Fan and the Bellows",
+        "artist": "The Chameleons"
+      },
+      {
+        "title": "The Killing Jar",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "Night Shift",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "Dazzle",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "The Last Beat of My Heart",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "The Passenger",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "Dead Souls",
+        "artist": "Nine Inch Nails"
+      },
+      {
+        "title": "The Mercy Seat",
+        "artist": "Nick Cave \u0026 The Bad Seeds"
+      },
+      {
+        "title": "Tupelo",
+        "artist": "Nick Cave \u0026 The Bad Seeds"
+      },
+      {
+        "title": "From Her to Eternity",
+        "artist": "Nick Cave \u0026 The Bad Seeds"
+      },
+      {
+        "title": "The Weeping Song",
+        "artist": "Nick Cave \u0026 The Bad Seeds"
+      },
+      {
+        "title": "A Forest",
+        "artist": "The Cure"
+      },
+      {
+        "title": "Primary",
+        "artist": "The Cure"
+      },
+      {
+        "title": "Charlotte Sometimes",
+        "artist": "The Cure"
+      },
+      {
+        "title": "All We Ever Wanted Was Everything",
+        "artist": "Bauhaus"
+      },
+      {
+        "title": "Silent Hedges",
+        "artist": "Bauhaus"
+      },
+      {
+        "title": "The Passion of Lovers",
+        "artist": "Bauhaus"
+      },
+      {
+        "title": "Hollow Hills",
+        "artist": "Bauhaus"
+      },
+      {
+        "title": "She\u0027s in Parties",
+        "artist": "Bauhaus"
+      },
+      {
+        "title": "A Million Miles Away",
+        "artist": "The Plimsouls"
+      },
+      {
+        "title": "Marquee Moon",
+        "artist": "Television"
+      },
+      {
+        "title": "I Will Dare",
+        "artist": "The Replacements"
+      },
+      {
+        "title": "The Killing of a Flashboy",
+        "artist": "Suede"
+      },
+      {
+        "title": "Christine",
+        "artist": "The House of Love"
+      },
+      {
+        "title": "Shine On",
+        "artist": "The House of Love"
+      },
+      {
+        "title": "In the Flat Field",
+        "artist": "Bauhaus"
+      },
+      {
+        "title": "Hong Kong Garden",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "Arabian Knights",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "The Scream",
+        "artist": "Siouxsie and the Banshees"
+      },
+      {
+        "title": "I Travel",
+        "artist": "Simple Minds"
+      },
+      {
+        "title": "Changeling",
+        "artist": "Simple Minds"
+      },
+      {
+        "title": "The American",
+        "artist": "Simple Minds"
+      },
+      {
+        "title": "The Thin Wall",
+        "artist": "Ultravox"
+      },
+      {
+        "title": "Dancing with Tears in My Eyes",
+        "artist": "Ultravox"
+      },
+      {
+        "title": "The Great Commandment",
+        "artist": "Camouflage"
+      },
+      {
+        "title": "The Walk",
+        "artist": "The Cure"
+      },
+      {
+        "title": "The Hanging Garden",
+        "artist": "The Cure"
+      },
+      {
+        "title": "The Cutter",
+        "artist": "Echo \u0026 the Bunnymen"
+      },
+      {
+        "title": "A Strange Day",
+        "artist": "The Cure"
+      },
+      {
+        "title": "The Drowning Man",
+        "artist": "The Cure"
+      },
+      {
+        "title": "All Cats Are Grey",
+        "artist": "The Cure"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "post-punk",
+      "mood": "",
+      "era": "1980s",
+      "discovery": "deep-cuts",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs like Pearl Jam",
+    "count": 10,
+    "generationMs": 6406,
+    "songs": [
+      {
+        "title": "Nearly Lost You",
+        "artist": "Screaming Trees"
+      },
+      {
+        "title": "Plush",
+        "artist": "Stone Temple Pilots"
+      },
+      {
+        "title": "Drown",
+        "artist": "The Smashing Pumpkins"
+      },
+      {
+        "title": "Far Behind",
+        "artist": "Candlebox"
+      },
+      {
+        "title": "Violet",
+        "artist": "Hole"
+      },
+      {
+        "title": "Seether",
+        "artist": "Veruca Salt"
+      },
+      {
+        "title": "Blurry",
+        "artist": "Puddle of Mudd"
+      },
+      {
+        "title": "Shimmer",
+        "artist": "Fuel"
+      },
+      {
+        "title": "Outshined",
+        "artist": "Soundgarden"
+      },
+      {
+        "title": "Would?",
+        "artist": "Alice in Chains"
+      },
+      {
+        "title": "Cumbersome",
+        "artist": "Seven Mary Three"
+      },
+      {
+        "title": "Hey Man Nice Shot",
+        "artist": "Filter"
+      },
+      {
+        "title": "Machinehead",
+        "artist": "Bush"
+      },
+      {
+        "title": "Bound for the Floor",
+        "artist": "Local H"
+      },
+      {
+        "title": "Sober",
+        "artist": "Tool"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Pearl Jam"
+      ],
+      "excludedArtists": [],
+      "genre": "grunge, alternative rock",
+      "mood": "raw, melodic, anthemic",
+      "era": "1990s",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "songs like Breaking Benjamin",
+    "count": 10,
+    "generationMs": 5396,
+    "songs": [
+      {
+        "title": "Fine Again",
+        "artist": "Seether"
+      },
+      {
+        "title": "The Red",
+        "artist": "Chevelle"
+      },
+      {
+        "title": "Remedy",
+        "artist": "Seether"
+      },
+      {
+        "title": "So Cold",
+        "artist": "Breaking Benjamin"
+      },
+      {
+        "title": "Cold",
+        "artist": "Crossfade"
+      },
+      {
+        "title": "I Stand Alone",
+        "artist": "Godsmack"
+      },
+      {
+        "title": "The Diary of Jane",
+        "artist": "Breaking Benjamin"
+      },
+      {
+        "title": "Voices",
+        "artist": "Rev Theory"
+      },
+      {
+        "title": "Outside",
+        "artist": "Staind"
+      },
+      {
+        "title": "Face to the Floor",
+        "artist": "Chevelle"
+      },
+      {
+        "title": "Monster",
+        "artist": "Skillet"
+      },
+      {
+        "title": "Blow Me Away",
+        "artist": "Breaking Benjamin"
+      },
+      {
+        "title": "Fake It",
+        "artist": "Seether"
+      },
+      {
+        "title": "What I\u0027ve Done",
+        "artist": "Linkin Park"
+      },
+      {
+        "title": "Pain",
+        "artist": "Three Days Grace"
+      }
+    ],
+    "brief": {
+      "kind": "similarity",
+      "referenceArtists": [
+        "Breaking Benjamin"
+      ],
+      "excludedArtists": [],
+      "genre": "alternative metal, post-grunge, hard rock",
+      "mood": "dark, melodic, emotionally intense",
+      "era": "",
+      "discovery": "balanced",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  },
+  {
+    "stage": "structured",
+    "provider": "chatgpt",
+    "model": "gpt-6-luna",
+    "prompt": "classic rock hits, but not the most listened to. find me hidden gems",
+    "count": 10,
+    "generationMs": 5827,
+    "songs": [
+      {
+        "title": "The Rover",
+        "artist": "Led Zeppelin"
+      },
+      {
+        "title": "Bad Motor Scooter",
+        "artist": "Montrose"
+      },
+      {
+        "title": "Suffragette City",
+        "artist": "David Bowie"
+      },
+      {
+        "title": "Blue Sky",
+        "artist": "The Allman Brothers Band"
+      },
+      {
+        "title": "Stone Blue",
+        "artist": "Foghat"
+      },
+      {
+        "title": "Never Been Any Reason",
+        "artist": "Head East"
+      },
+      {
+        "title": "Rock and Roll, Hoochie Koo",
+        "artist": "Rick Derringer"
+      },
+      {
+        "title": "Radar Love",
+        "artist": "Golden Earring"
+      },
+      {
+        "title": "Long Cool Woman (In a Black Dress)",
+        "artist": "The Hollies"
+      },
+      {
+        "title": "Can\u0027t You Hear Me Knocking",
+        "artist": "The Rolling Stones"
+      },
+      {
+        "title": "Highway Song",
+        "artist": "Blackfoot"
+      },
+      {
+        "title": "Rock Candy",
+        "artist": "Montrose"
+      },
+      {
+        "title": "Bargain",
+        "artist": "The Who"
+      },
+      {
+        "title": "Into the Mystic",
+        "artist": "Van Morrison"
+      },
+      {
+        "title": "The Wanton Song",
+        "artist": "Led Zeppelin"
+      }
+    ],
+    "brief": {
+      "kind": "discovery",
+      "referenceArtists": [],
+      "excludedArtists": [],
+      "genre": "classic rock",
+      "mood": "energetic",
+      "era": "classic rock era",
+      "discovery": "deep-cuts",
+      "referenceCount": -1,
+      "excludedVersions": []
+    },
+    "error": null
+  }
+]

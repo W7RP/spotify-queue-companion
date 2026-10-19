@@ -10,6 +10,7 @@ It is a library and build input, not another server or a new app window.
 | `prompts/mobile.txt` | Mobile Claude's title/artist response contract and Spotify-data boundary |
 | `curation.ts` | Request interpretation, artist caps, ordering and fast-model selection |
 | `policy.json` | Policy version, artist-share defaults, model families and supported effort settings |
+| `brief.schema.json`, `prompts/brief.txt` | Bounded musical interpretation returned alongside song proposals, including explicit artist allocations and exclusions |
 
 Normal changes are made here once. The application adapters keep their own OAuth,
 API keys, HTTP/SSE handling, Spotify retrieval and playback. Desktop ChatGPT and
@@ -53,6 +54,26 @@ node scripts/sync-selection-core.mjs --check
 and the helper, regeneration is repeatable, and stale/manual edits are detected.
 Existing curation, pipeline and provider tests verify the resulting behavior.
 The music benchmark in `evals/` remains shared.
+
+## Structured interpretation and bounded refill
+
+Policy 1.1.0 asks for a compact musical brief and songs in the same inference.
+Hosts validate that named artists came from the user's request, preserve explicit
+allocations, and use the brief for familiar-artist limits, ordering and exclusions.
+Known supported provider models receive a native JSON schema; all responses are
+validated before selection. Genre, mood and era guide the model; they are not
+independently verified audio attributes. Version filtering uses title labels.
+
+Normal requests still use one inference with reserves. Unrestricted discovery may
+make one targeted refill if the resolved selection remains short and selection
+has taken less than 60 seconds. The original target and brief stay pinned. Refill
+input contains the user's request and earlier model proposals, without forwarding
+Spotify results. The provider call is limited to 20 seconds (the PC mailbox expires
+after 25 seconds). Accepted tracks stay in the pool; there is no third attempt or
+silent relaxation of constraints. Restricted library requests and playlist blends
+do not use this refill. Invalid, cancelled or failed responses cannot commit a queue.
+
+See `docs/STRUCTURED-SELECTION-VERIFICATION.md` for measured results and limits.
 
 ## Source updates and installed-app updates
 

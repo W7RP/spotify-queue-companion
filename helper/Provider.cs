@@ -39,6 +39,10 @@ public sealed class ChatGptProvider(OAuth auth, HttpClient http) : IProvider
         // their existing API contract without an unsupported parameter.
         var lowEffortModels = SelectionPolicy.ChatGptLowEffortFamilies;
         if (lowEffortModels.Any(name => model == name || model.StartsWith(name + "-", StringComparison.Ordinal))) body["reasoning"] = new { effort = SelectionPolicy.Effort };
+        if (request.Structured && lowEffortModels.Any(name => model == name || model.StartsWith(name + "-", StringComparison.Ordinal))) {
+            using var schema = JsonDocument.Parse(SelectionPolicy.ResponseSchemaJson);
+            body["text"] = new { format = new { type = "json_schema", name = "queue_selection", strict = true, schema = schema.RootElement.Clone() } };
+        }
         using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/responses");
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await auth.Access(ct));
         req.Content = new StringContent(JsonSerializer.Serialize(body, Storage.Json), Encoding.UTF8, "application/json");

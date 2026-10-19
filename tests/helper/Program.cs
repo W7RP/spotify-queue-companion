@@ -80,6 +80,17 @@ try
     await Test("terminal provider failure rejects partial output", () => Reject(() => Select("data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"usage_limit\"}}}\n\n"), "usage_limit"));
     await Test("fabricated IDs are rejected", () => Reject(() => Select(Stream("{\"ids\":[\"unknown\"]}")), "invalid candidate"));
     await Test("restricted library cannot accept catalogue suggestions", () => Reject(() => Select(Stream("{\"ids\":[],\"suggestions\":[{\"title\":\"Other song\",\"artist\":\"Other\"}]}")), "requested library"));
+    await Test("structured ChatGPT response uses a schema and returns its brief in one call", async () => {
+        Credentials();var calls=0;var brief=new MusicBrief("discovery",[],[],"rock","","","balanced",-1,[]);
+        using var client=new HttpClient(new FakeHandler(async request=>{
+            if(request.Method==HttpMethod.Get)return new(HttpStatusCode.OK){Content=new StringContent("{\"models\":[{\"slug\":\"gpt-6-luna\",\"display_name\":\"Luna\",\"visibility\":\"list\"}]}")};
+            calls++;using var body=JsonDocument.Parse(await request.Content!.ReadAsStringAsync());
+            var format=body.RootElement.GetProperty("text").GetProperty("format");Assert(format.GetProperty("type").GetString()=="json_schema"&&format.GetProperty("strict").GetBoolean(),"Missing structured format.");
+            return new(HttpStatusCode.OK){Content=new StringContent(Stream(JsonSerializer.Serialize(new{ids=Array.Empty<string>(),suggestions=new[]{new SongSuggestion("Song","Artist")},brief},Storage.Json)))};
+        }));
+        var answer=await new ChatGptProvider(new OAuth(store,client),client).Select(new Generation("mellow rock",1,[],false,Structured:true),null,default);
+        Assert(calls==1&&answer.Brief?.Genre=="rock","Brief lost or extra call made.");
+    });
     await Test("quota errors remain explicit", () => Reject(() => Select("", true, HttpStatusCode.TooManyRequests), "usage limit"));
     await Test("identity-only scope cannot perform inference", async () => { Credentials(); var c = store.ReadSecret<Registration>("credentials.dat")!; store.WriteSecret("credentials.dat", c with { Scopes = ["openid"] }); using var client = new HttpClient(new FakeHandler(_ => throw new Exception("Network must not be reached."))); await Reject(() => new OAuth(store, client).Access(default), "not authorized"); });
     await Test("concurrent access rotates the refresh token once", async () => { Credentials(); var c=store.ReadSecret<Registration>("credentials.dat")!;store.WriteSecret("credentials.dat",c with{Expires=DateTimeOffset.UtcNow.AddMinutes(-1)});var calls=0;using var client=new HttpClient(new FakeHandler(async request=>{calls++;await Task.Delay(25);var form=await request.Content!.ReadAsStringAsync();Assert(form.Contains("client_id=test-registration")&&!form.Contains("dynamic_agent_client"),"Refresh used wrong registration.");return new(HttpStatusCode.OK){Content=new StringContent("{\"access_token\":\"FAKE_ROTATED_ACCESS\",\"refresh_token\":\"FAKE_ROTATED_REFRESH\",\"expires_in\":3600}")};}));var auth=new OAuth(store,client);var values=await Task.WhenAll(auth.Access(default),auth.Access(default));Assert(calls==1&&values.All(x=>x=="FAKE_ROTATED_ACCESS"),"Refresh was not serialized.");Assert(store.ReadSecret<Registration>("credentials.dat")!.RefreshToken=="FAKE_ROTATED_REFRESH","Rotation not saved."); });
