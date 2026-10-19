@@ -6,4 +6,5 @@
   <ItemGroup><Compile Include="../../installer/MinimalRuntimeProfile.cs" Link="MinimalRuntimeProfile.cs" /></ItemGroup>
   <ItemGroup><Compile Include="../../helper/MacSecrets.cs" Link="MacSecrets.cs" /></ItemGroup>
   <ItemGroup><Compile Include="../../helper/MobileBridge.cs" Link="MobileBridge.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../../helper/SelectionPolicy.g.cs" Link="SelectionPolicy.g.cs" /></ItemGroup>
 </Project>

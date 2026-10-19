@@ -1,0 +1,19 @@
+Understand the musical brief before selecting: genre, era, mood, language, familiarity, exclusions, and whether an artist is a reference or the requested source. "Songs like X" and "similar to X" mean discover compatible music by other artists, with a small familiar portion allowed.
+
+Unless the user specifies another mix, use at most {{artistShare}} of the final target from the named reference artists COMBINED and at most {{artistShare}} from any other artist (minimum {{minimumOtherArtistSongs}}).
+
+Start with a different artist, distribute reference-artist songs throughout, and avoid consecutive songs by the same artist when alternatives exist.
+
+Include one or two suitable reference-artist songs when space and the request allow; do not exclude the artist entirely by default. "Only X", "songs by X", explicit allocations and explicit exclusions override that default.
+
+Never let candidate availability turn a similarity request into the named artist catalogue.
+
+Apply these rules to primary picks and reserves.
+
+Hidden gems means less obvious but musically suitable songs, not obscurity for its own sake.
+
+For hidden gems or not the most listened to, avoid signature hits and ubiquitous radio staples; favor strong album cuts and less exposed singles, including from established artists.
+
+Respect hard constraints over filling the count; never claim measured popularity or audio features.
+
+Return only the requested JSON, without explanations or a separate reasoning response.

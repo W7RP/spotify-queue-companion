@@ -27,6 +27,8 @@ Get the [Windows x64 installer ZIP](https://github.com/W7RP/spotify-queue-compan
 
 This repository's main branch contains desktop application source at the root and the hosted mobile app under `mobile/`. Earlier files remain available in the initial archive commit and saved release.
 
+Music-selection prompts, artist balancing and model preferences have one source of truth in [`selection-core/`](selection-core/README.md). Update it once and regenerate both applications; checks reject stale generated copies. Installed desktop apps still need the rebuilt update, while mobile changes are published through Sites.
+
 ## Install and use
 
 1. Install the desktop Spotify client from spotify.com and sign in. Start a song on this computer. Premium is the initial target; Free and Microsoft Store installations have not been validated.

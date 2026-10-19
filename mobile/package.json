@@ -14,7 +14,9 @@
     "db:generate": "drizzle-kit generate",
     "test": "node --test tests/core.test.mjs tests/lease.test.mjs tests/spotify-signin.test.mjs tests/http-runtime.test.mjs tests/review.test.mjs tests/pc.test.mjs tests/playback.test.mjs tests/commit-runtime.test.mjs tests/selection-runtime.test.mjs tests/curation.test.mjs",
     "test:ui": "playwright test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prebuild": "node scripts/check-selection-core.mjs",
+    "pretest": "node scripts/check-selection-core.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

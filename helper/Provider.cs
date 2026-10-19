@@ -29,7 +29,7 @@ public sealed class ChatGptProvider(OAuth auth, HttpClient http) : IProvider
     {
         SelectionRules.ValidateRequest(request);
         if (models == null || modelAccount != auth.Current?.ClientId) await Models(ct);
-        var model = SelectionRules.PreferredModel(models!, selected, "luna");
+        var model = SelectionRules.PreferredModel(models!, selected, SelectionPolicy.ChatGptFamily);
         if (!models!.Any(x => x.Slug == model)) throw new InvalidOperationException("Selected model is unavailable. Choose another in settings.");
         var instructions = SelectionRules.InstructionsFor(request);
         var compact = SelectionRules.Compact(request);
@@ -37,8 +37,8 @@ public sealed class ChatGptProvider(OAuth auth, HttpClient http) : IProvider
         // Music selection needs modest reasoning. Only apply the documented
         // option to known GPT-6 families; other manually selected models keep
         // their existing API contract without an unsupported parameter.
-        var lowEffortModels = new[] { "gpt-6-luna", "gpt-6-sol", "gpt-6-astra", "gpt-6.1-sol" };
-        if (lowEffortModels.Any(name => model == name || model.StartsWith(name + "-", StringComparison.Ordinal))) body["reasoning"] = new { effort = "low" };
+        var lowEffortModels = SelectionPolicy.ChatGptLowEffortFamilies;
+        if (lowEffortModels.Any(name => model == name || model.StartsWith(name + "-", StringComparison.Ordinal))) body["reasoning"] = new { effort = SelectionPolicy.Effort };
         using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/responses");
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await auth.Access(ct));
         req.Content = new StringContent(JsonSerializer.Serialize(body, Storage.Json), Encoding.UTF8, "application/json");

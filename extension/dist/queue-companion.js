@@ -563,6 +563,36 @@
   }
 
   // src/curation.ts
+  var selectionPolicy = {
+    "schemaVersion": 1,
+    "version": "1.0.0",
+    "defaults": {
+      "artistShareDivisor": 5,
+      "minimumOtherArtistSongs": 2
+    },
+    "models": {
+      "effort": "low",
+      "chatgpt": {
+        "preferredFamily": "luna",
+        "fallbackFamilies": [],
+        "lowEffortFamilies": [
+          "gpt-6-luna",
+          "gpt-6-sol",
+          "gpt-6-astra",
+          "gpt-6.1-sol"
+        ]
+      },
+      "claude": {
+        "preferredFamily": "haiku",
+        "fallbackFamilies": [
+          "sonnet"
+        ],
+        "lowEffortModels": [
+          "claude-haiku-5-5"
+        ]
+      }
+    }
+  };
   var words = (text) => text.normalize("NFKD").replace(new RegExp("\\p{M}", "gu"), "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
   var artistKey = (track) => words(track.artistNames?.[0] ?? track.artist);
   function selectionBrief(prompt, count) {
@@ -577,8 +607,8 @@
       balance: similarity && !allocation,
       referenceText,
       count,
-      referenceLimit: Math.min(count - 1, Math.max(1, Math.floor(count / 5))),
-      artistLimit: Math.max(2, Math.ceil(count / 5))
+      referenceLimit: Math.min(count - 1, Math.max(1, Math.floor(count / selectionPolicy.defaults.artistShareDivisor))),
+      artistLimit: Math.max(selectionPolicy.defaults.minimumOtherArtistSongs, Math.ceil(count / selectionPolicy.defaults.artistShareDivisor))
     };
   }
   function isReferenceArtist(track, brief) {

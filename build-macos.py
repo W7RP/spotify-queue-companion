@@ -30,6 +30,7 @@ def sign(path):
 def build():
     if sys.platform != "darwin":
         raise SystemExit("Run this build on macOS; Windows build.ps1 produces the Windows installer.")
+    run("node", "scripts/sync-selection-core.mjs", "--check")
     arch = "arm64" if platform.machine() == "arm64" else "x64"
     rid = "osx-" + arch
     output = ROOT / "release" / ("macos-" + arch)

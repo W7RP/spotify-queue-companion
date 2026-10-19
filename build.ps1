@@ -2,6 +2,8 @@ param([switch]$SkipTests)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 function Check-Exit { if ($LASTEXITCODE -ne 0) { throw "Build command failed ($LASTEXITCODE)." } }
+node scripts/sync-selection-core.mjs
+Check-Exit
 Push-Location extension
 try {
     npm ci

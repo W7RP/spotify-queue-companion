@@ -16,6 +16,8 @@ Spotify’s public API cannot delete individual manually queued tracks. Those ma
 
 ## Music selection
 
+Shared selection policy and curation code are maintained in `selection-core/` in the main repository. This standalone Site contains a generated export with its policy version and fingerprint in `selection-core.lock.json`; tests and builds verify its integrity. Edit the shared source and run `scripts/sync-selection-core.mjs --mobile-checkout=<this-checkout>` from the main repository to update both products. Publishing this Site does not update another person's installed desktop app.
+
 Free-text requests use one fast ChatGPT or Claude request with reserve suggestions, followed by Spotify catalogue matching. Automatic mode chooses an offered Luna or Haiku model; an explicit model choice is preserved. Unavailable tracks, unmatched suggestions, recording duplicates and songs already in the visible queue can reduce the count. The app reports the number actually sent.
 
 Artist-similarity requests default to a small familiar portion (up to about 20% from reference artists combined), start with another artist, and spread familiar songs through the selection. Explicit artist-only requests and custom allocations take precedence. Reserves can replace choices rejected for artist concentration. Clearly labeled remaster editions can match the same recording, while covers, live versions and remixes remain distinct.

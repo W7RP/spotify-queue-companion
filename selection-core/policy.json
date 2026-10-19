@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "defaults": {
+    "artistShareDivisor": 5,
+    "minimumOtherArtistSongs": 2
+  },
+  "models": {
+    "effort": "low",
+    "chatgpt": {
+      "preferredFamily": "luna",
+      "fallbackFamilies": [],
+      "lowEffortFamilies": [
+        "gpt-6-luna",
+        "gpt-6-sol",
+        "gpt-6-astra",
+        "gpt-6.1-sol"
+      ]
+    },
+    "claude": {
+      "preferredFamily": "haiku",
+      "fallbackFamilies": [
+        "sonnet"
+      ],
+      "lowEffortModels": [
+        "claude-haiku-5-5"
+      ]
+    }
+  }
+}
