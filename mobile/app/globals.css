@@ -5,3 +5,4 @@
 .playback-mode{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 18px;color:#b3b3b3;font-size:12px}.playback-mode select{background:#282828;color:#fff;border:1px solid #555;border-radius:4px;padding:9px 12px;max-width:65%}.setting-row input[type=checkbox]{accent-color:#1ed760;width:20px;height:20px}
 
 .device-recovery{border-left:2px solid #1ed760;padding:4px 0 4px 15px;margin:15px 0 22px}.device-recovery p{font-size:13px;line-height:1.7;color:#b3b3b3;margin-bottom:12px}.device-recovery .secondary-button{display:inline-flex}
+.sign-in-prompt{background:var(--panel);border-radius:9px;padding:20px;margin-bottom:25px}.sign-in-prompt p{font-size:13px;line-height:1.65;color:var(--muted);margin:10px 0 17px}.sign-in-prompt .primary-button{max-width:100%}
