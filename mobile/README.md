@@ -100,3 +100,11 @@ The app refreshes device IDs immediately before sending, combines available-devi
 If Spotify refuses activation, the generated list remains saved for ten minutes. Choose **Open first song in Spotify**, tap Play in Spotify, then return and send the saved selection. This uses the first generated song instead of a throwaway track. Returning or reloading restores the same visitor-owned selection using an opaque session identifier and numeric kept-song indexes (review removals survive the handoff); it makes no new AI request and does not automatically send or replay music. Expired selections remain unavailable.
 
 Spotify documents that iOS App Remote needs an app switch to resume a disconnected paused client, and its native SDK uses a play URI to wake Spotify: [application lifecycle](https://developer.spotify.com/documentation/ios/concepts/application-lifecycle), [initial music configuration](https://developer.spotify.com/documentation/ios/getting-started). A web app cannot guarantee waking a suspended native Spotify client. No background keep-alive loop or native SDK capability is claimed here.
+
+## App icon
+
+The green queue mascot is the app brand, browser icon and iOS Home Screen icon. The master artwork is `public/queue-companion-artwork.png`; run `node scripts/icons.mjs` to regenerate opaque PNG exports, the padded maskable icon, and browser favicons. Metadata and the manifest use versioned icon URLs; the service worker clears only obsolete icon caches and never caches accounts or API requests.
+
+Artwork was made with the built-in image-generation tool from the user's sketch: a polished white queue capsule and two bars, circular eyes, a smile, curved arms and legs on charcoal. The final edit prompt changed only the red details to Spotify-style green while preserving the character, geometry and framing.
+
+Existing iPhone Home Screen installations may retain their old icon. Open the updated site in Safari and add it to the Home Screen again if necessary.
