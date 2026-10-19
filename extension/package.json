@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc --noEmit && esbuild src/index.ts --bundle --format=iife --target=chrome120 --outfile=dist/queue-companion.js",
     "test": "tsx --test ../tests/*.test.ts",
-    "test:ui": "node ../tests/ui/queue-panel.cjs"
+    "test:ui": "node ../tests/ui/queue-panel.cjs",
+    "eval:selection": "tsx ../scripts/evaluate-selection.ts"
   },
   "devDependencies": {
     "@types/node": "22.18.10",

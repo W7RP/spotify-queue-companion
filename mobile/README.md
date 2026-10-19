@@ -16,7 +16,9 @@ Spotify’s public API cannot delete individual manually queued tracks. Those ma
 
 ## Music selection
 
-Free-text requests use one Claude request with reserve suggestions, followed by exact Spotify catalogue matching. Unavailable tracks, unmatched suggestions, recording duplicates and songs already in the visible queue can reduce the count. The app reports the number actually sent.
+Free-text requests use one fast ChatGPT or Claude request with reserve suggestions, followed by Spotify catalogue matching. Automatic mode chooses an offered Luna or Haiku model; an explicit model choice is preserved. Unavailable tracks, unmatched suggestions, recording duplicates and songs already in the visible queue can reduce the count. The app reports the number actually sent.
+
+Artist-similarity requests default to a small familiar portion (up to about 20% from reference artists combined), start with another artist, and spread familiar songs through the selection. Explicit artist-only requests and custom allocations take precedence. Reserves can replace choices rejected for artist concentration. Clearly labeled remaster editions can match the same recording, while covers, live versions and remixes remain distinct.
 
 Spotify API data is never sent to Claude. Only the text you type and the requested count enter the model request. Playlist/recent-play discovery instead uses Spotify artist genres locally on the server. Reference recordings are excluded, and an explicit request to include a few playlist originals mixes those in. This preview searches a bounded pool and can return fewer tracks; it does not reproduce every desktop discovery feature.
 

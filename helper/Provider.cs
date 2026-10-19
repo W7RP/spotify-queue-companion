@@ -29,7 +29,7 @@ public sealed class ChatGptProvider(OAuth auth, HttpClient http) : IProvider
     {
         SelectionRules.ValidateRequest(request);
         if (models == null || modelAccount != auth.Current?.ClientId) await Models(ct);
-        var model = selected ?? models!.FirstOrDefault(x => x.Slug.Contains("luna", StringComparison.OrdinalIgnoreCase))?.Slug ?? models!.FirstOrDefault()?.Slug ?? throw new InvalidOperationException("No models available to this ChatGPT account.");
+        var model = SelectionRules.PreferredModel(models!, selected, "luna");
         if (!models!.Any(x => x.Slug == model)) throw new InvalidOperationException("Selected model is unavailable. Choose another in settings.");
         var instructions = SelectionRules.InstructionsFor(request);
         var compact = SelectionRules.Compact(request);

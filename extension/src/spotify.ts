@@ -65,7 +65,8 @@ export class Spotify implements QueueAdapter {
     const found=await this.search(title+' '+artist,5);const clean=(s:string)=>s.normalize('NFKD').toLowerCase().replace(/\p{M}/gu,'').replace(/[^\p{L}\p{N}]/gu,'');
     const sameArtist=(t:Track)=>clean(t.artist)===clean(artist)||(t.artistNames??t.artist.split(', ')).some(name=>clean(name)===clean(artist));
     // Multiple album editions of the same exact title/artist are resolved by Spotify's catalogue ranking.
-    return found.find(t=>clean(t.title)===clean(title)&&sameArtist(t))??null;
+    const recording=(value:string)=>value.replace(/\s*[-–—(\[]\s*(?:(?:19|20)\d{2}\s*)?(?:remaster(?:ed)?(?:\s*(?:19|20)\d{2})?|mono|stereo)(?:\s*version)?[)\]]?\s*$/i,'');
+    return found.find(t=>clean(t.title)===clean(title)&&sameArtist(t))??found.find(t=>clean(recording(t.title))===clean(recording(title))&&sameArtist(t))??null;
   }
   async liked(limit=200):Promise<Track[]> {return this.pageTracks('liked',o=>Spicetify.Platform.LibraryAPI.getTracks(o),limit,'liked');}
   async playlist(uri:string,limit=200):Promise<Track[]> {return this.pageTracks('playlist:'+uri,o=>Spicetify.Platform.PlaylistAPI.getContents(uri,o),limit,uri);}

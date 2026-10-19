@@ -2,8 +2,11 @@ export class AppError extends Error {
   constructor(message, status = 400, code = 'request_failed', retryAfter = 0) { super(message); this.status = status; this.code = code; this.retryAfter = retryAfter; }
 }
 export function normalize(value) { return String(value ?? '').normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase().replace(/[^\p{L}\p{N}]/gu, ''); }
+export function recordingTitle(value) {
+  return String(value).replace(/\s*[-–—(\[]\s*(?:(?:19|20)\d{2}\s*)?(?:remaster(?:ed)?(?:\s*(?:19|20)\d{2})?|mono|stereo)(?:\s*version)?[)\]]?\s*$/i, '');
+}
 export function songIdentity(track) {
-  const title = String(track.title).replace(/\s*[-–—(\[]\s*(?:(?:19|20)\d{2}\s*)?(?:remaster(?:ed)?(?:\s*(?:19|20)\d{2})?|mono|stereo)(?:\s*version)?[)\]]?\s*$/i, '');
+  const title = recordingTitle(track.title);
   return (track.artistNames?.length ? track.artistNames : [track.artist]).map(artist => normalize(title) + '|' + normalize(artist));
 }
 export function uniqueTracks(tracks, excluded = []) {
@@ -32,7 +35,7 @@ export function parseSuggestions(text, limit) {
   }).slice(0, limit).map(song => ({ title: song.title.trim(), artist: song.artist.trim() }));
 }
 export function exactMatch(track, suggestion) {
-  return normalize(track.title) === normalize(suggestion.title) && (track.artistNames ?? [track.artist]).some(a => normalize(a) === normalize(suggestion.artist));
+  return normalize(recordingTitle(track.title)) === normalize(recordingTitle(suggestion.title)) && (track.artistNames ?? [track.artist]).some(a => normalize(a) === normalize(suggestion.artist));
 }
 export function guardOrigin(request, expected) {
   if (request.headers.get('origin') !== expected) throw new AppError('This request must come from Queue Companion.', 403, 'origin');

@@ -19,6 +19,22 @@ const discoveryPrompt='classic rock hits, but not the most listened to. find me 
 const fifty={...preferences,length:50};
 const suggestions=(count:number)=>Array.from({length:count},(_,i)=>({title:String(i+1),artist:'Artist'}));
 
+test('artist similarity consumes reserves after an overrepresented candidate block, starts elsewhere and retains a familiar minority',async()=>{
+  const band=Array.from({length:8},(_,i)=>({...t(i+100,'catalogue'),artist:'Pearl Jam'}));
+  const related=Array.from({length:12},(_,i)=>({title:`Related ${i}`,artist:`Artist ${Math.floor(i/2)}`}));
+  const f=fixture({search:async()=>band,generate:async data=>({ids:data.candidates.map((t:Track)=>t.id),suggestions:related.slice(0,15-data.candidates.length),generationMs:1}),resolve:async(title,artist)=>({...t(200+Number(title.split(' ')[1]),'catalogue'),title,artist})});
+  const result=await f.pipeline.run('songs like Pearl Jam',{...preferences,length:10});
+  assert.equal(result.count,9); // Seven reserves plus two familiar songs; no padding.
+  assert.notEqual(f.writes[0][0].artist,'Pearl Jam');
+  assert.equal(f.writes[0].filter(t=>t.artist==='Pearl Jam').length,2);
+  assert.equal(f.requests.length,1);assert.equal(f.writes.length,1);
+});
+test('a single-song similarity request skips a reference candidate and resolves a discovery reserve',async()=>{
+  const f=fixture({search:async()=>[{...t(100,'catalogue'),artist:'Pearl Jam'}],generate:async data=>({ids:[data.candidates[0].id],suggestions:[{title:'Related',artist:'Other'}],generationMs:1}),resolve:async()=>({...t(101,'catalogue'),title:'Related',artist:'Other'})});
+  const result=await f.pipeline.run('songs like Pearl Jam',preferences);
+  assert.equal(result.count,1);assert.equal(f.writes[0][0].artist,'Other');
+});
+
 test('50-song discovery fills seven failed matches from reserves in one inference and one write',async()=>{
   let searched=0,resolved=0;
   const f=fixture({search:async(_term,limit)=>{searched=limit;return Array.from({length:100},(_,i)=>t(i+1,'catalogue'));},generate:async()=>({ids:[],suggestions:suggestions(75),generationMs:1}),resolve:async title=>{resolved++;const n=Number(title);return n<=7?null:t(n+100,'catalogue');}});

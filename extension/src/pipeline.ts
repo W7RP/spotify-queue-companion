@@ -2,6 +2,7 @@ import {balancedMix,parseIntent,playlistMatches,validateSelection,type Playlist,
 import {Spotify} from './spotify';import {Helper} from './ipc';import {QueueWriter} from './queue';
 import {shortfallReason,type SelectionDiagnostics} from './selection';
 import {primaryArtist,songKey,songKeys,spread,tasteSeeds,uniqueMusic} from './music';
+import {selectionBrief,curateArtists,isReferenceArtist} from './curation';
 export interface Preferences {length:number;cap:number;mode:Mode;model?:string;history:boolean;provider?:'claude'|'chatgpt';claudeModel?:string}
 export class Pipeline {
   private generation?:AbortController;private mutation=false;private previous:Track[]=[];private previousReferences:Track[]=[];private previousAccount='';private previousSources:{liked:boolean;playlists:string[]}={liked:false,playlists:[]};
@@ -129,6 +130,9 @@ export class Pipeline {
         // Validate all model IDs, including unused reserves, before taking the queue target.
         if(proposed.length)validateSelection(proposed,sourceSet,intent.count+reserve,true);
         const acceptedUris=new Set<string>(),acceptedSongs=new Set<string>();
+        const brief=selectionBrief(intent.prompt,intent.count);
+        const balanceNamedArtist=!sourceSet&&!seeds.length&&!intent.playlistCount&&brief.balance;
+        const artistCounts=new Map<string,number>();let referenceCount=0;
         const accept=(t:Track|null,fromId=false)=>{
           if(!t){selection.unmatched++;return;}
           const keys=songKeys(t);
@@ -139,7 +143,10 @@ export class Pipeline {
           }
           if(!intent.repeat&&(acceptedUris.has(t.uri)||keys.some(key=>acceptedSongs.has(key)))){selection.duplicates++;return;}
           if(!intent.repeat&&(original?hardExcluded(t):excluded(t))){selection.previous++;return;}
-          if(tracks.length<intent.count){tracks.push(t);if(original)originalSelected++;acceptedUris.add(t.uri);for(const key of keys)acceptedSongs.add(key);}
+          const artist=primaryArtist(t).normalize('NFKD').toLocaleLowerCase().replace(/\p{M}/gu,'');
+          const reference=isReferenceArtist(t,brief);
+          if(balanceNamedArtist&&(reference?referenceCount>=brief.referenceLimit:(artistCounts.get(artist)??0)>=brief.artistLimit)){selection.diversity=(selection.diversity??0)+1;return;}
+          if(tracks.length<intent.count){tracks.push(t);if(original)originalSelected++;acceptedUris.add(t.uri);for(const key of keys)acceptedSongs.add(key);artistCounts.set(artist,(artistCounts.get(artist)??0)+1);if(reference)referenceCount++;}
         };
         for(const t of proposed){if(tracks.length===intent.count)break;accept(t,true);}
         const suggestedKeys=new Set<string>();const pending:any[]=[];
@@ -152,6 +159,7 @@ export class Pipeline {
         resolutionMs=Math.round(performance.now()-resolvingAt);
       }
     }
+    if(!sourceSet&&!seeds.length&&!intent.playlistCount&&!intent.history)tracks=curateArtists(tracks,selectionBrief(intent.prompt,intent.count));
     if(seeds.length&&!sourceSet){
       const artists=new Map<string,Track[]>();for(const track of tracks){const artist=primaryArtist(track);const group=artists.get(artist)??[];group.push(track);artists.set(artist,group);}
       tracks=balancedMix([...artists.values()],intent.count,intent.repeat);

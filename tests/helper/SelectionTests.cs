@@ -23,6 +23,13 @@ static class SelectionTests
             var selection = SelectionRules.Parse("{\"ids\":[\"c0\"],\"suggestions\":[{\"title\":\"Reserve\",\"artist\":\"Artist\"}]}", request, 1);
             Assert(selection.Ids.Length + (selection.Suggestions?.Length ?? 0) == 2, "Reserve rejected.");
         });
+        Test("automatic routing selects offered Luna and Haiku regardless of catalogue order", () => {
+            var gpt = new ModelChoice[] { new("gpt-6-astra", "Astra"), new("gpt-5.6-luna", "Older Luna"), new("gpt-6-luna", "Luna") };
+            Assert(SelectionRules.PreferredModel(gpt, null, "luna") == "gpt-6-luna", "Wrong Luna.");
+            var claude = new ModelChoice[] { new("claude-sonnet-5-5", "Sonnet"), new("claude-haiku-4-5", "Old Haiku"), new("claude-haiku-5-5", "Haiku") };
+            Assert(SelectionRules.PreferredModel(claude, null, "haiku") == "claude-haiku-5-5", "Haiku without line metadata was missed.");
+            Assert(SelectionRules.PreferredModel(claude, "claude-sonnet-5-5", "haiku") == "claude-sonnet-5-5", "Explicit model lost.");
+        });
         Test("reserve limits and restricted source rules are enforced", () => {
             Reject(request with { Reserve = -1 }); Reject(request with { Reserve = 26 }); Reject(request with { Restricted = true });
             Reject(request with { Restricted = true, Reserve = 0 }, "{\"ids\":[],\"suggestions\":[{\"title\":\"Other\",\"artist\":\"Other\"}]}");

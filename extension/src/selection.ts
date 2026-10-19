@@ -7,6 +7,7 @@ export interface SelectionDiagnostics {
   previous:number;
   invalid:number;
   truncated:number;
+  diversity?:number;
 }
 
 export function shortfallReason(selected:number,requested:number,report:SelectionDiagnostics):string {
@@ -19,5 +20,6 @@ export function shortfallReason(selected:number,requested:number,report:Selectio
   if(report.duplicates)reasons.push(`${report.duplicates} duplicate ${report.duplicates===1?'match was':'matches were'} skipped`);
   if(report.previous)reasons.push(`${report.previous} ${report.previous===1?'song was':'songs were'} already in your listening references, queue or previous selection`);
   if(report.invalid)reasons.push(`${report.invalid} invalid song ${report.invalid===1?'suggestion was':'suggestions were'} skipped`);
+  if(report.diversity)reasons.push(`${report.diversity} choices from overrepresented artists were skipped to keep the selection varied`);
   return reasons.length?reasons.join('; ')+'.':`Only ${selected} matching songs were found.`;
 }

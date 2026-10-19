@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       if (typeof input.key !== 'string' || input.key.length < 20 || input.key.length > 500 || /\s/.test(input.key)) throw new AppError('Enter a valid Claude API key.');
       const record = await account(person.userId), models = await claudeModels(input.key);
       if (!models.length) throw new AppError('No available models were found for that key.');
-      await saveAccount(person.userId, { ...record.value, claudeKey: input.key, model: models[0].id, provider: 'claude' }, record.revision);
+      await saveAccount(person.userId, { ...record.value, claudeKey: input.key, model: '', provider: 'claude' }, record.revision);
       return response({ connected: true, models });
     }
     if (path === '/api/disconnect') {

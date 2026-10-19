@@ -178,7 +178,8 @@
       const found = await this.search(title + " " + artist, 5);
       const clean2 = (s) => s.normalize("NFKD").toLowerCase().replace(new RegExp("\\p{M}", "gu"), "").replace(/[^\p{L}\p{N}]/gu, "");
       const sameArtist = (t) => clean2(t.artist) === clean2(artist) || (t.artistNames ?? t.artist.split(", ")).some((name) => clean2(name) === clean2(artist));
-      return found.find((t) => clean2(t.title) === clean2(title) && sameArtist(t)) ?? null;
+      const recording = (value) => value.replace(/\s*[-–—(\[]\s*(?:(?:19|20)\d{2}\s*)?(?:remaster(?:ed)?(?:\s*(?:19|20)\d{2})?|mono|stereo)(?:\s*version)?[)\]]?\s*$/i, "");
+      return found.find((t) => clean2(t.title) === clean2(title) && sameArtist(t)) ?? found.find((t) => clean2(recording(t.title)) === clean2(recording(title)) && sameArtist(t)) ?? null;
     }
     async liked(limit = 200) {
       return this.pageTracks("liked", (o) => Spicetify.Platform.LibraryAPI.getTracks(o), limit, "liked");
@@ -303,7 +304,7 @@
   function parseIntent(prompt, length = 15, cap = 50, preference = "append") {
     const text = prompt.trim();
     if (!text || text.length > 1e3) throw Error("Use a request between 1 and 1,000 characters.");
-    const words = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, hundred: 100 };
+    const words2 = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50, hundred: 100 };
     const countText = text.replace(/[“"][^”"]+[”"]/g, "").replace(/(?:spotify:playlist:|https:\/\/open\.spotify\.com\/playlist\/)[A-Za-z0-9]{22}[^\s]*/g, "");
     const inclusionPattern = /\b(?:include|including|mix in|add in|throw in|keep)\s+(?:(a few|a couple|few|couple|some|\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty)\s+)?(?:of\s+)?(?:the\s+|its\s+)?(?:(original)\s+)?(?:songs?|tracks?)\s*(?:(?:from|off|of)\b|(?=too\b|as well\b|[,.!?]|$))/gi;
     const positiveInclusions = (value) => [...value.matchAll(inclusionPattern)].filter((m) => !/(?:\b(?:do not|don't|never|not|without)\s+)$/i.test(value.slice(0, m.index)));
@@ -311,7 +312,7 @@
     const inclusions = hasSimilarity ? positiveInclusions(countText) : [];
     const totalText = inclusions.reduceRight((s, m) => s.slice(0, m.index) + s.slice(m.index + m[0].length), countText);
     const number = totalText.match(/\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|hundred)\s+(?:(?!songs?\b|tracks?\b)[\p{L}-]+\s+){0,4}(?:songs?|tracks?)\b/iu)?.[1]?.toLowerCase();
-    const count = Math.max(1, Math.min(cap, number ? words[number] ?? Number(number) : length));
+    const count = Math.max(1, Math.min(cap, number ? words2[number] ?? Number(number) : length));
     const semantic = countText;
     const followup = /\b(add (?:another|more)|more (?:music|songs|tracks)|like (?:these|this))\b/i.test(semantic);
     const replace = /\b(replace (?:the |my )?queue|start over|make a new queue)\b/i.test(semantic);
@@ -364,7 +365,7 @@
     let playlistCount = 0;
     if (inclusions.length && (referencePlaylistNames.length || referencePlaylistUris.length)) {
       const amount = inclusions.at(-1)[1]?.toLowerCase();
-      playlistCount = amount && words[amount] !== void 0 ? words[amount] : amount && /^\d+$/.test(amount) ? Number(amount) : /couple/.test(amount ?? "") ? 2 : Math.min(3, Math.max(1, Math.round(count / 5)));
+      playlistCount = amount && words2[amount] !== void 0 ? words2[amount] : amount && /^\d+$/.test(amount) ? Number(amount) : /couple/.test(amount ?? "") ? 2 : Math.min(3, Math.max(1, Math.round(count / 5)));
       if (playlistCount && count < 2) throw Error("Choose at least two songs to mix playlist songs with discoveries.");
       if (playlistCount >= count) throw Error("The playlist portion must be smaller than the total song count.");
       if (!includedPlaylistNames.length && !includedPlaylistUris.length) {
@@ -507,6 +508,7 @@
     if (report.duplicates) reasons.push(`${report.duplicates} duplicate ${report.duplicates === 1 ? "match was" : "matches were"} skipped`);
     if (report.previous) reasons.push(`${report.previous} ${report.previous === 1 ? "song was" : "songs were"} already in your listening references, queue or previous selection`);
     if (report.invalid) reasons.push(`${report.invalid} invalid song ${report.invalid === 1 ? "suggestion was" : "suggestions were"} skipped`);
+    if (report.diversity) reasons.push(`${report.diversity} choices from overrepresented artists were skipped to keep the selection varied`);
     return reasons.length ? reasons.join("; ") + "." : `Only ${selected} matching songs were found.`;
   }
 
@@ -558,6 +560,63 @@
       if (!found) break;
     }
     return out;
+  }
+
+  // src/curation.ts
+  var words = (text) => text.normalize("NFKD").replace(new RegExp("\\p{M}", "gu"), "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  var artistKey = (track) => words(track.artistNames?.[0] ?? track.artist);
+  function selectionBrief(prompt, count) {
+    const text = words(prompt);
+    const similarity = /\b(?:like|similar to|similar music to|inspired by|in the style of|sounds like)\b/.test(text);
+    const referenceText = text.split(/\b(?:similar to|similar music to|inspired by|in the style of|sounds like|like)\b/).slice(1).map((part) => part.split(/\b(?:but|without|except|excluding|only|include|including)\b/)[0].trim()).filter(Boolean);
+    const narrow = text.match(/\b(?:only|exclusively|nothing but|all by)\s+(?:(?:songs?|tracks?|music)\s+)?(?:(?:by|from)\s+)?(.+)/)?.[1];
+    const artistOnly = !!narrow && (/^(?:them|that band|that artist)\b/.test(narrow) || referenceText.some((part) => (" " + narrow + " ").includes(" " + part + " ")));
+    const allocation = artistOnly || /\b(?:mostly|mainly|more (?:of|from)|half|percent|equal|evenly|\d+\s+(?:songs?|tracks?)\s+(?:by|from)|include|including|mix in)\b/.test(text) || /\d\s*%/.test(prompt);
+    return {
+      similarity,
+      balance: similarity && !allocation,
+      referenceText,
+      count,
+      referenceLimit: Math.min(count - 1, Math.max(1, Math.floor(count / 5))),
+      artistLimit: Math.max(2, Math.ceil(count / 5))
+    };
+  }
+  function isReferenceArtist(track, brief) {
+    return (track.artistNames?.length ? track.artistNames : [track.artist]).some((name) => {
+      const key = words(name);
+      return !!key && brief.referenceText.some((part) => (" " + part + " ").includes(" " + key + " "));
+    });
+  }
+  function curateArtists(tracks, brief, restricted = false) {
+    if (restricted) return tracks.slice(0, brief.count);
+    const references = [], others = [], totals = /* @__PURE__ */ new Map();
+    for (const track of tracks) {
+      const reference = isReferenceArtist(track, brief), key = artistKey(track);
+      if (brief.balance && (reference ? references.length >= brief.referenceLimit : (totals.get(key) ?? 0) >= brief.artistLimit)) continue;
+      totals.set(key, (totals.get(key) ?? 0) + 1);
+      (reference ? references : others).push(track);
+    }
+    if (brief.balance && !others.length) return [];
+    const referenceCount = brief.balance ? Math.min(references.length, brief.count - 1) : Math.min(references.length, brief.count);
+    const familiar = references.slice(0, referenceCount);
+    const remaining = others.slice();
+    const ordered = [];
+    let previous = "";
+    while (ordered.length < brief.count - familiar.length && remaining.length) {
+      let index = remaining.findIndex((track2) => artistKey(track2) !== previous);
+      if (index < 0) index = 0;
+      const [track] = remaining.splice(index, 1);
+      ordered.push(track);
+      previous = artistKey(track);
+    }
+    if (!ordered.length) return familiar.slice(0, brief.count);
+    const result = [];
+    let at = 0;
+    for (let i = 0; i < ordered.length; i++) {
+      result.push(ordered[i]);
+      while (at < familiar.length && Math.floor((i + 1) * familiar.length / ordered.length) > at) result.push(familiar[at++]);
+    }
+    return result.slice(0, brief.count);
   }
 
   // src/pipeline.ts
@@ -768,6 +827,10 @@
           });
           if (proposed.length) validateSelection(proposed, sourceSet, intent.count + reserve, true);
           const acceptedUris = /* @__PURE__ */ new Set(), acceptedSongs = /* @__PURE__ */ new Set();
+          const brief = selectionBrief(intent.prompt, intent.count);
+          const balanceNamedArtist = !sourceSet && !seeds.length && !intent.playlistCount && brief.balance;
+          const artistCounts = /* @__PURE__ */ new Map();
+          let referenceCount = 0;
           const accept = (t, fromId = false) => {
             if (!t) {
               selection.unmatched++;
@@ -787,11 +850,19 @@
               selection.previous++;
               return;
             }
+            const artist = primaryArtist(t).normalize("NFKD").toLocaleLowerCase().replace(new RegExp("\\p{M}", "gu"), "");
+            const reference = isReferenceArtist(t, brief);
+            if (balanceNamedArtist && (reference ? referenceCount >= brief.referenceLimit : (artistCounts.get(artist) ?? 0) >= brief.artistLimit)) {
+              selection.diversity = (selection.diversity ?? 0) + 1;
+              return;
+            }
             if (tracks.length < intent.count) {
               tracks.push(t);
               if (original) originalSelected++;
               acceptedUris.add(t.uri);
               for (const key of keys) acceptedSongs.add(key);
+              artistCounts.set(artist, (artistCounts.get(artist) ?? 0) + 1);
+              if (reference) referenceCount++;
             }
           };
           for (const t of proposed) {
@@ -830,6 +901,7 @@
           resolutionMs = Math.round(performance.now() - resolvingAt);
         }
       }
+      if (!sourceSet && !seeds.length && !intent.playlistCount && !intent.history) tracks = curateArtists(tracks, selectionBrief(intent.prompt, intent.count));
       if (seeds.length && !sourceSet) {
         const artists = /* @__PURE__ */ new Map();
         for (const track of tracks) {

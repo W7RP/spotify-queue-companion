@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:workers';
 import { db, seal, open, hash, random, body, response } from './server';
 import { AppError } from './core.mjs';
+import { fastModel } from './curation';
 import { bindComputer, claimMusicJob, finishMusicJob, musicProposals } from './pc-jobs.mjs';
 
 type Bridge = { user_id: string; seen_at: number; ready: number; models: string };
@@ -51,7 +52,7 @@ export async function proposeOnComputer(owner: string, prompt: string, count: nu
   const status = await computerStatus(owner);
   if (!status.connected) throw new AppError(status.online ? 'Reconnect ChatGPT in desktop Queue Companion, then refresh here.' : 'Your PC is offline. Keep it on, awake and connected to the internet, then refresh here.', 409, 'pc_offline');
   const id = crypto.randomUUID(), expires = Date.now() + 100_000;
-  const chosen = status.models.find(m => m.id === model)?.id ?? status.models.find(m => m.id.includes('luna'))?.id ?? status.models[0]?.id;
+  const chosen = fastModel(status.models, 'chatgpt', model);
   if (!chosen) throw new AppError('No ChatGPT models are available on your PC.', 409, 'chatgpt_connect');
   await db().prepare('DELETE FROM pc_requests WHERE user_id = ? AND expires_at < ?').bind(owner, Date.now()).run();
   const input = { prompt, count, reserve: Math.min(25, Math.ceil(count / 2)), model: chosen };

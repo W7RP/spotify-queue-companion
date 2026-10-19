@@ -24,6 +24,9 @@ test('Spotify resolution requires an exact normalized title and a credited artis
  assert.equal(exactMatch(song(1, 'A Song', 'José González'), { title: 'A Song', artist: 'Jose Gonzalez' }), true);
  assert.equal(exactMatch(song(1, 'A Song', 'Other'), { title: 'A Song', artist: 'Artist' }), false);
  assert.equal(exactMatch(song(1, 'A Song Live', 'Artist'), { title: 'A Song', artist: 'Artist' }), false);
+ assert.equal(exactMatch(song(1, 'A Song - 2024 Remaster', 'Artist'), { title: 'A Song', artist: 'Artist' }), true);
+ assert.equal(exactMatch(song(1, 'A Song - Live', 'Artist'), { title: 'A Song', artist: 'Artist' }), false);
+ assert.equal(exactMatch(song(1, 'A Song - Remastered', 'Cover Artist'), { title: 'A Song', artist: 'Artist' }), false);
 });
 test('mutations require exact same-origin; missing Origin is denied', () => {
  const origin = 'https://queue.example';
