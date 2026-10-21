@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { availableDevices, chooseDevice, startSelection, continueSelection, observeSelection, preparePlaybackOrder, refreshedDeviceId } from '../lib/queue/playback.mjs';
+import { availableDevices, chooseDevice, startSelection, continueSelection, recoverEmptyQueue, emptyPlayback, observeSelection, preparePlaybackOrder, refreshedDeviceId } from '../lib/queue/playback.mjs';
 import { spotifyResponse } from '../lib/queue/http.mjs';
 import { AppError } from '../lib/queue/core.mjs';
 const tracks = Array.from({ length: 50 }, (_, i) => ({ uri: 'spotify:track:' + String(i).padStart(22, '0') }));
@@ -95,4 +95,60 @@ test('continue uses the queue endpoint callback for the remainder and counts the
 
 test('five visible successors cannot confirm a longer selection missing the rest', () => {
   assert.equal(observeSelection(tracks, tracks[0], tracks.slice(1, 6), true).sequenceConfirmed, false);
+});
+
+
+function emptyQueueFixture(options = {}) {
+  const list = tracks.slice(0, options.count ?? 5), sent = [], points = [];
+  let view = { playerKnown: true, queueKnown: true, queueCount: 0, deviceId: 'phone', hasItem: false, isPlaying: false, playing: null, queue: [] }, advances = 0, reads = 0;
+  const update = value => { view = { ...view, ...value }; view.queueCount = view.queue.length; };
+  return { list, sent, points, update, get advances() { return advances; }, run: () => recoverEmptyQueue(list, 'phone', async () => {
+    reads++; options.onRead?.(reads, view, update, sent); return { ...view };
+  }, async track => {
+    if (options.failAt === sent.length + 1) throw new AppError('Busy', 429);
+    sent.push(track.uri); update({ queue: [...view.queue, track] });
+    if (options.autoStart && sent.length === 1) update({ hasItem: true, isPlaying: true, playing: list[0], queue: [] });
+  }, async () => {
+    advances++; update({ hasItem: true, isPlaying: true, playing: list[0], queue: view.queue.slice(1) });
+    if (options.lostAdvance) throw Error('Response lost');
+  }, async point => points.push(point), async () => {}) };
+}
+
+test('a confirmed empty player rebuilds its actual queue and advances exactly once after the songs are visible', async () => {
+  const f = emptyQueueFixture({ count: 50 }); const result = await f.run();
+  assert.equal(result.state, 'complete'); assert.equal(result.accepted, 50); assert.equal(result.queueFallback, true);
+  assert.deepEqual(f.sent, tracks.map(t => t.uri)); assert.equal(f.advances, 1);
+  assert.equal(f.points[0].state, 'rebuilding'); assert.equal(f.points.at(-1).state, 'complete');
+  assert.equal(await f.run(), null); assert.equal(f.advances, 1); assert.equal(f.sent.length, 50);
+});
+
+test('delayed original playback prevents recovery writes and never skips its first song', async () => {
+  const f = emptyQueueFixture({ onRead: (n, view, update) => { if (n === 2) update({ hasItem: true, isPlaying: true, playing: tracks[0], queue: tracks.slice(1, 5) }); } });
+  assert.equal(await f.run(), null); assert.equal(f.sent.length, 0); assert.equal(f.advances, 0);
+});
+
+test('unknown reads, a missing device, paused songs and existing queues cannot be treated as empty', async () => {
+  for (const changes of [{ playerKnown: false }, { queueKnown: false }, { deviceId: 'other' }, { hasItem: true, playing: tracks[0] }, { queue: [tracks[10]] }]) {
+    const f = emptyQueueFixture(); f.update(changes); assert.equal(await f.run(), null); assert.equal(f.sent.length, 0); assert.equal(f.advances, 0);
+  }
+  assert.equal(emptyPlayback({ playerKnown: true, queueKnown: true, deviceId: 'phone', queue: [], queueCount: 1, isPlaying: false, hasItem: false }, 'phone'), false);
+});
+
+test('a device or song change during a rebuild halts before another enqueue or next command', async () => {
+  for (const changes of [{ deviceId: 'other' }, { hasItem: true, isPlaying: true, playing: tracks[10] }, { queue: [tracks[10]] }]) {
+    const f = emptyQueueFixture({ onRead: (n, view, update, sent) => { if (sent.length === 2) update(changes); } });
+    const result = await f.run(); assert.equal(result.state, 'unconfirmed'); assert.equal(result.accepted, 2); assert.equal(f.sent.length, 2); assert.equal(f.advances, 0);
+  }
+});
+
+test('the first queued song starting itself does not receive a next command', async () => {
+  const f = emptyQueueFixture({ autoStart: true }); const result = await f.run();
+  assert.equal(result.state, 'complete'); assert.equal(f.advances, 0); assert.equal(f.sent.length, 5);
+});
+
+test('a partial enqueue failure or lost advance response never retries either command', async () => {
+  const partial = emptyQueueFixture({ failAt: 3 }); const one = await partial.run();
+  assert.equal(one.state, 'unconfirmed'); assert.equal(one.accepted, 2); assert.equal(partial.sent.length, 2); assert.equal(partial.advances, 0);
+  const lost = emptyQueueFixture({ lostAdvance: true }); const two = await lost.run();
+  assert.equal(two.state, 'uncertain'); assert.equal(two.accepted, 5); assert.equal(lost.advances, 1);
 });

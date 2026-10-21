@@ -1,6 +1,6 @@
 import { AppError, enqueueSequential, uniqueTracks } from './core.mjs';
 import { renewQueueLease, releaseReviewedLease } from './lease.mjs';
-import { chooseDevice, availableDevices, startSelection, continueSelection, observeSelection, preparePlaybackOrder } from './playback.mjs';
+import { chooseDevice, availableDevices, startSelection, continueSelection, recoverEmptyQueue, observeSelection, preparePlaybackOrder } from './playback.mjs';
 import { reviewedSelection } from './review.mjs';
 import { db, open, seal, spotifyAccess, spotify, account, song, type Song } from './server';
 import { resolveDevice, rememberDevice } from './devices';
@@ -15,7 +15,7 @@ export async function receipt(userId: string, selectionId: string) {
   const row = await db().prepare('SELECT sealed FROM selections WHERE id = ? AND user_id = ? AND expires_at > ?').bind(selectionId, userId, Date.now()).first<{ sealed: string }>();
   const selection = row ? await open<any>(row.sealed, userId) : null;
   const tracks = selection ? (details.selectedIndexes ?? selection.tracks.map((_: any, i: number) => i)).map((i: number) => selection.tracks[i]) : [];
-  if (job.state === 'unconfirmed' && tracks.length) {
+  if ((job.state === 'unconfirmed' || job.state === 'uncertain' && details.queueFallback) && tracks.length && (!details.queueFallback || job.count === job.total)) {
     try {
       const credentials = await spotifyAccess(userId);
       if (credentials.subject === selection.subject) {
@@ -23,17 +23,17 @@ export async function receipt(userId: string, selectionId: string) {
         const observed = observeSelection(tracks, song(state?.item ?? queue?.currently_playing), (queue?.queue ?? []).map((t: any) => song(t)).filter(Boolean), state?.is_playing, state?.device?.id, details.deviceId);
         if (observed.sequenceConfirmed) {
           Object.assign(details, observed, { message: undefined });
-          await db().prepare("UPDATE queue_jobs SET state = 'complete', sealed = ?, updated_at = ? WHERE id = ? AND user_id = ? AND state = 'unconfirmed'").bind(await seal(details, userId), Date.now(), job.id, userId).run();
+          await db().prepare("UPDATE queue_jobs SET state = 'complete', sealed = ?, updated_at = ? WHERE id = ? AND user_id = ? AND state IN ('unconfirmed', 'uncertain')").bind(await seal(details, userId), Date.now(), job.id, userId).run();
           await db().prepare('DELETE FROM queue_locks WHERE user_id = ? AND job_id = ?').bind(userId, job.id).run();
           job.state = 'complete';
         }
       }
     } catch { /* A status check never resends playback or hides an unconfirmed write. */ }
   }
-  const stale = ['sending', 'writing', 'preparing', 'observing'].includes(job.state) && Date.now() - job.updated_at > 90_000;
+  const stale = ['sending', 'writing', 'preparing', 'observing', 'rebuilding', 'advancing'].includes(job.state) && Date.now() - job.updated_at > 90_000;
   return { id: job.id, state: stale ? 'uncertain' : job.state, accepted: job.count, total: job.total, tracks, requested: details.requested ?? job.total, deviceName: details.deviceName, mode: details.mode ?? 'append',
     playbackConfirmed: details.playbackConfirmed, sequenceConfirmed: details.sequenceConfirmed,
-    recoveryAttempt: !!selection?.queueRecovery,
+    recoveryAttempt: !!selection?.queueRecovery || !!details.queueFallback, queueFallback: !!details.queueFallback,
     message: job.state === 'unconfirmed' ? details.message : stale || job.state === 'uncertain' ? 'A previous queue change could not be confirmed. Check Spotify’s Queue before adding more songs.' : undefined };
 }
 
@@ -121,7 +121,16 @@ export async function addSelection(userId: string, selectionId: string, keepUris
     await db().prepare('INSERT INTO queue_jobs(id, user_id, selection_id, state, count, total, updated_at, sealed) VALUES (?, ?, ?, ?, 0, ?, ?, ?)')
       .bind(id, userId, selectionId, 'preparing', tracks.length, Date.now(), await seal({ prompt: selection.prompt, requested: selection.count, deviceName: selection.deviceName, deviceId: device.id, mode, selectedIndexes: reviewed.indexes }, userId)).run();
     created = true;
-    const checkpoint = async (point: { state: string; accepted: number }) => {
+    let queueFallback = false;
+    const checkpoint = async (point: { state: string; accepted: number; queueFallback?: boolean }) => {
+      if (point.queueFallback) {
+        accepted = point.accepted;
+        if (!queueFallback) {
+          const job = await getJob(userId, selectionId), details = await open<any>(job!.sealed, userId);
+          await db().prepare('UPDATE queue_jobs SET sealed = ? WHERE id = ? AND user_id = ?').bind(await seal({ ...details, queueFallback: true }, userId), id, userId).run();
+          queueFallback = true;
+        }
+      }
       await renewQueueLease(db(), userId, id);
       await db().prepare('UPDATE queue_jobs SET state = ?, count = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(mode === 'replace' && point.state === 'complete' ? 'observing' : point.state, point.accepted, Date.now(), id, userId).run();
     };
@@ -134,8 +143,13 @@ export async function addSelection(userId: string, selectionId: string, keepUris
       }
       await renewQueueLease(db(), userId, id); writing = true;
     };
+    let lastView: any = null;
+    const readView = async () => {
+      const [state, queue] = await Promise.all([spotify(credentials.access, '/me/player'), spotify(credentials.access, '/me/player/queue')]);
+      return lastView = { playerKnown: !!state && typeof state.is_playing === 'boolean', queueKnown: Array.isArray(queue?.queue), queueCount: queue?.queue?.length, deviceId: state?.device?.id, isPlaying: state?.is_playing, hasItem: !!(state?.item || queue?.currently_playing), playing: song(state?.item ?? queue?.currently_playing), queue: (queue?.queue ?? []).map((t: any) => song(t)).filter(Boolean) };
+    };
     if (selection.queueRecovery) accepted = 1;
-    const result = mode === 'replace' && !selection.queueRecovery
+    let result = mode === 'replace' && !selection.queueRecovery
       ? await startSelection(tracks, async (value: object) => {
         await beforeWrite();
         const state = await spotify(credentials.access, '/me/player');
@@ -152,27 +166,42 @@ export async function addSelection(userId: string, selectionId: string, keepUris
     let observed: { playbackConfirmed?: boolean; sequenceConfirmed?: boolean } = {};
     if (mode === 'replace' && result.state === 'complete') {
       await rememberDevice(userId, device).catch(() => {});
-      // Playback reads may lag an accepted command. Never resend to fix a lagging read.
-      try {
-        for (let attempt = 0; attempt < 6; attempt++) {
-          const [state, queue] = await Promise.all([spotify(credentials.access, '/me/player'), spotify(credentials.access, '/me/player/queue')]);
-          observed = observeSelection(tracks, song(state?.item ?? queue?.currently_playing), (queue?.queue ?? []).map((t: any) => song(t)).filter(Boolean), state?.is_playing, state?.device?.id, device.id);
+      const observe = async (attempts: number) => {
+        for (let attempt = 0; attempt < attempts; attempt++) {
+          const view = await readView();
+          observed = observeSelection(tracks, view.playing, view.queue, view.isPlaying, view.deviceId, device.id);
           if (observed.sequenceConfirmed) break;
-          if (attempt < 5) await new Promise(resolve => setTimeout(resolve, 700));
+          if (attempt < attempts - 1) await new Promise(resolve => setTimeout(resolve, 750));
         }
-      } catch { /* Acknowledgement alone cannot prove playback. Never replay here. */ }
-      if (!observed.sequenceConfirmed) {
+      };
+      // An accepted command can take time to reach Connect. Reads never resend it.
+      try { await observe(selection.queueRecovery ? 6 : 12); } catch { /* Unknown reads cannot prove failure or permit rebuilding. */ }
+      if (!observed.sequenceConfirmed && !selection.queueRecovery) {
+        const recovered = await recoverEmptyQueue(tracks, device.id, readView,
+          async (track: Song) => {
+            await beforeWrite();
+            await spotify(credentials.access, '/me/player/queue?' + new URLSearchParams({ uri: track.uri, device_id: device.id }), 'POST');
+          }, async () => {
+            await beforeWrite();
+            await spotify(credentials.access, '/me/player/next?' + new URLSearchParams({ device_id: device.id }), 'POST');
+          }, checkpoint);
+        if (recovered) {
+          result = recovered;
+          try { await observe(result.state === 'complete' ? 3 : 1); } catch { /* Preserve the durable recovery receipt. */ }
+        }
+      }
+      if (result.state === 'complete' && !observed.sequenceConfirmed) {
         result.state = 'unconfirmed';
-        (result as any).message = observed.playbackConfirmed ? 'The first song is playing, but Spotify has not confirmed the rest of this selection. Check its queue before continuing.' : 'Spotify accepted the command but did not confirm playback. Your songs are saved. Open the first saved song in Spotify, tap Play, then continue to add the remaining songs to its queue.';
+        (result as any).message = queueFallback ? 'Your songs were sent to Spotify’s queue, but playback is not confirmed. Open Spotify and check its queue, then refresh here. Nothing will be resent.' : observed.playbackConfirmed ? 'The first song is playing, but Spotify has not confirmed the rest of this selection. Check its queue before continuing.' : 'Spotify accepted the command but did not confirm playback. Your songs are saved. Open the first saved song in Spotify, tap Play, then continue to add the remaining songs to its queue.';
       }
       const job = await getJob(userId, selectionId);
       const details = await open<any>(job!.sealed, userId);
       await db().prepare('UPDATE queue_jobs SET state = ?, sealed = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(result.state, await seal({ ...details, ...observed, message: (result as any).message }, userId), Date.now(), id, userId).run();
-      console.info(JSON.stringify({ event: 'spotify_start_observed', state: result.state, count: tracks.length, playing: observed.playbackConfirmed === true, ordered: observed.sequenceConfirmed === true, recovery: !!selection.recoveryOf }));
+      console.info(JSON.stringify({ event: 'spotify_start_observed', state: result.state, count: tracks.length, accepted: result.accepted, playing: observed.playbackConfirmed === true, ordered: observed.sequenceConfirmed === true, recovery: !!selection.queueRecovery, queueFallback, playerKnown: lastView?.playerKnown === true, sameDevice: lastView?.deviceId === device.id, hasItem: lastView?.hasItem === true, queueKnown: lastView?.queueKnown === true, visibleCount: lastView?.queueCount ?? null }));
     }
     if (result.state === 'unconfirmed') await db().prepare('UPDATE queue_locks SET expires_at = ? WHERE user_id = ? AND job_id = ?').bind(Date.now(), userId, id).run();
     else if (result.state !== 'uncertain') await db().prepare('DELETE FROM queue_locks WHERE user_id = ? AND job_id = ?').bind(userId, id).run();
-    return { id, ...result, ...observed, tracks, requested: selection.count, mode, deviceName: selection.deviceName, recoveryAttempt: !!selection.queueRecovery };
+    return { id, ...result, ...observed, tracks, requested: selection.count, mode, deviceName: selection.deviceName, recoveryAttempt: !!selection.queueRecovery || queueFallback, queueFallback };
   } catch (error) {
     if (created && writing) {
       await db().prepare('UPDATE queue_jobs SET state = ?, count = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind('uncertain', accepted, Date.now(), id, userId).run();

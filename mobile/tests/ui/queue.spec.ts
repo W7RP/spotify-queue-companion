@@ -33,6 +33,42 @@ test('accepted-but-empty playback stays saved with a warning and explicit recove
  expect(await page.evaluate(() => sessionStorage.getItem('qc-pending-selection'))).toBeNull();
 });
 
+test('delayed playback is confirmed automatically using reads only and clears the old warning', async ({ page }) => {
+ let writes = 0, receiptReads = 0;
+ const selection = { id: 'delayed-selection', tracks: [track(5), track(6)], requested: 2, mode: 'replace' };
+ await page.route('**/api/**', async route => {
+  const path = new URL(route.request().url()).pathname;
+  if (path === '/api/select') return route.fulfill({ json: selection });
+  if (path === '/api/selection') return route.fulfill({ json: selection });
+  if (path === '/api/queue' || path === '/api/queue/restart') { writes++; return route.fulfill({ json: { ...selection, id: 'job', state: 'unconfirmed', accepted: 2, total: 2, message: 'Playback has not been confirmed.' } }); }
+  if (path === '/api/receipt') { receiptReads++; return route.fulfill({ json: { receipt: writes ? { ...selection, id: 'job', state: receiptReads > 1 ? 'complete' : 'unconfirmed', accepted: 2, total: 2, playbackConfirmed: receiptReads > 1, message: receiptReads > 1 ? undefined : 'Playback has not been confirmed.', deviceName: 'iPhone' } : null } }); }
+  const values: Record<string, unknown> = { '/api/status': { ...status, mode: 'replace', review: false }, '/api/playback': { device: { id: 'phone', name: 'iPhone' }, playing: writes ? track(5) : null, queue: writes ? [track(6)] : [] } };
+  return route.fulfill({ json: values[path] ?? {} });
+ });
+ await page.goto('/'); await page.getByLabel('What do you want to hear?').fill('Soul'); await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
+ await expect(page.getByRole('alert')).toContainText('not been confirmed');
+ await expect(page.getByRole('status')).toContainText('Playing your selection on iPhone', { timeout: 6000 });
+ await expect(page.getByRole('alert')).toHaveCount(0); await expect(page.getByRole('region', { name: 'Review selection' })).toHaveCount(0);
+ expect(writes).toBe(1); expect(await page.evaluate(() => sessionStorage.getItem('qc-pending-selection'))).toBeNull();
+});
+
+test('a durable automatic queue attempt opens the native queue and cannot be resent after reload', async ({ page }) => {
+ let writes = 0;
+ const selection = { id: 'queue-fallback-selection', tracks: [track(5), track(6)], requested: 2, mode: 'replace' };
+ const receipt = { ...selection, id: 'fallback-job', state: 'unconfirmed', accepted: 2, total: 2, queueFallback: true, recoveryAttempt: true, message: 'Queue playback has not been confirmed.' };
+ await page.route('**/api/**', async route => {
+  const path = new URL(route.request().url()).pathname;
+  if (path === '/api/queue' || path === '/api/queue/restart') { writes++; return route.fulfill({ json: receipt }); }
+  const values: Record<string, unknown> = { '/api/status': { ...status, mode: 'replace', review: false }, '/api/playback': { device: { id: 'phone', name: 'iPhone' }, playing: null, queue: [track(5), track(6)] }, '/api/select': selection, '/api/selection': selection, '/api/receipt': { receipt: writes ? receipt : null } };
+  return route.fulfill({ json: values[path] ?? {} });
+ });
+ await page.goto('/'); await page.getByLabel('What do you want to hear?').fill('Soul'); await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
+ const review = page.getByRole('region', { name: 'Review selection' });
+ await expect(review.getByRole('link', { name: 'Open Spotify', exact: true })).toHaveAttribute('href', 'spotify://');
+ await expect(review.getByRole('button', { name: 'Continue selection', exact: true })).toBeDisabled();
+ await page.reload(); await expect(review.getByRole('button', { name: 'Continue selection', exact: true })).toBeDisabled(); expect(writes).toBe(1);
+});
+
 test('default flow generates and starts a full selection on a paused device without a review click', async ({ page }) => {
  let writes = 0, submitted: any;
  await page.route('**/api/**', async route => {

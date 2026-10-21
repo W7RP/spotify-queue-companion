@@ -51,6 +51,68 @@ export function observeSelection(tracks, playing, queue, isPlaying, actualDevice
   return { playbackConfirmed, sequenceConfirmed };
 }
 
+// A queue rebuild is permitted only after an acknowledged start has left a
+// known, empty player AND queue on the same device. Unknown reads are not empty.
+export function knownPlayback(view, deviceId) {
+  return view?.playerKnown === true && view.deviceId === deviceId && view.queueKnown === true && view.queueCount === view.queue.length;
+}
+export function emptyPlayback(view, deviceId) {
+  return knownPlayback(view, deviceId) && view.isPlaying === false && !view.hasItem && view.queue.length === 0;
+}
+export async function recoverEmptyQueue(tracks, deviceId, read, enqueue, advance, checkpoint, wait = () => new Promise(resolve => setTimeout(resolve, 500))) {
+  // Give delayed playback another chance. Never append into a still-loading,
+  // existing or foreign queue, and never replay a timed-out original command.
+  try {
+    for (let i = 0; i < 3; i++) {
+      if (!emptyPlayback(await read(), deviceId)) return null;
+      if (i < 2) await wait();
+    }
+  } catch { return null; }
+  let accepted = 0;
+  const finish = async (state, message) => {
+    const result = { state, accepted, total: tracks.length, queueFallback: true, ...(message ? { message } : {}) };
+    await checkpoint(result); return result;
+  };
+  await checkpoint({ state: 'rebuilding', accepted: 0, queueFallback: true });
+  try {
+    for (const track of tracks) {
+      const view = await read();
+      const firstPlaying = view.hasItem && view.playing?.uri === tracks[0].uri && view.isPlaying === true;
+      const expected = tracks.slice(firstPlaying ? 1 : 0, accepted);
+      if (!knownPlayback(view, deviceId) || view.hasItem && !firstPlaying || !view.hasItem && view.isPlaying !== false || view.queue.length > expected.length || view.queue.some((t, i) => t.uri !== expected[i]?.uri)) {
+        return await finish('unconfirmed', 'Spotify playback changed during queue recovery. Open Spotify to review it; nothing will be resent.');
+      }
+      await enqueue(track); accepted++;
+      await checkpoint({ state: 'rebuilding', accepted, queueFallback: true });
+    }
+    for (let i = 0; i < 8; i++) {
+      const view = await read();
+      if (!knownPlayback(view, deviceId)) break;
+      const observed = observeSelection(tracks, view.playing, view.queue, view.isPlaying, view.deviceId, deviceId);
+      if (observed.sequenceConfirmed) return await finish('complete'); // Spotify may start the first queued item itself.
+      if (view.hasItem) { if (view.playing?.uri !== tracks[0].uri || view.isPlaying !== true) break; }
+      else {
+        const visibleEnough = view.queue.length >= Math.min(20, tracks.length) && view.queue.length <= tracks.length && view.queue.every((t, n) => t.uri === tracks[n]?.uri);
+        if (view.isPlaying === false && visibleEnough) {
+          await checkpoint({ state: 'advancing', accepted, queueFallback: true });
+          await advance(); // Exactly once, after the queued first song is visible. Never retry a lost response.
+          for (let n = 0; n < 8; n++) {
+            const after = await read();
+            if (knownPlayback(after, deviceId) && observeSelection(tracks, after.playing, after.queue, after.isPlaying, after.deviceId, deviceId).sequenceConfirmed) return await finish('complete');
+            if (n < 7) await wait();
+          }
+          break;
+        }
+      }
+      if (i < 7) await wait();
+    }
+    return await finish('unconfirmed', 'Your songs were sent to Spotify’s queue, but playback is not confirmed. Open Spotify and check its queue. Refresh here afterward; no songs or playback commands will be resent.');
+  } catch (error) {
+    const known = error instanceof AppError && error.status < 500;
+    return await finish(known ? 'unconfirmed' : 'uncertain', 'Spotify queue recovery could not be confirmed. Open Spotify to review the queued songs before making another request. Nothing will be resent automatically.');
+  }
+}
+
 export async function preparePlaybackOrder(deviceId, read, write, wait = () => new Promise(resolve => setTimeout(resolve, 500))) {
   let state = await read();
   if (state?.device?.id !== deviceId || state?.is_playing === false) {
