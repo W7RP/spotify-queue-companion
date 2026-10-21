@@ -2,7 +2,7 @@ import { env } from 'cloudflare:workers';
 import { response, user, account, saveAccount, fail, mutation, body, spotifyAccess, spotify, song, db, open } from '@/lib/queue/server';
 import { AppError } from '@/lib/queue/core.mjs';
 import { makeSelection, claudeModels } from '@/lib/queue/select';
-import { addSelection, receipt, reviewQueue } from '@/lib/queue/commit';
+import { addSelection, restartSelection, receipt, reviewQueue } from '@/lib/queue/commit';
 import { playbackSnapshot } from '@/lib/queue/devices';
 import { computerEndpoint, computerStatus } from '@/lib/queue/pc';
 export async function GET(request: Request) {
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       const row = await db().prepare('SELECT sealed FROM selections WHERE id = ? AND user_id = ? AND expires_at > ?').bind(id, person.userId, Date.now()).first<{ sealed: string }>();
       if (!row) throw new AppError('This selection expired. Make a new request.', 410);
       const selected = await open<any>(row.sealed, person.userId);
-      return response({ id, tracks: selected.tracks, requested: selected.count, mode: selected.mode, note: selected.note });
+      return response({ id, tracks: selected.tracks, requested: selected.count, mode: selected.mode, note: selected.note, recoveryAttempt: !!selected.recoveryOf });
     }
     if (path === '/api/receipt') {
       const id = new URL(request.url).searchParams.get('selection') ?? '';
@@ -75,6 +75,7 @@ export async function POST(request: Request) {
       if (input.device !== undefined && (typeof input.device !== 'string' || input.device.length > 200)) throw new AppError('Choose a valid Spotify device.');
       return response(await addSelection(person.userId, input.selection, input.keepUris, input.mode, input.device));
     }
+    if (path === '/api/queue/restart') return response(await restartSelection(person.userId, input.selection, input.keepUris, input.device));
     if (path === '/api/review') { await reviewQueue(person.userId); return response({ reviewed: true }); }
     if (path === '/api/erase') {
       // No operation can be resurrected by a pending token/model response after deletion.

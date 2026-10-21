@@ -89,6 +89,20 @@ After setup: choose **ChatGPT** in Settings, check **Connected through your PC**
 
 ## Playback write handling
 
+An accepted Play now command is now checked against the chosen device, playing first
+song and visible next-up sequence before the app reports success. An acknowledgement
+that leaves Spotify empty is recorded as unconfirmed, with the generated selection
+kept on screen across refreshes. Read-only receipt checks can confirm delayed playback.
+They never resend the command.
+
+For an unconfirmed start, open the first saved song in Spotify and tap Play, then
+return and choose Continue selection. The server verifies the first song is playing
+on the selected device before allowing one explicit restart of the same saved list.
+Repeated clicks return that attempt's receipt; a second failure cannot loop into more
+starts. No new AI request is made. The original ten-minute selection expiry applies.
+This is a recovery path for Spotify acknowledgements that do not result in playback;
+it cannot guarantee that Spotify will execute an accepted command.
+
 Player POST/PUT success responses are acknowledgements. Empty 200, 202 and 204 replies are all accepted without trying to parse JSON. Previously an empty non-204 reply could add the first song, fail JSON parsing, record zero accepted and stop the batch. The append pipeline now checkpoints every acknowledged write; Play now submits the whole bounded list in one PUT to `/me/player/play` with `position_ms: 0`. Receipts prevent duplicate sends after reloads. Playback confirmation is read-only and cannot trigger a replay.
 
 Device discovery uses `/me/player/devices`, including paused controllable clients, and rechecks the chosen device immediately before sending. No active song is required for discovery or generation. An expired uncertain append can be superseded by an explicit new Play now request; a still-active operation remains protected by its lease.

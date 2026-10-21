@@ -2,6 +2,37 @@ import { test, expect } from '@playwright/test';
 const status = { signedIn: true, spotify: true, claude: true, model: 'claude-test-fixture', count: 15, mode: 'append', review: true, queueReview: false };
 const track = (n: number) => ({ uri: 'spotify:track:' + String(n).padStart(22, '0'), title: 'Fixture song ' + n, artist: 'Fixture artist ' + n, image: '', url: 'https://open.spotify.com/track/' + String(n).padStart(22, '0') });
 
+test('accepted-but-empty playback stays saved with a warning and explicit recovery survives reload', async ({ page }) => {
+ let writes = 0, generations = 0, recovered = false;
+ const selection = { id: 'empty-playback-selection', tracks: [track(5), track(6)], requested: 2, mode: 'replace' };
+ await page.route('**/api/**', async route => {
+  const path = new URL(route.request().url()).pathname;
+  if (path === '/api/select') { generations++; return route.fulfill({ json: selection }); }
+  if (path === '/api/selection') return route.fulfill({ json: selection });
+  if (path === '/api/queue') { writes++; return route.fulfill({ json: { state: 'unconfirmed', accepted: 2, total: 2, mode: 'replace', playbackConfirmed: false, sequenceConfirmed: false, message: 'Spotify accepted the command but did not confirm playback. Your songs are saved.' } }); }
+  if (path === '/api/queue/restart') { writes++; recovered = true; return route.fulfill({ json: { state: 'complete', accepted: 2, total: 2, mode: 'replace', selectionId: 'recovered-selection', recoveryAttempt: true, playbackConfirmed: true, sequenceConfirmed: true, deviceName: 'iPhone' } }); }
+  const values: Record<string, unknown> = {
+   '/api/status': { ...status, mode: 'replace', review: false },
+   '/api/playback': { device: { id: 'phone', name: 'iPhone' }, playing: recovered ? track(5) : null, queue: recovered ? [track(6)] : [] },
+   '/api/receipt': { receipt: writes ? { ...selection, state: recovered ? 'complete' : 'unconfirmed', accepted: 2, total: 2, mode: 'replace', message: recovered ? undefined : 'Spotify accepted the command but did not confirm playback. Your songs are saved.' } : null },
+  };
+  await route.fulfill({ json: values[path] ?? {} });
+ });
+ await page.goto('/'); await page.getByLabel('What do you want to hear?').fill('Soul music');
+ await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
+ await expect(page.getByRole('alert')).toContainText('did not confirm playback');
+ await expect(page.getByRole('status')).toHaveCount(0);
+ const review = page.getByRole('region', { name: 'Review selection' });
+ await expect(review).toContainText('Fixture song 5'); await expect(review).not.toContainText('Nothing sent yet');
+ await expect(review.getByRole('link', { name: 'Open first song in Spotify', exact: true })).toHaveAttribute('href', track(5).uri);
+ await page.reload(); await expect(review).toContainText('Fixture song 6');
+ expect(writes).toBe(1); expect(generations).toBe(1);
+ await review.getByRole('button', { name: 'Continue selection', exact: true }).click();
+ await expect(page.getByRole('status')).toContainText('Playing your selection on iPhone');
+ expect(writes).toBe(2); expect(generations).toBe(1);
+ expect(await page.evaluate(() => sessionStorage.getItem('qc-pending-selection'))).toBeNull();
+});
+
 test('default flow generates and starts a full selection on a paused device without a review click', async ({ page }) => {
  let writes = 0, submitted: any;
  await page.route('**/api/**', async route => {

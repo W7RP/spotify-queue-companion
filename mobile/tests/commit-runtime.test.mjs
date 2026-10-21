@@ -26,24 +26,25 @@ export default { async fetch(request) {
       await db().prepare('INSERT INTO selections VALUES (?, ?, ?, ?)').bind(selectionId, 'owner', await seal({ tracks: fixtureTracks, prompt: 'Fixture request', count: 20, subject: 'fake-owner', deviceId: 'paused-phone' }, 'owner'), Date.now() + 600000).run();
       return response({ ready: true });
     }
+    if (params.has('restart')) return response(await restartSelection(params.get('owner') || 'owner', selectionId, undefined, 'paused-phone'));
     return response(await addSelection(params.get('owner') || 'owner', selectionId, undefined, params.get('mode') || 'replace', 'paused-phone'));
   } catch (error) { return fail(error); }
 } };
 `;
 
-async function fixture(mode, status = 200, cold = false, refusesWake = false) {
-  const writes = []; let playing = false, active = !cold;
+async function fixture(mode, status = 200, cold = false, refusesWake = false, failStarts = 0) {
+  const writes = []; let playing = false, active = !cold, queued = false, warmFirst = false;
   const raw = t => ({ type: 'track', id: t.id, name: t.title, artists: [{ name: t.artist }], album: { images: [] } });
   const worker = new Miniflare({ modules: true, compatibilityDate: '2026-05-15', script: source, d1Databases: ['DB'], bindings: { DATA_ENCRYPTION_KEY: '01'.repeat(32) }, log: new Log(LogLevel.NONE), outboundService: async request => {
     const path = new URL(request.url).pathname;
-    if (request.method !== 'GET') { writes.push({ path, method: request.method, body: request.method === 'PUT' ? await request.json() : null }); if (refusesWake && !active) return new Response(null, { status: 404 }); active = true; playing = true; return new Response(null, { status }); }
+    if (request.method !== 'GET') { writes.push({ path, method: request.method, body: request.method === 'PUT' ? await request.json() : null }); if (refusesWake && !active) return new Response(null, { status: 404 }); active = true; playing = true; if (path.endsWith('/play')) { if (failStarts > 0) { failStarts--; playing = false; queued = false; } else queued = true; } return new Response(null, { status }); }
     if (path.endsWith('/devices')) return Response.json({ devices: cold ? [] : [{ id: 'paused-phone', name: 'iPhone', type: 'Smartphone', is_active: playing }] });
-    if (path.endsWith('/queue')) return Response.json({ currently_playing: playing && mode === 'replace' ? raw(tracks[0]) : null, queue: playing && mode === 'replace' ? tracks.slice(1).map(raw) : [] });
+    if (path.endsWith('/queue')) return Response.json({ currently_playing: playing ? raw(queued || warmFirst ? tracks[0] : tracks[19]) : null, queue: queued && mode === 'replace' ? tracks.slice(1).map(raw) : [] });
     if (!active) return new Response(null, { status: 204 });
-    return Response.json({ device: { id: 'paused-phone' }, shuffle_state: false, repeat_state: 'off', is_playing: playing, item: playing ? raw(tracks[0]) : null });
+    return Response.json({ device: { id: 'paused-phone' }, shuffle_state: false, repeat_state: 'off', is_playing: playing, item: playing ? raw(queued || warmFirst ? tracks[0] : tracks[19]) : null });
   } });
   const init = await worker.dispatchFetch('https://fixture.test/init'); assert.equal(init.status, 200, await init.text());
-  return { worker, writes, makeReachable: () => { active = true; playing = true; }, send: () => worker.dispatchFetch('https://fixture.test/send?mode=' + mode) };
+  return { worker, writes, confirmPlaying: () => { active = true; playing = true; queued = true; }, makeReachable: () => { active = true; playing = true; warmFirst = true; }, restart: () => worker.dispatchFetch('https://fixture.test/send?restart=1'), send: () => worker.dispatchFetch('https://fixture.test/send?mode=' + mode) };
 }
 
 test('actual commit route with D1 handles twenty empty-success append replies and receipts prevent replay', async () => {
@@ -82,5 +83,57 @@ test('a refused wake leaves the selection unsent and it can finish after the use
     assert.equal(writes.filter(w => w.path.endsWith('/play')).length, 0);
     makeReachable(); const resumed = await send(); assert.equal(resumed.status, 200); assert.equal((await resumed.json()).accepted, 20);
     await send(); assert.equal(writes.filter(w => w.path.endsWith('/play')).length, 1);
+  } finally { await worker.dispose(); }
+});
+
+test('an acknowledged play that empties Spotify stays unconfirmed through receipts and never auto-replays', async () => {
+  const { worker, writes, send, restart } = await fixture('replace', 204, false, false, 1);
+  try {
+    const response = await send(); assert.equal(response.status, 200);
+    const result = await response.json();
+    assert.equal(result.state, 'unconfirmed'); assert.equal(result.accepted, 20);
+    assert.equal(result.playbackConfirmed, false); assert.equal(result.sequenceConfirmed, false);
+    const read = await (await send()).json();
+    assert.equal(read.state, 'unconfirmed'); assert.equal(read.tracks.length, 20);
+    assert.match(read.message, /did not confirm playback/);
+    const retry = await restart(); assert.equal(retry.status, 409);
+    assert.equal(writes.filter(w => w.path.endsWith('/play')).length, 1);
+  } finally { await worker.dispose(); }
+});
+
+test('explicit recovery waits for the saved first song and starts the full saved list only once', async () => {
+  const { worker, writes, send, restart, makeReachable } = await fixture('replace', 204, false, false, 1);
+  try {
+    await send(); assert.equal((await restart()).status, 409);
+    makeReachable();
+    const result = await (await restart()).json();
+    assert.equal(result.state, 'complete'); assert.equal(result.recoveryAttempt, true);
+    assert.equal(result.playbackConfirmed, true); assert.equal(result.sequenceConfirmed, true);
+    assert.deepEqual(writes.filter(w => w.path.endsWith('/play')).map(w => w.body.uris), [tracks.map(t => t.uri), tracks.map(t => t.uri)]);
+    const repeated = await (await restart()).json();
+    assert.equal(repeated.selectionId, result.selectionId);
+    assert.equal(writes.filter(w => w.path.endsWith('/play')).length, 2);
+    assert.equal((await worker.dispatchFetch('https://fixture.test/send?restart=1&owner=other')).status, 409);
+  } finally { await worker.dispose(); }
+});
+
+test('a delayed observation can confirm the original command through a read without resending it', async () => {
+  const { worker, writes, send, confirmPlaying } = await fixture('replace', 204, false, false, 1);
+  try {
+    const result = await (await send()).json(); assert.equal(result.state, 'unconfirmed');
+    confirmPlaying();
+    const reread = await (await send()).json(); assert.equal(reread.playbackConfirmed, true); assert.equal(reread.sequenceConfirmed, true);
+    assert.equal(writes.filter(w => w.path.endsWith('/play')).length, 1);
+  } finally { await worker.dispose(); }
+});
+
+test('a second accepted-but-empty start cannot create a third playback attempt', async () => {
+  const { worker, writes, send, restart, makeReachable } = await fixture('replace', 204, false, false, 2);
+  try {
+    await send(); makeReachable();
+    const result = await (await restart()).json();
+    assert.equal(result.state, 'unconfirmed'); assert.equal(result.recoveryAttempt, true);
+    assert.equal((await (await restart()).json()).state, 'unconfirmed');
+    assert.equal(writes.filter(w => w.path.endsWith('/play')).length, 2);
   } finally { await worker.dispose(); }
 });

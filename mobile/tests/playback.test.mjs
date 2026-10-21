@@ -34,6 +34,7 @@ test('playback observation separates the playing first song from old manual queu
   assert.deepEqual(observeSelection(tracks, tracks[0], tracks.slice(1, 21), true), { playbackConfirmed: true, sequenceConfirmed: true });
   assert.deepEqual(observeSelection(tracks, tracks[0], [{ uri: 'old-manual-song' }], true), { playbackConfirmed: true, sequenceConfirmed: false });
   assert.equal(observeSelection(tracks, tracks[0], tracks.slice(1), false).playbackConfirmed, false);
+  assert.equal(observeSelection(tracks, tracks[0], tracks.slice(1), true, 'another-device', 'phone').playbackConfirmed, false);
 });
 
 test('write acknowledgements do not parse empty or non-JSON bodies; read responses still parse JSON', async () => {
@@ -48,7 +49,7 @@ test('shuffle and repeat-one are confirmed off before ordered playback, includin
   let state = null; const writes = [];
   await preparePlaybackOrder('phone', async () => state, async (kind, body) => {
     writes.push(kind);
-    if (kind === 'transfer') { assert.deepEqual(body, { device_ids: ['phone'], play: true }); state = { device: { id: 'phone' }, shuffle_state: true, repeat_state: 'track' }; }
+    if (kind === 'transfer') { assert.deepEqual(body, { device_ids: ['phone'], play: true }); state = { device: { id: 'phone' }, is_playing: true, shuffle_state: true, repeat_state: 'track' }; }
     if (kind === 'shuffle') state.shuffle_state = body.state;
     if (kind === 'repeat') state.repeat_state = body.state;
   }, async () => {});
@@ -67,6 +68,13 @@ test('a paused device is explicitly resumed before the full selection is sent', 
   let playing = false; const calls = [];
   await preparePlaybackOrder('phone', async () => ({ device: { id: 'phone' }, is_playing: playing, shuffle_state: false, repeat_state: 'off' }), async (kind, value) => { calls.push({ kind, value }); playing = true; }, async () => {});
   assert.deepEqual(calls, [{ kind: 'transfer', value: { device_ids: ['phone'], play: true } }]);
+});
+
+test('a transfer acknowledgement cannot race a still-paused device into a replacement', async () => {
+  let reads = 0;
+  await preparePlaybackOrder('phone', async () => ({ device: { id: 'phone' }, is_playing: ++reads > 3, shuffle_state: false, repeat_state: 'off' }), async () => {}, async () => {});
+  assert.equal(reads, 4);
+  await assert.rejects(preparePlaybackOrder('phone', async () => ({ device: { id: 'phone' }, is_playing: false }), async () => {}, async () => {}), /did not finish reconnecting/);
 });
 
 

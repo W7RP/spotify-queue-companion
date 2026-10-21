@@ -35,8 +35,8 @@ export async function startSelection(tracks, send, checkpoint) {
   const result = { state: 'complete', accepted: tracks.length, total: tracks.length };
   await checkpoint(result); return result;
 }
-export function observeSelection(tracks, playing, queue, isPlaying) {
-  const playbackConfirmed = isPlaying === true && playing?.uri === tracks[0]?.uri;
+export function observeSelection(tracks, playing, queue, isPlaying, actualDevice, expectedDevice) {
+  const playbackConfirmed = isPlaying === true && playing?.uri === tracks[0]?.uri && (!expectedDevice || actualDevice === expectedDevice);
   const expected = tracks.slice(1, 6), visible = queue.slice(0, expected.length);
   const sequenceConfirmed = playbackConfirmed && visible.length === expected.length && expected.every((track, i) => track.uri === visible[i]?.uri);
   return { playbackConfirmed, sequenceConfirmed };
@@ -50,10 +50,10 @@ export async function preparePlaybackOrder(deviceId, read, write, wait = () => n
     await write('transfer', { device_ids: [deviceId], play: true });
     for (let attempt = 0; attempt < 6; attempt++) {
       state = await read();
-      if (state?.device?.id === deviceId) break;
+      if (state?.device?.id === deviceId && state?.is_playing === true) break;
       await wait();
     }
-    if (state?.device?.id !== deviceId) throw new AppError('Spotify did not reconnect. Your songs are kept; open the first one in Spotify, tap Play, then return to finish.', 409, 'spotify_device');
+    if (state?.device?.id !== deviceId || state?.is_playing !== true) throw new AppError('Spotify did not finish reconnecting. Your songs are kept; open the first one in Spotify, tap Play, then return to finish.', 409, 'spotify_device');
   }
   const shuffle = state.shuffle_state !== false, repeatTrack = state.repeat_state === 'track';
   if (shuffle) await write('shuffle', { state: false });

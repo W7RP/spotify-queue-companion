@@ -68,3 +68,44 @@ This confirms the normal default flow on the physical iPhone; it does not imply
 that public Spotify APIs provide native manual queue deletion.
 
 Final functional Site source: `3f0b29a3929c06f8a1cf3add05e2101a7d071f31`.
+
+
+---
+
+# Mobile playback acknowledgement recovery
+
+2026-10-21: a user reported that Play now stopped their current song, left Spotify
+empty, and still showed a green acknowledgement in Queue Companion. Production logs
+showed a 204 response from Spotify's start-playback endpoint. The app's URI-list
+request matches Spotify's documented format. No change to the playback implementation
+had been deployed between the working version and this report. These facts do not
+establish why Spotify failed to start the list.
+
+The confirmed application bug was treating an accepted write as completed playback.
+The fix keeps accepted and observed delivery distinct, persists observation in the
+receipt, and requires the selected device, playing first song and next-up sequence
+before reporting completion. A missing observation is unconfirmed and retains the
+generated selection. Delayed read-only checks may confirm it without another write.
+Device wake-up now waits for playing state as well as the device ID, avoiding a
+replacement while a transfer is still pending.
+
+Recovery is an explicit user action: open the first saved song and tap Play in
+Spotify, then continue the existing selection. The server checks the first song and
+device, preserves source/account checks, and creates one deterministic child attempt
+for the same selected list. Repeated requests return its receipt. No automatic replay
+or new inference is performed, and a failed child cannot create a recovery chain.
+Selection expiry remains ten minutes. An uncertain transport error retains its
+existing manual-review behavior; it is not treated as a known empty acknowledgement.
+
+Regression coverage uses actual selection/receipt code and encrypted D1 records with
+fixture Spotify transport: a 204 that empties playback, persistence across receipts,
+blocked recovery before native playback, successful recovery without repeated writes,
+late confirmation through reads, another account, and a second failure with no third
+attempt. Browser coverage checks that the warning and saved selection survive reload
+and no green success or repeated model request appears before confirmed recovery.
+
+No live Spotify playback writes were made during these checks. The real-device
+failure and recovery still need confirmation from the user's phone; passing transport
+fixtures is not evidence that Spotify's current iOS behavior is resolved.
+
+Verification for this update: 67 backend checks and 48 browser checks passed; TypeScript and the production build passed. Live-phone confirmation remains pending.
