@@ -5,7 +5,7 @@ import { boundedFetch, spotifyResponse } from './http.mjs';
 export { boundedFetch };
 
 export type DeviceHint = { id: string; name: string; type: string; seen: number; subject?: string };
-export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string; scopes?: string }; playbackPlaylist?: { id: string; subject: string }; lastDevice?: DeviceHint; claudeKey?: string; model?: string; count?: number; mode?: 'append' | 'replace'; review?: boolean; provider?: 'chatgpt' | 'claude' | 'spotify' };
+export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; lastDevice?: DeviceHint; claudeKey?: string; model?: string; count?: number; mode?: 'append' | 'replace'; review?: boolean; provider?: 'chatgpt' | 'claude' | 'spotify' };
 export type Song = { id: string; uri: string; title: string; artist: string; artistNames: string[]; artistIds: string[]; image: string; url: string; source: string };
 export function db() { if (!env.DB) throw new AppError('The service is being prepared. Please try again shortly.', 503); return env.DB; }
 export function origin() { if (!env.APP_ORIGIN) throw new AppError('The service is being prepared.', 503); return env.APP_ORIGIN; }
@@ -64,25 +64,24 @@ export async function spotifyAccess(id: string) {
     if (!result.ok) throw new AppError('Spotify sign-in expired. Reconnect in Settings.', 401, 'spotify_connect');
     const token = await result.json() as any;
     if (typeof token.access_token !== 'string' || !Number.isFinite(token.expires_in)) throw new AppError('Spotify could not refresh your connection.', 502);
-    const updated = { ...credentials, scopes: typeof token.scope === 'string' ? token.scope : credentials.scopes, access: token.access_token, refresh: token.refresh_token ?? credentials.refresh, expires: Date.now() + token.expires_in * 1000 };
+    const updated = { ...credentials, access: token.access_token, refresh: token.refresh_token ?? credentials.refresh, expires: Date.now() + token.expires_in * 1000 };
     await saveAccount(id, { ...record.value, spotify: updated }, record.revision); return updated;
   } finally { await db().prepare('UPDATE accounts SET refresh_until = 0 WHERE user_id = ? AND refresh_until = ?').bind(id, refreshUntil).run(); }
 }
-export async function spotify(token: string, path: string, method = 'GET', value?: object, jsonWrite = false) {
+export async function spotify(token: string, path: string, method = 'GET', value?: object) {
   // Paths are constructed on the server. No visitor-controlled proxy URLs.
   if (!path.startsWith('/') || path.startsWith('//')) throw new AppError('Invalid music request.');
   const result = await boundedFetch('https://api.spotify.com/v1' + path, { method, headers: { Authorization: 'Bearer ' + token, ...(value ? { 'Content-Type': 'application/json' } : {}) }, ...(value ? { body: JSON.stringify(value) } : {}) });
-  if (method !== 'GET') console.info(JSON.stringify({ event: 'spotify_write', path: path.split('?')[0].replace(/\/playlists\/[a-zA-Z0-9]{22}/, '/playlists/:id'), method, status: result.status }));
+  if (method !== 'GET') console.info(JSON.stringify({ event: 'spotify_write', path: path.split('?')[0], method, status: result.status }));
   if (!result.ok) {
     const wait = Math.min(3600, Math.max(1, Number(result.headers.get('Retry-After')) || 30));
     if (result.status === 429) throw new AppError(`Spotify is busy. Wait ${wait} seconds before trying again.`, 429, 'spotify_rate_limit', wait);
     if (result.status === 401) throw new AppError('Reconnect Spotify in Settings.', 401, 'spotify_connect');
     if (result.status === 403) throw new AppError('Spotify denied access. Check Premium and the developer app’s allowed users.', 403, 'spotify_access');
-    if (result.status === 404 && path.startsWith('/playlists/')) throw new AppError('The Queue Companion playback playlist is unavailable. Restore it in Spotify, then try again.', 404, 'spotify_playlist');
     if (result.status === 404) throw new AppError('Spotify lost its connection to that device. Your generated songs are kept. Reconnect Spotify, then return to finish.', 404, 'spotify_device');
     throw new AppError('Spotify could not complete the request. Try again after checking Spotify.', 502, 'spotify_failed');
   }
-  return spotifyResponse(result, jsonWrite ? 'GET' : method);
+  return spotifyResponse(result, method);
 }
 export function song(raw: any, source = 'catalogue'): Song | null {
   raw = raw?.item ?? raw?.track ?? raw;

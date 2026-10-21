@@ -60,7 +60,7 @@ export async function finishSpotifySignIn(request, deps) {
     if (typeof identity.id !== 'string' || !identity.id) reject('profile_failed');
     if (identity.product && identity.product !== 'premium') reject('premium_required');
     stage = 'storage';
-    await deps.saveAccount({ ...before.value, spotify: { access: token.access_token, refresh: token.refresh_token, subject: identity.id, scopes: typeof token.scope === 'string' ? token.scope : '', expires: Date.now() + token.expires_in * 1000 } }, before.revision);
+    await deps.saveAccount({ ...before.value, spotify: { access: token.access_token, refresh: token.refresh_token, subject: identity.id, expires: Date.now() + token.expires_in * 1000 } }, before.revision);
   } catch (error) {
     if (error instanceof SpotifySignInError) throw error;
     throw new SpotifySignInError(stage === 'storage' || stage === 'state' ? 'storage_failed' : stage === 'token' ? 'token_failed' : stage === 'profile' ? 'profile_failed' : 'unavailable', stage);

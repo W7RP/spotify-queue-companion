@@ -123,8 +123,6 @@ Artwork was made with the built-in image-generation tool from the user's sketch:
 
 Existing iPhone Home Screen installations may retain their old icon. Open the updated site in Safari and add it to the Home Screen again if necessary.
 
-## Private playback playlist
+## Playback recovery
 
-Play now saves the exact reviewed selection to one private, non-collaborative Queue Companion playlist and starts that playlist at the first song. Each new Play now selection replaces its contents. Existing Spotify connections must reconnect once to grant `playlist-modify-private`; the app keeps pending selections during reconnection. Append still uses Spotify’s queue endpoint.
-
-The app verifies saved playlist order before starting it, then checks actual playback and queue order before reporting success. Unconfirmed playback offers the full saved playlist in Spotify; refreshing never repeats the playback command. This avoids Spotify clients that acknowledge bare track-list playback while stopping the current song and clearing the queue. Device-level confirmation still requires a real Spotify test.
+Play now sends the generated track list directly to Spotify. It creates no playlists and requests no playlist-edit permission. If Spotify acknowledges the command but stops playback, the saved-selection recovery asks you to play its first song, then uses the queue endpoint to add only the remaining songs. Continue never sends the failing full-list playback command again. This recovery preserves the currently playing song; existing manual queue entries still require review in Spotify. Normal automatic playback is verified separately from the API acknowledgement.

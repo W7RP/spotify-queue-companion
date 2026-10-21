@@ -1,4 +1,4 @@
-import { AppError } from './core.mjs';
+import { AppError, enqueueSequential } from './core.mjs';
 
 export function availableDevices(raw) {
   const seen = new Set();
@@ -24,10 +24,9 @@ export function refreshedDeviceId(id, previous, current) {
 }
 // The write response confirms acceptance of the entire list. Playback observation
 // is separate: a slow/missing read must never replay a successful PUT.
-export async function startSelection(tracks, send, checkpoint, playlistId) {
-  if (!/^[a-zA-Z0-9]{22}$/.test(playlistId ?? '')) throw new AppError('A verified playback playlist is required. Nothing was started.', 409);
+export async function startSelection(tracks, send, checkpoint) {
   await checkpoint({ state: 'sending', accepted: 0 });
-  try { await send({ context_uri: 'spotify:playlist:' + playlistId, offset: { position: 0 }, position_ms: 0 }); }
+  try { await send({ uris: tracks.map(t => t.uri), position_ms: 0 }); }
   catch (error) {
     const known = error instanceof AppError && error.status < 500;
     const result = { state: known ? 'failed' : 'uncertain', accepted: 0, total: tracks.length, message: known ? error.message : 'Spotify may have started this selection, but the response was lost. Check playback before trying again.' };
@@ -36,9 +35,18 @@ export async function startSelection(tracks, send, checkpoint, playlistId) {
   const result = { state: 'complete', accepted: tracks.length, total: tracks.length };
   await checkpoint(result); return result;
 }
+// Once the user has started the first saved song, complete the actual queue.
+// Never resend the URI-list play command that stopped playback on that client.
+export async function continueSelection(tracks, send, checkpoint) {
+  await checkpoint({ state: 'sending', accepted: 1 });
+  const sent = await enqueueSequential(tracks.slice(1), send, async point => checkpoint({ ...point, accepted: point.accepted + 1 }));
+  const result = { ...sent, accepted: sent.accepted + 1, total: tracks.length };
+  await checkpoint(result);
+  return result;
+}
 export function observeSelection(tracks, playing, queue, isPlaying, actualDevice, expectedDevice) {
   const playbackConfirmed = isPlaying === true && playing?.uri === tracks[0]?.uri && (!expectedDevice || actualDevice === expectedDevice);
-  const expected = tracks.slice(1, 6), visible = queue.slice(0, expected.length);
+  const expected = tracks.slice(1, 21), visible = queue.slice(0, expected.length);
   const sequenceConfirmed = playbackConfirmed && visible.length === expected.length && expected.every((track, i) => track.uri === visible[i]?.uri);
   return { playbackConfirmed, sequenceConfirmed };
 }

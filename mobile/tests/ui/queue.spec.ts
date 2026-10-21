@@ -2,19 +2,19 @@ import { test, expect } from '@playwright/test';
 const status = { signedIn: true, spotify: true, claude: true, model: 'claude-test-fixture', count: 15, mode: 'append', review: true, queueReview: false };
 const track = (n: number) => ({ uri: 'spotify:track:' + String(n).padStart(22, '0'), title: 'Fixture song ' + n, artist: 'Fixture artist ' + n, image: '', url: 'https://open.spotify.com/track/' + String(n).padStart(22, '0') });
 
-test('unconfirmed playlist playback survives reload and manual recovery never resends a play command', async ({ page }) => {
+test('accepted-but-empty playback stays saved with a warning and explicit recovery survives reload', async ({ page }) => {
  let writes = 0, generations = 0, recovered = false;
- const playlist = 'spotify:playlist:' + 'P'.repeat(22);
  const selection = { id: 'empty-playback-selection', tracks: [track(5), track(6)], requested: 2, mode: 'replace' };
  await page.route('**/api/**', async route => {
   const path = new URL(route.request().url()).pathname;
   if (path === '/api/select') { generations++; return route.fulfill({ json: selection }); }
   if (path === '/api/selection') return route.fulfill({ json: selection });
-  if (path === '/api/queue' || path === '/api/queue/restart') { writes++; return route.fulfill({ json: { state: 'unconfirmed', accepted: 2, total: 2, mode: 'replace', playbackPlaylist: playlist, canRestart: false, playbackConfirmed: false, sequenceConfirmed: false, message: 'Spotify accepted the command but did not confirm playback. Your songs are saved.' } }); }
+  if (path === '/api/queue') { writes++; return route.fulfill({ json: { state: 'unconfirmed', accepted: 2, total: 2, mode: 'replace', playbackConfirmed: false, sequenceConfirmed: false, message: 'Spotify accepted the command but did not confirm playback. Your songs are saved.' } }); }
+  if (path === '/api/queue/restart') { writes++; recovered = true; return route.fulfill({ json: { state: 'complete', accepted: 2, total: 2, mode: 'replace', selectionId: 'recovered-selection', recoveryAttempt: true, playbackConfirmed: true, sequenceConfirmed: true, deviceName: 'iPhone' } }); }
   const values: Record<string, unknown> = {
-   '/api/status': { ...status, mode: 'replace', review: false, playlistPermission: true },
+   '/api/status': { ...status, mode: 'replace', review: false },
    '/api/playback': { device: { id: 'phone', name: 'iPhone' }, playing: recovered ? track(5) : null, queue: recovered ? [track(6)] : [] },
-   '/api/receipt': { receipt: writes ? { ...selection, state: recovered ? 'complete' : 'unconfirmed', accepted: 2, total: 2, mode: 'replace', playbackPlaylist: playlist, canRestart: false, message: recovered ? undefined : 'Spotify accepted the command but did not confirm playback. Your songs are saved.' } : null },
+   '/api/receipt': { receipt: writes ? { ...selection, state: recovered ? 'complete' : 'unconfirmed', accepted: 2, total: 2, mode: 'replace', message: recovered ? undefined : 'Spotify accepted the command but did not confirm playback. Your songs are saved.' } : null },
   };
   await route.fulfill({ json: values[path] ?? {} });
  });
@@ -24,32 +24,13 @@ test('unconfirmed playlist playback survives reload and manual recovery never re
  await expect(page.getByRole('status')).toHaveCount(0);
  const review = page.getByRole('region', { name: 'Review selection' });
  await expect(review).toContainText('Fixture song 5'); await expect(review).not.toContainText('Nothing sent yet');
- await expect(review.getByRole('link', { name: 'Open saved playlist in Spotify', exact: true })).toHaveAttribute('href', playlist);
- await expect(review.getByRole('button', { name: 'Waiting for Spotify confirmation' })).toBeDisabled();
+ await expect(review.getByRole('link', { name: 'Open first song in Spotify', exact: true })).toHaveAttribute('href', track(5).uri);
  await page.reload(); await expect(review).toContainText('Fixture song 6');
  expect(writes).toBe(1); expect(generations).toBe(1);
- recovered = true; await page.getByRole('button', { name: 'Refresh Spotify queue' }).click();
- await expect(review).toHaveCount(0);
- expect(writes).toBe(1); expect(generations).toBe(1);
+ await review.getByRole('button', { name: 'Continue selection', exact: true }).click();
+ await expect(page.getByRole('status')).toContainText('Playing your selection on iPhone');
+ expect(writes).toBe(2); expect(generations).toBe(1);
  expect(await page.evaluate(() => sessionStorage.getItem('qc-pending-selection'))).toBeNull();
-});
-
-test('existing Spotify connections get a reconnect link and retain generated songs when permission is missing', async ({ page }) => {
- await page.route('**/api/**', async route => {
-  const path = new URL(route.request().url()).pathname;
-  if (path === '/api/queue') return route.fulfill({ status: 409, json: { error: 'Reconnect Spotify to allow one private playback playlist. Your selection is kept.', code: 'spotify_playlist_permission' } });
-  const values: Record<string, unknown> = {
-   '/api/status': { ...status, mode: 'replace', review: false, playlistPermission: false },
-   '/api/playback': { device: { id: 'phone', name: 'iPhone' }, playing: null, queue: [] },
-   '/api/select': { id: 'saved-no-permission', tracks: [track(5)], requested: 1, mode: 'replace' },
-   '/api/receipt': { receipt: null },
-  }; await route.fulfill({ json: values[path] ?? {} });
- });
- await page.goto('/'); await expect(page.getByRole('link', { name: 'Reconnect Spotify', exact: true })).toHaveAttribute('href', '/api/spotify/start');
- await page.getByLabel('What do you want to hear?').fill('Soul music'); await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
- await expect(page.getByRole('alert')).toContainText('Reconnect Spotify');
- await expect(page.getByRole('region', { name: 'Review selection' })).toContainText('Fixture song 5');
- expect(await page.evaluate(() => sessionStorage.getItem('qc-pending-selection'))).toBe('saved-no-permission');
 });
 
 test('default flow generates and starts a full selection on a paused device without a review click', async ({ page }) => {
