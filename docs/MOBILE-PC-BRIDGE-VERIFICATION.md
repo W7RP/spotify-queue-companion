@@ -48,3 +48,23 @@ Keep the PC on, awake and online while finding songs. Once Spotify accepts a
 reviewed selection, playback continues independently. Removing the computer
 configuration stops polling; it does not disconnect desktop ChatGPT. No incoming
 port, tunnel, paid hosting or additional domain was configured.
+
+## Older helper replacing the bridge (2026-10-21)
+
+The owner reported an offline PC while Windows was running. The installed helper
+process had started at 20:34 UTC, but its binary had an October 11 timestamp and
+predated the mobile bridge. Both the local bridge status and production D1 row
+stopped updating around 20:31 UTC. The installed Repair executable had been
+replaced at 20:32 UTC. These observations identify an older installed payload;
+they do not establish what launched the installer.
+
+Restoring the current helper immediately restored outbound polling. The production
+mailbox reported a heartbeat five seconds old with ready=1 at 20:45 UTC. The
+Windows login Run entry already pointed to the correct installation path.
+
+Rebuilt both helper and installer from the current repository and replaced the
+installed helper and local Repair executable. SHA-256 checks matched each installed
+file to its fresh build. No Spotify restart, OAuth reconnection, credential change,
+network change or artificial heartbeat was required. All 52 isolated helper checks
+passed. Existing downloaded installers can still contain older helpers; this repair
+does not update copies elsewhere or establish a new public release.
