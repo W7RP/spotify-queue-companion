@@ -151,3 +151,35 @@ The client checks unconfirmed receipts every two seconds for up to thirty second
 Validation: 80 backend/domain/runtime checks, 54 browser checks, TypeScript and production build passed. Workerd/D1 coverage includes empty-player rebuilding after all list-play commands fail, delayed original starts, existing queues, device changes, missing queue propagation, partial delivery, refused Next and lost advance responses. Pure tests include fifty tracks and the first queued track starting itself. Browser tests verify read-only automatic confirmation and durable no-replay behavior. Fixture wait intervals are compressed without removing reads or state transitions. No live Spotify playback writes were made by the assistant; phone confirmation remains pending.
 
 References: [Spotify queue](https://developer.spotify.com/documentation/web-api/reference/add-to-queue), [Spotify Next](https://developer.spotify.com/documentation/web-api/reference/skip-users-playback-to-next-track), [Spotify playback](https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback), [Tailscale exit-node routing](https://tailscale.com/docs/features/exit-nodes).
+
+## Delivery through short connection interruptions (2026-10-21)
+
+The phone still cleared playback with its VPN and Tailscale disabled. Production
+recorded a canceled queue invocation after about 6.9 seconds. A separate recovery
+received four successful enqueue acknowledgements followed by a 502 on the fifth,
+without advancing playback. This exposes application failure handling problems;
+it does not establish why Spotify's initial full-list command empties the player.
+
+Queue and Continue operations now register their existing promise with Workers
+waitUntil, preserving the same job through a brief browser disconnect rather than
+replaying it. Cloudflare permits up to thirty seconds of work after disconnect;
+this is bounded recovery, not indefinite background processing. After a lost HTTP
+response the browser follows its saved receipt with reads, blocks duplicate delivery,
+and avoids showing success until playback is observed.
+
+Recovery retains the selected device through short missing reads. An ambiguous
+enqueue response is reconciled through exact positive queue evidence, never by
+resending that track. If a later enqueue cannot be confirmed, the app may start the
+confirmed prefix once and reports the partial count. A narrowly bounded final-track
+case may be confirmed later only when the entire selected order fits in Spotify's
+visible queue window. Other partial attempts cannot become complete based on a
+limited snapshot. No playlist behavior or permissions are added.
+
+Validation: 85 backend/domain/runtime checks, 57 browser checks, TypeScript and
+production build passed. A real workerd/D1 fixture gates delivery until its HTTP
+response has ended, then verifies the original operation finishes once. Other cases
+cover applied-but-502 writes, late final-track confirmation, retained devices and
+partial prefix playback without replay. The assistant made no live Spotify playback
+writes; the next phone test remains necessary to confirm the observed regression.
+
+Reference: [Cloudflare waitUntil lifetime](https://developers.cloudflare.com/workers/runtime-apis/context/#waituntil).

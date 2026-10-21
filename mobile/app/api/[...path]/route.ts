@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:workers';
-import { response, user, account, saveAccount, fail, mutation, body, spotifyAccess, spotify, song, db, open } from '@/lib/queue/server';
+import { response, keepAlive, user, account, saveAccount, fail, mutation, body, spotifyAccess, spotify, song, db, open } from '@/lib/queue/server';
 import { AppError } from '@/lib/queue/core.mjs';
 import { makeSelection, claudeModels } from '@/lib/queue/select';
 import { addSelection, restartSelection, receipt, reviewQueue } from '@/lib/queue/commit';
@@ -73,9 +73,9 @@ export async function POST(request: Request) {
     if (path === '/api/queue') {
       if (input.mode !== undefined && !['append', 'replace'].includes(input.mode)) throw new AppError('Choose a valid playback mode.');
       if (input.device !== undefined && (typeof input.device !== 'string' || input.device.length > 200)) throw new AppError('Choose a valid Spotify device.');
-      return response(await addSelection(person.userId, input.selection, input.keepUris, input.mode, input.device));
+      return response(await keepAlive(addSelection(person.userId, input.selection, input.keepUris, input.mode, input.device)));
     }
-    if (path === '/api/queue/restart') return response(await restartSelection(person.userId, input.selection, input.keepUris, input.device));
+    if (path === '/api/queue/restart') return response(await keepAlive(restartSelection(person.userId, input.selection, input.keepUris, input.device)));
     if (path === '/api/review') { await reviewQueue(person.userId); return response({ reviewed: true }); }
     if (path === '/api/erase') {
       // No operation can be resurrected by a pending token/model response after deletion.

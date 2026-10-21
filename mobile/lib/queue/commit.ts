@@ -15,15 +15,16 @@ export async function receipt(userId: string, selectionId: string) {
   const row = await db().prepare('SELECT sealed FROM selections WHERE id = ? AND user_id = ? AND expires_at > ?').bind(selectionId, userId, Date.now()).first<{ sealed: string }>();
   const selection = row ? await open<any>(row.sealed, userId) : null;
   const tracks = selection ? (details.selectedIndexes ?? selection.tracks.map((_: any, i: number) => i)).map((i: number) => selection.tracks[i]) : [];
-  if ((job.state === 'unconfirmed' || job.state === 'uncertain' && details.queueFallback) && tracks.length && (!details.queueFallback || job.count === job.total)) {
+  if ((job.state === 'unconfirmed' || job.state === 'uncertain' && details.queueFallback) && tracks.length && (!details.queueFallback || job.count === job.total || details.pendingTail && job.count + 1 === job.total && job.total <= 21)) {
     try {
       const credentials = await spotifyAccess(userId);
       if (credentials.subject === selection.subject) {
         const [state, queue] = await Promise.all([spotify(credentials.access, '/me/player'), spotify(credentials.access, '/me/player/queue')]);
         const observed = observeSelection(tracks, song(state?.item ?? queue?.currently_playing), (queue?.queue ?? []).map((t: any) => song(t)).filter(Boolean), state?.is_playing, state?.device?.id, details.deviceId);
         if (observed.sequenceConfirmed) {
-          Object.assign(details, observed, { message: undefined });
-          await db().prepare("UPDATE queue_jobs SET state = 'complete', sealed = ?, updated_at = ? WHERE id = ? AND user_id = ? AND state IN ('unconfirmed', 'uncertain')").bind(await seal(details, userId), Date.now(), job.id, userId).run();
+          Object.assign(details, observed, { message: undefined, pendingTail: false });
+          if (details.queueFallback) job.count = job.total;
+          await db().prepare("UPDATE queue_jobs SET state = 'complete', count = ?, sealed = ?, updated_at = ? WHERE id = ? AND user_id = ? AND state IN ('unconfirmed', 'uncertain')").bind(job.count, await seal(details, userId), Date.now(), job.id, userId).run();
           await db().prepare('DELETE FROM queue_locks WHERE user_id = ? AND job_id = ?').bind(userId, job.id).run();
           job.state = 'complete';
         }
@@ -121,8 +122,8 @@ export async function addSelection(userId: string, selectionId: string, keepUris
     await db().prepare('INSERT INTO queue_jobs(id, user_id, selection_id, state, count, total, updated_at, sealed) VALUES (?, ?, ?, ?, 0, ?, ?, ?)')
       .bind(id, userId, selectionId, 'preparing', tracks.length, Date.now(), await seal({ prompt: selection.prompt, requested: selection.count, deviceName: selection.deviceName, deviceId: device.id, mode, selectedIndexes: reviewed.indexes }, userId)).run();
     created = true;
-    let queueFallback = false;
-    const checkpoint = async (point: { state: string; accepted: number; queueFallback?: boolean }) => {
+    let queueFallback = false, pendingTail = false;
+    const checkpoint = async (point: { state: string; accepted: number; queueFallback?: boolean; pendingTail?: boolean }) => {
       if (point.queueFallback) {
         accepted = point.accepted;
         if (!queueFallback) {
@@ -130,6 +131,11 @@ export async function addSelection(userId: string, selectionId: string, keepUris
           await db().prepare('UPDATE queue_jobs SET sealed = ? WHERE id = ? AND user_id = ?').bind(await seal({ ...details, queueFallback: true }, userId), id, userId).run();
           queueFallback = true;
         }
+      }
+      if (point.pendingTail && !pendingTail) {
+        const job = await getJob(userId, selectionId), details = await open<any>(job!.sealed, userId);
+        await db().prepare('UPDATE queue_jobs SET sealed = ? WHERE id = ? AND user_id = ?').bind(await seal({ ...details, pendingTail: true }, userId), id, userId).run();
+        pendingTail = true;
       }
       await renewQueueLease(db(), userId, id);
       await db().prepare('UPDATE queue_jobs SET state = ?, count = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(mode === 'replace' && point.state === 'complete' ? 'observing' : point.state, point.accepted, Date.now(), id, userId).run();
@@ -196,7 +202,7 @@ export async function addSelection(userId: string, selectionId: string, keepUris
       }
       const job = await getJob(userId, selectionId);
       const details = await open<any>(job!.sealed, userId);
-      await db().prepare('UPDATE queue_jobs SET state = ?, sealed = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(result.state, await seal({ ...details, ...observed, message: (result as any).message }, userId), Date.now(), id, userId).run();
+      await db().prepare('UPDATE queue_jobs SET state = ?, sealed = ?, updated_at = ? WHERE id = ? AND user_id = ?').bind(result.state, await seal({ ...details, ...observed, pendingTail: !!(result as any).pendingTail, message: (result as any).message }, userId), Date.now(), id, userId).run();
       console.info(JSON.stringify({ event: 'spotify_start_observed', state: result.state, count: tracks.length, accepted: result.accepted, playing: observed.playbackConfirmed === true, ordered: observed.sequenceConfirmed === true, recovery: !!selection.queueRecovery, queueFallback, playerKnown: lastView?.playerKnown === true, sameDevice: lastView?.deviceId === device.id, hasItem: lastView?.hasItem === true, queueKnown: lastView?.queueKnown === true, visibleCount: lastView?.queueCount ?? null }));
     }
     if (result.state === 'unconfirmed') await db().prepare('UPDATE queue_locks SET expires_at = ? WHERE user_id = ? AND job_id = ?').bind(Date.now(), userId, id).run();

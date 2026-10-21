@@ -1,8 +1,14 @@
-import { env } from 'cloudflare:workers';
+import { env, waitUntil } from 'cloudflare:workers';
 import { getChatGPTUser, chatGPTSignInPath } from '@/app/chatgpt-auth';
 import { AppError, guardOrigin } from './core.mjs';
 import { boundedFetch, spotifyResponse } from './http.mjs';
 export { boundedFetch };
+// Keep the same operation alive across a short Safari/network disconnect.
+// The caller still awaits the result; no second operation or delivery replay is created.
+export function keepAlive<T>(operation: Promise<T>): Promise<T> {
+  waitUntil(operation.then(() => undefined, () => undefined));
+  return operation;
+}
 
 export type DeviceHint = { id: string; name: string; type: string; seen: number; subject?: string };
 export type Account = { spotify?: { access: string; refresh: string; expires: number; subject: string }; lastDevice?: DeviceHint; claudeKey?: string; model?: string; count?: number; mode?: 'append' | 'replace'; review?: boolean; provider?: 'chatgpt' | 'claude' | 'spotify' };

@@ -59,46 +59,89 @@ export function knownPlayback(view, deviceId) {
 export function emptyPlayback(view, deviceId) {
   return knownPlayback(view, deviceId) && view.isPlaying === false && !view.hasItem && view.queue.length === 0;
 }
-export async function recoverEmptyQueue(tracks, deviceId, read, enqueue, advance, checkpoint, wait = () => new Promise(resolve => setTimeout(resolve, 500))) {
+export async function recoverEmptyQueue(tracks, deviceId, read, enqueue, advance, checkpoint, wait = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms))) {
+  const settled = async () => {
+    let last = { playerKnown: false, queueKnown: false, queueCount: 0, deviceId: '', queue: [] };
+    for (let i = 0; i < 4; i++) {
+      try {
+        last = await read();
+        if (knownPlayback(last, deviceId) || last?.deviceId && last.deviceId !== deviceId) return last;
+      } catch { /* Retry reads only. A missing response is never an empty player. */ }
+      if (i < 3) await wait(250 * (i + 1));
+    }
+    return last;
+  };
+  const matchesPrefix = (view, count) => {
+    if (!knownPlayback(view, deviceId)) return false;
+    const firstPlaying = view.hasItem && view.playing?.uri === tracks[0].uri && view.isPlaying === true;
+    if (view.hasItem && !firstPlaying || !view.hasItem && view.isPlaying !== false) return false;
+    const expected = tracks.slice(firstPlaying ? 1 : 0, count);
+    return expected.length <= 20 && view.queue.length === expected.length && expected.every((t, i) => t.uri === view.queue[i]?.uri);
+  };
   // Give delayed playback another chance. Never append into a still-loading,
   // existing or foreign queue, and never replay a timed-out original command.
   try {
     for (let i = 0; i < 3; i++) {
-      if (!emptyPlayback(await read(), deviceId)) return null;
+      if (!emptyPlayback(await settled(), deviceId)) return null;
       if (i < 2) await wait();
     }
   } catch { return null; }
-  let accepted = 0;
+  let accepted = 0, deliveryProblem = '', pendingTail = false;
   const finish = async (state, message) => {
-    const result = { state, accepted, total: tracks.length, queueFallback: true, ...(message ? { message } : {}) };
+    const result = { state, accepted, total: tracks.length, queueFallback: true, pendingTail, ...(message ? { message } : {}) };
     await checkpoint(result); return result;
   };
   await checkpoint({ state: 'rebuilding', accepted: 0, queueFallback: true });
   try {
     for (const track of tracks) {
-      const view = await read();
+      const view = await settled();
       const firstPlaying = view.hasItem && view.playing?.uri === tracks[0].uri && view.isPlaying === true;
       const expected = tracks.slice(firstPlaying ? 1 : 0, accepted);
       if (!knownPlayback(view, deviceId) || view.hasItem && !firstPlaying || !view.hasItem && view.isPlaying !== false || view.queue.length > expected.length || view.queue.some((t, i) => t.uri !== expected[i]?.uri)) {
         return await finish('unconfirmed', 'Spotify playback changed during queue recovery. Open Spotify to review it; nothing will be resent.');
       }
-      await enqueue(track); accepted++;
+      try { await enqueue(track); }
+      catch (error) {
+        const rejected = error instanceof AppError && error.status < 500;
+        let delivered = false;
+        // 502/timeouts can arrive after Spotify applies the write. Require
+        // positive queue evidence; never retry the ambiguous enqueue itself.
+        if (!rejected) for (let i = 0; i < 6; i++) {
+          const after = await settled();
+          if (matchesPrefix(after, accepted + 1)) { delivered = true; break; }
+          if (after?.deviceId && after.deviceId !== deviceId) break;
+          if (i < 5) await wait(Math.min(1500, 300 * (i + 1)));
+        }
+        if (!delivered) {
+          deliveryProblem = rejected ? 'unconfirmed' : 'uncertain';
+          pendingTail = !rejected && accepted + 1 === tracks.length && tracks.length <= 21;
+          await checkpoint({ state: 'rebuilding', accepted, queueFallback: true, pendingTail });
+          break; // Start only the prefix that was positively acknowledged/observed.
+        }
+      }
+      accepted++;
       await checkpoint({ state: 'rebuilding', accepted, queueFallback: true });
     }
+    if (!accepted) return await finish(deliveryProblem || 'unconfirmed', 'Spotify did not confirm any queued songs. Your selection is saved. Open Spotify before trying again; nothing will be resent.');
     for (let i = 0; i < 8; i++) {
-      const view = await read();
+      const view = await settled();
       if (!knownPlayback(view, deviceId)) break;
-      const observed = observeSelection(tracks, view.playing, view.queue, view.isPlaying, view.deviceId, deviceId);
-      if (observed.sequenceConfirmed) return await finish('complete'); // Spotify may start the first queued item itself.
+      if (pendingTail && (matchesPrefix(view, tracks.length) || observeSelection(tracks, view.playing, view.queue, view.isPlaying, view.deviceId, deviceId).sequenceConfirmed)) {
+        accepted = tracks.length; pendingTail = false; deliveryProblem = '';
+        await checkpoint({ state: 'rebuilding', accepted, queueFallback: true });
+      }
+      const playable = tracks.slice(0, accepted);
+      const observed = observeSelection(playable, view.playing, view.queue, view.isPlaying, view.deviceId, deviceId);
+      if (observed.sequenceConfirmed) return await finish(accepted === tracks.length ? 'complete' : deliveryProblem || 'unconfirmed', accepted === tracks.length ? undefined : `Playing the confirmed part of your queue. ${accepted} of ${tracks.length} songs were confirmed; review Spotify before adding more.`);
       if (view.hasItem) { if (view.playing?.uri !== tracks[0].uri || view.isPlaying !== true) break; }
       else {
-        const visibleEnough = view.queue.length >= Math.min(20, tracks.length) && view.queue.length <= tracks.length && view.queue.every((t, n) => t.uri === tracks[n]?.uri);
+        const visibleEnough = view.queue.length >= Math.min(20, accepted) && view.queue.length <= accepted && view.queue.every((t, n) => t.uri === tracks[n]?.uri);
         if (view.isPlaying === false && visibleEnough) {
           await checkpoint({ state: 'advancing', accepted, queueFallback: true });
           await advance(); // Exactly once, after the queued first song is visible. Never retry a lost response.
           for (let n = 0; n < 8; n++) {
-            const after = await read();
-            if (knownPlayback(after, deviceId) && observeSelection(tracks, after.playing, after.queue, after.isPlaying, after.deviceId, deviceId).sequenceConfirmed) return await finish('complete');
+            const after = await settled();
+            if (knownPlayback(after, deviceId) && observeSelection(playable, after.playing, after.queue, after.isPlaying, after.deviceId, deviceId).sequenceConfirmed) return await finish(accepted === tracks.length ? 'complete' : deliveryProblem || 'unconfirmed', accepted === tracks.length ? undefined : `Playing the confirmed part of your queue. ${accepted} of ${tracks.length} songs were confirmed; review Spotify before adding more.`);
             if (n < 7) await wait();
           }
           break;

@@ -5,7 +5,7 @@ import ts from 'typescript';
 import { Miniflare, Log, LogLevel } from 'miniflare';
 
 const files = ['core.mjs', 'http.mjs', 'lease.mjs', 'review.mjs', 'playback.mjs', 'server.ts', 'devices.ts', 'commit.ts'];
-let source = "import { env } from 'cloudflare:workers';\n";
+let source = "import { env, waitUntil } from 'cloudflare:workers';\n";
 for (const file of files) {
   let value = await readFile(new URL('../lib/queue/' + file, import.meta.url), 'utf8');
   value = value.replace(/^import .*;\r?\n/gm, '').replace('export { boundedFetch };', '');
@@ -13,7 +13,7 @@ for (const file of files) {
   source += '\n';
 }
 // Compress waits in the provider fixture, retaining every production read, guard and checkpoint.
-source = source.replaceAll('setTimeout(resolve, 750)', 'setTimeout(resolve, 1)').replaceAll('setTimeout(resolve, 500)', 'setTimeout(resolve, 1)');
+source = source.replaceAll('setTimeout(resolve, 750)', 'setTimeout(resolve, 1)').replaceAll('setTimeout(resolve, 500)', 'setTimeout(resolve, 1)').replaceAll('setTimeout(resolve, ms)', 'setTimeout(resolve, 1)');
 const schema = await readFile(new URL('../drizzle/0000_low_thunderbolt.sql', import.meta.url), 'utf8');
 const tracks = Array.from({ length: 20 }, (_, n) => ({ id: String(n + 1).padStart(22, '0'), uri: 'spotify:track:' + String(n + 1).padStart(22, '0'), title: 'Song ' + n, artist: 'Artist ' + n, artistNames: ['Artist ' + n], artistIds: [], source: 'catalogue', image: '', url: '' }));
 source += `
@@ -28,6 +28,8 @@ export default { async fetch(request) {
       await db().prepare('INSERT INTO selections VALUES (?, ?, ?, ?)').bind(selectionId, 'owner', await seal({ tracks: fixtureTracks, prompt: 'Fixture request', count: 20, subject: 'fake-owner', deviceId: 'paused-phone' }, 'owner'), Date.now() + 600000).run();
       return response({ ready: true });
     }
+    if (new URL(request.url).pathname === '/detached') { keepAlive(addSelection('owner', selectionId, undefined, 'replace', 'paused-phone')); return response({ started: true }); }
+    if (new URL(request.url).pathname === '/receipt') return response({ receipt: await receipt('owner', selectionId) });
     if (params.has('restart')) return response(await restartSelection(params.get('owner') || 'owner', selectionId, undefined, 'paused-phone'));
     return response(await addSelection(params.get('owner') || 'owner', selectionId, undefined, params.get('mode') || 'replace', 'paused-phone'));
   } catch (error) { return fail(error); }
@@ -35,6 +37,7 @@ export default { async fetch(request) {
 `;
 
 async function fixture(mode, status = 200, cold = false, refusesWake = false, failStarts = 0, failQueueAt = 0, options = {}) {
+  let releaseWrite; const writeGate = new Promise(resolve => { releaseWrite = resolve; });
   const writes = []; let playing = false, active = !cold, queued = false, warmFirst = false, appended = [], failedStart = false, readsAfterStart = 0;
   const raw = t => ({ type: 'track', id: t.id, name: t.title, artists: [{ name: t.artist }], album: { images: [] } });
   const worker = new Miniflare({ modules: true, compatibilityDate: '2026-05-15', script: source, d1Databases: ['DB'], bindings: { DATA_ENCRYPTION_KEY: '01'.repeat(32) }, log: new Log(LogLevel.NONE), outboundService: async request => {
@@ -42,11 +45,13 @@ async function fixture(mode, status = 200, cold = false, refusesWake = false, fa
     if (request.method !== 'GET') {
       const text = await request.text(); const body = text ? JSON.parse(text) : null;
       writes.push({ path, method: request.method, body, uri: url.searchParams.get('uri') });
+      if (options.pauseFirstWrite && writes.length === 1) await writeGate;
       if (refusesWake && !active) return new Response(null, { status: 404 });
       active = true;
       if (path.endsWith('/queue')) {
         if (failQueueAt && appended.length === failQueueAt - 1) return new Response(null, { status: 503 });
         appended.push(tracks.find(t => t.uri === url.searchParams.get('uri')));
+        if (options.lostEnqueueAt === appended.length) return new Response(null, { status: 502 });
         if (!options.nativeQueue) playing = true;
       } else if (path.endsWith('/next')) {
         if (options.refuseNext) return new Response(null, { status: 404 });
@@ -68,7 +73,7 @@ async function fixture(mode, status = 200, cold = false, refusesWake = false, fa
     return Response.json({ device: { id: failedStart && options.rotateDevice ? 'other-device' : 'paused-phone' }, shuffle_state: false, repeat_state: 'off', is_playing: playing, item: playing ? raw(queued || warmFirst ? tracks[0] : tracks[19]) : null });
   } });
   const init = await worker.dispatchFetch('https://fixture.test/init'); assert.equal(init.status, 200, await init.text());
-  return { worker, writes, confirmPlaying: () => { active = true; playing = true; queued = true; appended = []; }, makeReachable: () => { active = true; playing = true; warmFirst = true; }, restart: () => worker.dispatchFetch('https://fixture.test/send?restart=1'), send: () => worker.dispatchFetch('https://fixture.test/send?mode=' + mode) };
+  return { worker, writes, releaseWrite, confirmPlaying: () => { active = true; playing = true; queued = true; appended = []; }, makeReachable: () => { active = true; playing = true; warmFirst = true; }, restart: () => worker.dispatchFetch('https://fixture.test/send?restart=1'), send: () => worker.dispatchFetch('https://fixture.test/send?mode=' + mode) };
 }
 
 test('actual commit route with D1 handles twenty empty-success append replies and receipts prevent replay', async () => {
@@ -207,12 +212,45 @@ test('a lost advance response can be confirmed later by reads without a second n
   } finally { await worker.dispose(); }
 });
 
-test('partial automatic recovery and unobserved queue propagation never skip or resend', async () => {
+test('partial automatic recovery starts only its confirmed prefix; missing queue propagation never advances', async () => {
   for (const options of [{ nativeQueue: true, failAt: 6 }, { nativeQueue: true, noQueueEcho: true }]) {
     const { worker, writes, send, confirmPlaying } = await fixture('replace', 204, false, false, Infinity, options.failAt ?? 0, options);
     try {
       const result = await (await send()).json(); assert.equal(result.queueFallback, true); assert.equal(result.accepted, options.failAt ? 5 : 20); assert.notEqual(result.state, 'complete');
-      const count = writes.length; if (options.failAt) confirmPlaying(); const repeated = await (await send()).json(); assert.equal(repeated.accepted, result.accepted); assert.notEqual(repeated.state, 'complete'); assert.equal(writes.length, count); assert.equal(writes.filter(w => w.path.endsWith('/next')).length, 0);
+      const count = writes.length; if (options.failAt) confirmPlaying(); const repeated = await (await send()).json(); assert.equal(repeated.accepted, result.accepted); assert.notEqual(repeated.state, 'complete'); assert.equal(writes.length, count); assert.equal(writes.filter(w => w.path.endsWith('/next')).length, options.failAt ? 1 : 0);
     } finally { await worker.dispose(); }
   }
+});
+
+
+test('an enqueue applied by Spotify before a 502 is confirmed by reads without resending it', async () => {
+  const { worker, writes, send } = await fixture('replace', 204, false, false, Infinity, 0, { nativeQueue: true, lostEnqueueAt: 5 });
+  try {
+    const result = await (await send()).json(); assert.equal(result.state, 'complete'); assert.equal(result.accepted, 20);
+    const queued = writes.filter(w => w.path.endsWith('/queue')); assert.equal(queued.length, 20); assert.equal(new Set(queued.map(w => w.uri)).size, 20);
+    assert.equal(writes.filter(w => w.path.endsWith('/next')).length, 1);
+    const count = writes.length; await send(); assert.equal(writes.length, count);
+  } finally { await worker.dispose(); }
+});
+
+test('a pending final enqueue can later be confirmed from the full visible selection without a write', async () => {
+  const { worker, writes, send, confirmPlaying } = await fixture('replace', 204, false, false, Infinity, 20, { nativeQueue: true });
+  try {
+    const first = await (await send()).json(); assert.equal(first.state, 'uncertain'); assert.equal(first.accepted, 19); assert.equal(first.playbackConfirmed, true);
+    assert.equal(writes.filter(w => w.path.endsWith('/next')).length, 1);
+    confirmPlaying(); const count = writes.length;
+    const after = await (await send()).json(); assert.equal(after.state, 'complete'); assert.equal(after.accepted, 20); assert.equal(writes.length, count);
+  } finally { await worker.dispose(); }
+});
+
+test('keepAlive lets the actual queue operation finish after its HTTP response ends', async () => {
+  const { worker, writes, releaseWrite } = await fixture('replace', 204, false, false, Infinity, 0, { nativeQueue: true, pauseFirstWrite: true });
+  try {
+    const detached = await worker.dispatchFetch('https://fixture.test/detached'); assert.deepEqual(await detached.json(), { started: true });
+    for (let i = 0; i < 100 && !writes.length; i++) await new Promise(resolve => setTimeout(resolve, 5));
+    assert.equal(writes.length, 1); releaseWrite();
+    let final;
+    for (let i = 0; i < 200; i++) { final = (await (await worker.dispatchFetch('https://fixture.test/receipt')).json()).receipt; if (final?.state === 'complete') break; await new Promise(resolve => setTimeout(resolve, 10)); }
+    assert.equal(final.state, 'complete'); assert.equal(final.accepted, 20); assert.equal(writes.filter(w => w.path.endsWith('/next')).length, 1);
+  } finally { releaseWrite(); await worker.dispose(); }
 });

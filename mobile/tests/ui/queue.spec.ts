@@ -69,6 +69,22 @@ test('a durable automatic queue attempt opens the native queue and cannot be res
  await page.reload(); await expect(review.getByRole('button', { name: 'Continue selection', exact: true })).toBeDisabled(); expect(writes).toBe(1);
 });
 
+test('an interrupted queue response resumes its saved receipt without a second POST', async ({ page }) => {
+ let writes = 0, reads = 0;
+ const selection = { id: 'interrupted-selection', tracks: [track(5), track(6)], requested: 2, mode: 'replace' };
+ await page.route('**/api/**', async route => {
+  const path = new URL(route.request().url()).pathname;
+  if (path === '/api/queue' || path === '/api/queue/restart') { writes++; return route.abort('failed'); }
+  if (path === '/api/receipt') { reads++; return route.fulfill({ json: { receipt: writes ? { ...selection, id: 'background-job', state: reads > 1 ? 'complete' : 'rebuilding', accepted: reads > 1 ? 2 : 1, total: 2, playbackConfirmed: reads > 1, sequenceConfirmed: reads > 1, deviceName: 'iPhone' } : null } }); }
+  const values: Record<string, unknown> = { '/api/status': { ...status, mode: 'replace', review: false }, '/api/playback': { device: { id: 'phone', name: 'iPhone' }, playing: writes ? track(5) : null, queue: writes ? [track(6)] : [] }, '/api/select': selection, '/api/selection': selection };
+  return route.fulfill({ json: values[path] ?? {} });
+ });
+ await page.goto('/'); await page.getByLabel('What do you want to hear?').fill('Soul'); await page.getByRole('button', { name: 'Generate & play', exact: true }).click();
+ await expect(page.getByRole('alert')).toContainText('connection was interrupted'); await expect(page.getByRole('button', { name: 'Checking saved request…' })).toBeDisabled();
+ await expect(page.getByRole('status')).toContainText('Playing your selection on iPhone', { timeout: 9000 });
+ await expect(page.getByRole('alert')).toHaveCount(0); expect(writes).toBe(1); expect(await page.evaluate(() => sessionStorage.getItem('qc-pending-selection'))).toBeNull();
+});
+
 test('default flow generates and starts a full selection on a paused device without a review click', async ({ page }) => {
  let writes = 0, submitted: any;
  await page.route('**/api/**', async route => {

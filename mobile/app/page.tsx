@@ -6,7 +6,7 @@ import { refreshedDeviceId } from '@/lib/queue/playback.mjs';
 type Track = { uri: string; title: string; artist: string; image: string; url: string };
 type Status = { signedIn?: boolean; chatgpt?: boolean; pc?: { paired: boolean; online: boolean; connected: boolean }; spotify: boolean; claude: boolean; provider?: string; mode?: 'replace' | 'append'; review?: boolean; model: string; count: number; queueReview?: boolean; queueBusy?: boolean };
 type Selection = { queueFallback?: boolean; restart?: boolean; recoveryAttempt?: boolean; indexes?: number[]; mode?: 'replace' | 'append'; id: string; tracks: Track[]; requested: number; deviceName?: string; expires?: number; note?: string; unmatched?: number };
-type Delivery = { id?: string; mode?: string; tracks: Track[]; accepted: number; total: number; state: string; deviceName?: string };
+type Delivery = { id?: string; queueFallback?: boolean; mode?: string; tracks: Track[]; accepted: number; total: number; state: string; deviceName?: string };
 type Device = { id: string; name: string; type: string; restricted: boolean; active?: boolean; available?: boolean };
 type Playback = { device: Device | null; devices?: Device[]; playing: Track | null; queue: Track[]; isPlaying: boolean };
 type RequestRow = { id: string; prompt: string; accepted: number; total: number; state: string; at: number };
@@ -47,6 +47,7 @@ export default function Home() {
   const [sourceDraft, setSourceDraft] = useState<string | null>(null);
   const provider = sourceDraft ?? status?.provider ?? (status?.claude ? 'claude' : 'chatgpt');
   const mode = status?.mode ?? 'replace';
+  const deliveryActive = ['processing', 'preparing', 'sending', 'writing', 'observing', 'rebuilding', 'advancing'].includes(delivery?.state ?? '');
   const [selectedDevice, setSelectedDevice] = useState('');
   const providerName = provider === 'spotify' ? 'Spotify library' : provider === 'claude' ? 'Claude API' : 'ChatGPT';
   const working = useRef(false), choices = useRef<Record<string, string>>({}), composer = useRef<HTMLTextAreaElement>(null);
@@ -103,14 +104,18 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [status?.signedIn]);
   useEffect(() => {
-    if (delivery?.state !== 'unconfirmed') return;
+    if (!['processing', 'preparing', 'sending', 'writing', 'observing', 'rebuilding', 'advancing', 'unconfirmed'].includes(delivery?.state ?? '') && !(delivery?.state === 'uncertain' && delivery.queueFallback)) return;
     const selectionId = sessionStorage.getItem('qc-selection') ?? sessionStorage.getItem('qc-last-selection');
     if (!selectionId) return;
     let cancelled = false, checking = false;
-    const until = Date.now() + 30_000;
+    const until = Date.now() + (['unconfirmed', 'uncertain'].includes(delivery?.state ?? '') ? 30_000 : 90_000);
     const timer = setInterval(async () => {
       if (cancelled || checking || working.current || document.visibilityState !== 'visible') return;
-      if (Date.now() > until) { clearInterval(timer); return; }
+      if (Date.now() > until) {
+        clearInterval(timer);
+        if (!['unconfirmed', 'uncertain'].includes(delivery?.state ?? '') && (sessionStorage.getItem('qc-selection') ?? sessionStorage.getItem('qc-last-selection')) === selectionId) { setDelivery(value => value && { ...value, state: 'uncertain' }); setError('The saved request is still unconfirmed. Check Spotify before making another request; nothing was resent.'); }
+        return;
+      }
       checking = true;
       try {
         const result = await api('receipt?selection=' + encodeURIComponent(selectionId));
@@ -119,7 +124,7 @@ export default function Home() {
           setDelivery(result.receipt);
           if (result.receipt.state === 'complete') {
             clearInterval(timer); sessionStorage.removeItem('qc-selection'); sessionStorage.removeItem('qc-pending-selection'); sessionStorage.removeItem('qc-kept-indices');
-            setPreview(null); setRecoverDevice(false); setError(''); setMessage(`Playing your selection on ${result.receipt.deviceName ?? 'Spotify'}.`);
+            setPreview(null); setRecoverDevice(false); setError(''); setMessage(result.receipt.mode === 'append' ? `Spotify accepted ${result.receipt.accepted} songs for ${result.receipt.deviceName ?? 'your device'}.` : `Playing your selection on ${result.receipt.deviceName ?? 'Spotify'}.`);
             await loadPlayback();
           }
         }
@@ -127,7 +132,7 @@ export default function Home() {
       finally { checking = false; }
     }, 2_000);
     return () => { cancelled = true; clearInterval(timer); };
-  }, [delivery?.id, delivery?.state, loadPlayback]);
+  }, [delivery?.id, delivery?.state, delivery?.queueFallback, loadPlayback]);
   useEffect(() => { if (!cooldown) return; const timer = setTimeout(() => setCooldown(0), Math.max(0, cooldown - Date.now())); return () => clearTimeout(timer); }, [cooldown]);
   useEffect(() => {
     if (!sheet) return;
@@ -155,7 +160,7 @@ export default function Home() {
     finally { working.current = false; setBusy(''); }
   }
   async function add(playlistChoice?: { name: string; uri: string }) {
-    if (working.current || cooldown > Date.now()) return;
+    if (working.current || deliveryActive || cooldown > Date.now()) return;
     if (!status?.spotify) { setTab('settings'); setError('Connect Spotify to add songs to your queue.'); return; }
     if (playlistChoice) choices.current[playlistChoice.name] = playlistChoice.uri; else choices.current = {};
     if (!prompt.trim()) { composer.current?.focus(); return; }
@@ -173,7 +178,16 @@ export default function Home() {
     sessionStorage.setItem('qc-selection', selected.id); sessionStorage.setItem('qc-last-selection', selected.id);
     const latest = await loadPlayback();
     const requestedDevice = selectedDevice ? refreshedDeviceId(selectedDevice, playback?.devices ?? (playback?.device ? [playback.device] : []), latest.devices ?? (latest.device ? [latest.device] : [])) : latest.device?.id || playback?.device?.id || '';
-    const result = await api(selected.restart ? 'queue/restart' : 'queue', { selection: selected.id, keepUris: selected.tracks.map(track => track.uri), mode: selected.mode ?? mode, device: requestedDevice });
+    let result: any;
+    try { result = await api(selected.restart ? 'queue/restart' : 'queue', { selection: selected.id, keepUris: selected.tracks.map(track => track.uri), mode: selected.mode ?? mode, device: requestedDevice }); }
+    catch (error: any) {
+      if (!error.status || error.status >= 500) {
+        setDelivery({ id: selected.id, mode: selected.mode ?? mode, tracks: selected.tracks, accepted: 0, total: selected.tracks.length, state: 'processing', deviceName: selected.deviceName });
+        setMessage(''); setError('The connection was interrupted. Checking the saved request; no songs will be resent.');
+        return;
+      }
+      throw error;
+    }
     setDelivery({ ...result, tracks: result.tracks ?? selected.tracks, deviceName: result.deviceName ?? selected.deviceName });
     if (result.selectionId) { selected = { ...selected, id: result.selectionId }; sessionStorage.setItem('qc-selection', selected.id); sessionStorage.setItem('qc-last-selection', selected.id); }
     if (result.state === 'unconfirmed') {
@@ -190,7 +204,7 @@ export default function Home() {
     await refresh();
   }
   async function sendPreview() {
-    if (!preview?.tracks.length || working.current || cooldown > Date.now()) return;
+    if (!preview?.tracks.length || working.current || deliveryActive || cooldown > Date.now()) return;
     working.current = true; setError(''); setMessage(''); setSelectionNote('');
     try { await submitSelection(preview); }
     catch (e: any) { if (e.status === 410) setPreview(null); showError(e); }
@@ -220,10 +234,10 @@ export default function Home() {
           <textarea id="music-request" ref={composer} value={prompt} onChange={e => { setPrompt(e.target.value); setPreview(null); }} maxLength={1000} placeholder={provider === 'spotify' ? 'Mix songs from my "Evening" playlist and liked songs.' : 'Classic rock hidden gems, a little less obvious.'} rows={3} disabled={!!busy || loading}/>
           <div className="request-controls"><label className="count-control"><select aria-label="Number of songs" value={count} disabled={!!busy || loading} onChange={e => { const value = Number(e.target.value); setCount(value); saveSettings(value); }}>{[5,10,15,20,25,30,40,50].map(n => <option key={n} value={n}>{n} songs</option>)}</select><Icon name="chevron" size={16}/></label><button className="source-button" disabled={!!busy || loading} onClick={() => setTab('settings')}>{providerName}{provider === 'chatgpt' && !status?.chatgpt ? (status?.pc?.paired ? ' · PC offline' : ' · Not connected') : provider === 'claude' && !status?.claude ? ' · Not connected' : ''}<Icon name="arrow" size={13}/></button></div>
           <label className="playback-mode"><span>Playback</span><select aria-label="Playback mode" value={mode} disabled={!!busy || loading} onChange={e => saveSettings(count, status?.model ?? '', provider, e.target.value as 'replace' | 'append')}><option value="replace">Play now</option><option value="append">Append to queue</option></select></label>
-          <button className="primary-button add-button" disabled={!!busy || loading || cooldown > Date.now() || (mode === 'append' && !!status?.queueReview)} onClick={() => add()}>{busy ? <><span className="spinner"/>{busy}</> : status?.review ? 'Find songs' : mode === 'replace' ? 'Generate & play' : 'Generate & append'}</button>
+          <button className="primary-button add-button" disabled={!!busy || deliveryActive || loading || cooldown > Date.now() || (mode === 'append' && !!status?.queueReview)} onClick={() => add()}>{busy || deliveryActive ? <><span className="spinner"/>{busy || 'Checking saved request…'}</> : status?.review ? 'Find songs' : mode === 'replace' ? 'Generate & play' : 'Generate & append'}</button>
           <button className={'device-button' + (device && device.available !== false ? ' connected' : '')} disabled={!!busy} onClick={() => setSheet('device')}><Icon name={device?.type === 'Smartphone' ? 'phone' : 'device'} size={18}/><span>{device ? (device.available === false ? 'Reconnect ' + device.name : device.name) : status?.spotify ? 'Open Spotify to find your device' : 'Connect Spotify to get started'}</span><Icon name="arrow" size={14}/></button>
         </section>
-        {preview && <section className="selection-preview" aria-label="Review selection"><div className="section-heading"><h2>{recoverDevice ? 'Your songs are saved' : 'Review your songs'}</h2><button className="text-button" disabled={!!busy} onClick={() => { setPreview(null); sessionStorage.removeItem('qc-pending-selection'); sessionStorage.removeItem('qc-kept-indices'); setRecoverDevice(false); setMessage('Selection cleared. No songs were sent to Spotify.'); }}>Clear selection</button></div><p className="section-description">{preview.tracks.length} kept of {preview.requested} requested · {preview.restart || preview.recoveryAttempt ? "Playback is not confirmed. Your saved selection is kept." : "Nothing sent yet. Remove any songs you don’t want."}</p>{recoverDevice && <div className="device-recovery"><p>{preview.queueFallback ? 'Automatic queue recovery did not confirm playback. Open Spotify and review the accepted songs in its queue before making another request. Nothing will be resent.' : (preview.mode ?? mode) === 'replace' ? 'Open the first selected song below and tap Play in Spotify, then return and continue. Continue adds the remaining songs to its queue without restarting or replacing the song you started.' : 'iOS can disconnect Spotify while it is paused. Open Spotify and resume your current song, then return and append this saved selection.'} Your selection stays available for 10 minutes; no new AI request is needed.</p>{preview.tracks.length > 0 && <a className="secondary-button" href={preview.queueFallback ? 'spotify://' : (preview.mode ?? mode) === 'replace' ? preview.tracks[0].uri : 'spotify://'}>{!preview.queueFallback && (preview.mode ?? mode) === 'replace' ? 'Open first song in Spotify' : 'Open Spotify'}</a>}</div>}{preview.recoveryAttempt && <p className="review-detail">Spotify still has not confirmed this selection. Check playback in Spotify. No further playback command will be sent automatically.</p>}{preview.note && <p className="review-detail">{preview.note}</p>}<div>{preview.tracks.map((track, index) => <div className="review-track" key={track.uri}><TrackRow track={track} index={index}/><button className="icon-button" aria-label={'Remove ' + track.title + ' from selection'} disabled={!!busy} onClick={() => setPreview(value => { if (!value) return value; const at = value.tracks.findIndex(t => t.uri === track.uri); const indexes = (value.indexes ?? value.tracks.map((_, i) => i)).filter((_, i) => i !== at); sessionStorage.setItem('qc-kept-indices', JSON.stringify(indexes)); return { ...value, indexes, tracks: value.tracks.filter((_, i) => i !== at) }; })}><Icon name="close" size={18}/></button></div>)}</div><button className="primary-button" disabled={!!busy || !preview.tracks.length || !!preview.recoveryAttempt || (mode === 'append' && !!status?.queueReview)} onClick={sendPreview}>{recoverDevice ? 'Continue selection' : `${(preview.mode ?? mode) === 'replace' ? 'Play' : 'Append'} ${preview.tracks.length} ${preview.tracks.length === 1 ? 'song' : 'songs'} to Spotify`}</button><p className="review-detail">{(preview.mode ?? mode) === 'replace' ? 'Starts your selection from the first song.' : 'Keeps the current song and existing queue.'} Selection expires after 10 minutes.</p></section>}
+        {preview && <section className="selection-preview" aria-label="Review selection"><div className="section-heading"><h2>{deliveryActive ? 'Starting your songs' : recoverDevice ? 'Your songs are saved' : 'Review your songs'}</h2><button className="text-button" disabled={!!busy} onClick={() => { setPreview(null); sessionStorage.removeItem('qc-pending-selection'); sessionStorage.removeItem('qc-kept-indices'); setRecoverDevice(false); setMessage('Selection cleared. No songs were sent to Spotify.'); }}>Clear selection</button></div><p className="section-description">{preview.tracks.length} kept of {preview.requested} requested · {preview.restart || preview.recoveryAttempt ? "Playback is not confirmed. Your saved selection is kept." : "Nothing sent yet. Remove any songs you don’t want."}</p>{recoverDevice && !deliveryActive && <div className="device-recovery"><p>{preview.queueFallback ? 'Automatic queue recovery did not confirm playback. Open Spotify and review the accepted songs in its queue before making another request. Nothing will be resent.' : (preview.mode ?? mode) === 'replace' ? 'Open the first selected song below and tap Play in Spotify, then return and continue. Continue adds the remaining songs to its queue without restarting or replacing the song you started.' : 'iOS can disconnect Spotify while it is paused. Open Spotify and resume your current song, then return and append this saved selection.'} Your selection stays available for 10 minutes; no new AI request is needed.</p>{preview.tracks.length > 0 && <a className="secondary-button" href={preview.queueFallback ? 'spotify://' : (preview.mode ?? mode) === 'replace' ? preview.tracks[0].uri : 'spotify://'}>{!preview.queueFallback && (preview.mode ?? mode) === 'replace' ? 'Open first song in Spotify' : 'Open Spotify'}</a>}</div>}{preview.recoveryAttempt && <p className="review-detail">Spotify still has not confirmed this selection. Check playback in Spotify. No further playback command will be sent automatically.</p>}{preview.note && <p className="review-detail">{preview.note}</p>}<div>{preview.tracks.map((track, index) => <div className="review-track" key={track.uri}><TrackRow track={track} index={index}/><button className="icon-button" aria-label={'Remove ' + track.title + ' from selection'} disabled={!!busy} onClick={() => setPreview(value => { if (!value) return value; const at = value.tracks.findIndex(t => t.uri === track.uri); const indexes = (value.indexes ?? value.tracks.map((_, i) => i)).filter((_, i) => i !== at); sessionStorage.setItem('qc-kept-indices', JSON.stringify(indexes)); return { ...value, indexes, tracks: value.tracks.filter((_, i) => i !== at) }; })}><Icon name="close" size={18}/></button></div>)}</div><button className="primary-button" disabled={!!busy || deliveryActive || !preview.tracks.length || !!preview.recoveryAttempt || (mode === 'append' && !!status?.queueReview)} onClick={sendPreview}>{deliveryActive ? 'Delivery in progress' : recoverDevice ? 'Continue selection' : `${(preview.mode ?? mode) === 'replace' ? 'Play' : 'Append'} ${preview.tracks.length} ${preview.tracks.length === 1 ? 'song' : 'songs'} to Spotify`}</button><p className="review-detail">{(preview.mode ?? mode) === 'replace' ? 'Starts your selection from the first song.' : 'Keeps the current song and existing queue.'} Selection expires after 10 minutes.</p></section>}
         {delivery && <section className="delivery-section" aria-label="Your last request"><div className="section-heading"><h2>Your last request</h2><span>{delivery.accepted} of {delivery.total} accepted</span></div><p className="review-detail">{delivery.deviceName ?? 'Spotify device'} · Spotify may show only part of a long queue. “Accepted” alone does not confirm queue visibility.</p>{delivery.tracks?.length ? deliveryVisibility(delivery.tracks, delivery.accepted, playback, delivery.state).map((item: any, index: number) => <div className="delivery-track" key={item.uri}><TrackRow track={delivery.tracks[index]}/><span className={'delivery-state ' + item.state}>{item.state === 'visible' ? 'Visible in queue' : item.state === 'playing' ? 'Now playing' : item.state === 'not_sent' ? 'Not sent' : item.state === 'unconfirmed' ? 'Unconfirmed' : 'Accepted'}</span></div>) : <p className="review-detail">Song details have expired. Delivery counts are retained in Your requests.</p>}</section>}
         {status?.queueReview && mode === 'append' && <section className="review-notice"><h2>Check your Spotify queue</h2><p>A previous request may still be running or may have added songs. Review it in Spotify before making another request.</p><button className="secondary-button" onClick={review} disabled={!!status.queueBusy || !!busy}>I’ve checked my queue</button></section>}
         <div className="queue-content">{playback?.playing && <section className="now-playing"><h2>{playback.isPlaying ? 'Now playing' : 'Current song'}</h2><TrackRow track={playback.playing} playing/></section>}

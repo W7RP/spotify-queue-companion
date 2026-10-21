@@ -107,6 +107,7 @@ function emptyQueueFixture(options = {}) {
   }, async track => {
     if (options.failAt === sent.length + 1) throw new AppError('Busy', 429);
     sent.push(track.uri); update({ queue: [...view.queue, track] });
+    if (options.lostEnqueueAt === sent.length) throw new AppError('Bad gateway', 502);
     if (options.autoStart && sent.length === 1) update({ hasItem: true, isPlaying: true, playing: list[0], queue: [] });
   }, async () => {
     advances++; update({ hasItem: true, isPlaying: true, playing: list[0], queue: view.queue.slice(1) });
@@ -148,7 +149,25 @@ test('the first queued song starting itself does not receive a next command', as
 
 test('a partial enqueue failure or lost advance response never retries either command', async () => {
   const partial = emptyQueueFixture({ failAt: 3 }); const one = await partial.run();
-  assert.equal(one.state, 'unconfirmed'); assert.equal(one.accepted, 2); assert.equal(partial.sent.length, 2); assert.equal(partial.advances, 0);
+  assert.equal(one.state, 'unconfirmed'); assert.equal(one.accepted, 2); assert.equal(partial.sent.length, 2); assert.equal(partial.advances, 1);
   const lost = emptyQueueFixture({ lostAdvance: true }); const two = await lost.run();
   assert.equal(two.state, 'uncertain'); assert.equal(two.accepted, 5); assert.equal(lost.advances, 1);
+});
+
+
+test('an ambiguous enqueue is counted only after its exact queue position is observed', async () => {
+  let delayed = 0;
+  const f = emptyQueueFixture({ lostEnqueueAt: 3, onRead: (n, view, update, sent) => {
+    if (sent.length === 3) { delayed++; update({ queue: tracks.slice(0, delayed < 3 ? 2 : 3) }); }
+  } });
+  const result = await f.run(); assert.equal(result.state, 'complete'); assert.equal(result.accepted, 5);
+  assert.deepEqual(f.sent, tracks.slice(0, 5).map(t => t.uri)); assert.equal(f.advances, 1);
+});
+
+test('brief missing playback reads during delivery recover without forgetting the selected device', async () => {
+  let missing = 0;
+  const f = emptyQueueFixture({ onRead: (n, view, update, sent) => {
+    if (sent.length === 2) { missing++; update({ playerKnown: missing >= 3, deviceId: missing >= 3 ? 'phone' : '' }); }
+  } });
+  const result = await f.run(); assert.equal(result.state, 'complete'); assert.equal(f.sent.length, 5); assert.equal(f.advances, 1);
 });
