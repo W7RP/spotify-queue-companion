@@ -2,6 +2,20 @@ import { test, expect } from '@playwright/test';
 const status = { signedIn: true, spotify: true, claude: true, model: 'claude-test-fixture', count: 15, mode: 'append', review: true, queueReview: false };
 const track = (n: number) => ({ uri: 'spotify:track:' + String(n).padStart(22, '0'), title: 'Fixture song ' + n, artist: 'Fixture artist ' + n, image: '', url: 'https://open.spotify.com/track/' + String(n).padStart(22, '0') });
 
+test('unavailable replacement uses Append even with an old saved Play now preference',async({page})=>{
+ let generatedMode='',sentMode='';
+ await page.route('**/api/**',async route=>{
+  const path=new URL(route.request().url()).pathname;
+  if(path==='/api/status')return route.fulfill({json:{...status,mode:'replace',replacementAvailable:false,review:false}});
+  if(path==='/api/select'){generatedMode=route.request().postDataJSON().mode;return route.fulfill({json:{id:'append-safe',tracks:[track(1)],requested:1,mode:'append'}});}
+  if(path==='/api/queue'){sentMode=route.request().postDataJSON().mode;return route.fulfill({json:{id:'append-safe',state:'complete',accepted:1,total:1,tracks:[track(1)],mode:'append'}});}
+  return route.fulfill({json:path==='/api/playback'?{device:{id:'phone',name:'iPhone'},playing:track(2),queue:[]}:path==='/api/receipt'?{receipt:null}:{}});
+ });
+ await page.goto('/');await expect(page.getByLabel('Playback mode')).toHaveValue('append');await expect(page.locator('option[value="replace"]')).toBeDisabled();
+ await page.getByLabel('What do you want to hear?').fill('drain gang');await page.getByRole('button',{name:'Generate & append',exact:true}).click();
+ await expect(page.getByRole('status')).toContainText('Spotify accepted 1 song');expect(generatedMode).toBe('append');expect(sentMode).toBe('append');
+});
+
 test('accepted-but-empty playback stays saved with a warning and explicit recovery survives reload', async ({ page }) => {
  let writes = 0, generations = 0, recovered = false;
  const selection = { id: 'empty-playback-selection', tracks: [track(5), track(6)], requested: 2, mode: 'replace' };

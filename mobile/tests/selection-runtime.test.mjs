@@ -31,7 +31,7 @@ async function fixture(scenario="normal") {
   const initial=scenario==='normal'?proposals:proposals.slice(6,11);
   const extras=Array.from({length:8},(_,i)=>({title:`Refill ${i}`,artist:`New ${i}`}));
   proposals=[...proposals,...extras];
-  const worker=new Miniflare({modules:true,compatibilityDate:'2026-05-15',script:source,d1Databases:['DB'],bindings:{DATA_ENCRYPTION_KEY:'01'.repeat(32)},log:new Log(LogLevel.NONE),outboundService:async request=>{
+  const worker=new Miniflare({modules:true,compatibilityDate:'2026-05-15',script:source,d1Databases:['DB'],bindings:{DATA_ENCRYPTION_KEY:'01'.repeat(32),SPOTIFY_REPLACE_ENABLED:'true'},log:new Log(LogLevel.NONE),outboundService:async request=>{
     const url=new URL(request.url);
     if(url.hostname==='api.anthropic.com'&&url.pathname.endsWith('/models'))return Response.json({data:[{id:'claude-opus-5-5'},{id:'claude-haiku-4-5'},{id:'claude-haiku-5-5'},{id:'claude-haiku-6-0',lifecycle:'retired'}]});
     if(url.hostname==='api.anthropic.com') {
@@ -42,6 +42,7 @@ async function fixture(scenario="normal") {
       return Response.json({stop_reason:'end_turn',content:[{type:'thinking',thinking:'Private fixture thought'},{type:'text',text:JSON.stringify({songs,brief})}]});
     }
     if(request.method!=='GET'){writes.push(url.pathname);throw Error('Selection must never mutate Spotify');}
+    if(url.pathname.endsWith('/me/player/queue'))return Response.json({currently_playing:null,queue:[]});
     if(url.pathname.endsWith('/search')) {
       const query=url.searchParams.get('q');lookups.push(query);const row=proposals.find(s=>query.includes(JSON.stringify(s.title))&&query.includes(JSON.stringify(s.artist)));
       return Response.json({tracks:{items:row?[{type:'track',id:String(proposals.indexOf(row)+1).padStart(22,'0'),name:row.title+' - 2024 Remaster',artists:[{id:'artist',name:row.artist}],album:{images:[]}}]:[]}});

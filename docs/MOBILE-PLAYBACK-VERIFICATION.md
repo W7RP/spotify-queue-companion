@@ -183,3 +183,22 @@ partial prefix playback without replay. The assistant made no live Spotify playb
 writes; the next phone test remains necessary to confirm the observed regression.
 
 Reference: [Cloudflare waitUntil lifetime](https://developers.cloudflare.com/workers/runtime-apis/context/#waituntil).
+
+## Append-only hosted preview (2026-10-21)
+
+The user's own tests found Append working while replacement clears playback. A
+Spotify update is a possible cause, not an established diagnosis. The hosted app
+now defaults to Append and disables Play now. An old saved preference cannot enable
+replacement. Server guards reject replacement selection/delivery and Continue
+before Spotify writes, including stale browser requests. Existing receipts remain
+readable and no queued songs or library content are deleted.
+
+The retained replacement implementation requires an explicit runtime opt-in,
+`SPOTIFY_REPLACE_ENABLED=true`. Its existing tests opt in; the added deployment-mode
+test omits that flag and confirms zero player/queue writes. Browser checks confirm
+an old Play now preference submits Append for both selection and delivery. This
+change is limited to the hosted Web API path; desktop plugin replacement retains
+its existing native queue safeguards. It does not restore queue replacement.
+
+Validation: 91 mobile checks and 60 browser checks passed, with TypeScript and the
+production build. No live Spotify playback writes were made by the assistant.

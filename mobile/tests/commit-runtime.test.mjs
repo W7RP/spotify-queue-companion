@@ -40,7 +40,7 @@ async function fixture(mode, status = 200, cold = false, refusesWake = false, fa
   let releaseWrite; const writeGate = new Promise(resolve => { releaseWrite = resolve; });
   const writes = []; let playing = false, active = !cold, queued = false, warmFirst = false, appended = [], failedStart = false, readsAfterStart = 0;
   const raw = t => ({ type: 'track', id: t.id, name: t.title, artists: [{ name: t.artist }], album: { images: [] } });
-  const worker = new Miniflare({ modules: true, compatibilityDate: '2026-05-15', script: source, d1Databases: ['DB'], bindings: { DATA_ENCRYPTION_KEY: '01'.repeat(32) }, log: new Log(LogLevel.NONE), outboundService: async request => {
+  const worker = new Miniflare({ modules: true, compatibilityDate: '2026-05-15', script: source, d1Databases: ['DB'], bindings: { DATA_ENCRYPTION_KEY: '01'.repeat(32), ...(options.disableReplacement ? {} : { SPOTIFY_REPLACE_ENABLED: 'true' }) }, log: new Log(LogLevel.NONE), outboundService: async request => {
     const url = new URL(request.url), path = url.pathname;
     if (request.method !== 'GET') {
       const text = await request.text(); const body = text ? JSON.parse(text) : null;
@@ -83,6 +83,13 @@ test('actual commit route with D1 handles twenty empty-success append replies an
     const replay = await (await send()).json(); assert.equal(replay.accepted, 20); assert.equal(writes.length, 20);
     const other = await worker.dispatchFetch('https://fixture.test/send?owner=other'); assert.equal(other.status, 410); assert.equal(writes.length, 20);
   } finally { await worker.dispose(); }
+});
+
+test('replacement is disabled by default before player or queue writes',async()=>{
+ const {worker,writes,send}=await fixture('replace',200,false,false,0,0,{disableReplacement:true});try {
+  const result=await send();assert.equal(result.status,409);assert.equal((await result.json()).code,'replacement_unavailable');assert.equal(writes.length,0);
+  const retry=await worker.dispatchFetch('https://fixture.test/send?restart=1');assert.equal(retry.status,409);assert.equal(writes.length,0);
+ }finally{await worker.dispose();}
 });
 
 test('actual Play now route starts a paused phone with all twenty URIs in one PUT, observes order and never replays', async () => {

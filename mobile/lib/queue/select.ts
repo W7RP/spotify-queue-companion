@@ -3,7 +3,7 @@ import { mobileInstructions, selectionBrief, curateArtists, fastModel, claudeReq
 import { parseIntent, balancedMix, playlistMatches, type Playlist } from './domain';
 import { requireMusicSource } from './review.mjs';
 import { proposeOnComputer } from './pc';
-import { account, spotifyAccess, spotify, song, db, seal, boundedFetch, type Song } from './server';
+import { account, spotifyAccess, spotify, song, db, seal, boundedFetch, requirePlaybackMode, type Song } from './server';
 
 export async function claudeModels(key: string) {
   const result = await boundedFetch('https://api.anthropic.com/v1/models?limit=100', { headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' } });
@@ -56,10 +56,11 @@ async function search(token: string, query: string, offset = 0) {
   const page = await spotify(token, '/search?' + new URLSearchParams({ q: query.slice(0, 200), type: 'track', limit: '10', offset: String(offset) }));
   return (page.tracks?.items ?? []).map((raw: any) => song(raw)).filter(Boolean) as Song[];
 }
-export async function makeSelection(userId: string, prompt: string, requestedCount: number, requestedDevice = '', choices: Record<string, string> = {}, requestedMode: 'append' | 'replace' = 'replace') {
+export async function makeSelection(userId: string, prompt: string, requestedCount: number, requestedDevice = '', choices: Record<string, string> = {}, requestedMode: 'append' | 'replace' = 'append') {
   if (typeof prompt !== 'string' || prompt.trim().length < 2 || prompt.length > 1000 || !Number.isInteger(requestedCount) || requestedCount < 1 || requestedCount > 50) throw new AppError('Describe your music and choose between 1 and 50 songs.');
   let intent: ReturnType<typeof parseIntent>;
   try { intent = parseIntent(prompt, requestedCount, 50, requestedMode); } catch (error: any) { throw new AppError(error.message); }
+  requirePlaybackMode(intent.mode);
   if (intent.more) throw new AppError('For this mobile preview, describe the next set of songs in a new request.');
   const record = await account(userId);
   const needsModel = !intent.liked && !intent.history && !intent.inspiration && !intent.playlistNames.length && !intent.playlistUris.length && !intent.referencePlaylistNames.length && !intent.referencePlaylistUris.length && !intent.includedPlaylistNames.length && !intent.includedPlaylistUris.length;

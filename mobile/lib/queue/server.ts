@@ -3,6 +3,10 @@ import { getChatGPTUser, chatGPTSignInPath } from '@/app/chatgpt-auth';
 import { AppError, guardOrigin } from './core.mjs';
 import { boundedFetch, spotifyResponse } from './http.mjs';
 export { boundedFetch };
+export function replacementAvailable() { return env.SPOTIFY_REPLACE_ENABLED === 'true'; }
+export function requirePlaybackMode(mode: string) {
+  if (mode === 'replace' && !replacementAvailable()) throw new AppError('Spotify replacement is temporarily unavailable. Choose Append to queue; your current song will keep playing. Nothing was sent.', 409, 'replacement_unavailable');
+}
 // Keep the same operation alive across a short Safari/network disconnect.
 // The caller still awaits the result; no second operation or delivery replay is created.
 export function keepAlive<T>(operation: Promise<T>): Promise<T> {

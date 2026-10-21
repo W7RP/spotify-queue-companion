@@ -1,5 +1,5 @@
 import { env } from 'cloudflare:workers';
-import { response, keepAlive, user, account, saveAccount, fail, mutation, body, spotifyAccess, spotify, song, db, open } from '@/lib/queue/server';
+import { response, keepAlive, replacementAvailable, requirePlaybackMode, user, account, saveAccount, fail, mutation, body, spotifyAccess, spotify, song, db, open } from '@/lib/queue/server';
 import { AppError } from '@/lib/queue/core.mjs';
 import { makeSelection, claudeModels } from '@/lib/queue/select';
 import { addSelection, restartSelection, receipt, reviewQueue } from '@/lib/queue/commit';
@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     if (path === '/api/status') {
       const record = await account(person.userId), lock = await db().prepare('SELECT job_id, expires_at FROM queue_locks WHERE user_id = ?').bind(person.userId).first();
       const pc = await computerStatus(person.userId);
-      return response({ signedIn: true, spotify: !!record.value.spotify, claude: !!record.value.claudeKey, provider: record.value.provider ?? (record.value.claudeKey ? 'claude' : 'chatgpt'), chatgpt: pc.connected, pc, model: record.value.model ?? '', count: record.value.count ?? 15, mode: record.value.mode ?? 'replace', review: record.value.review ?? false, spotifyConfigured: !!env.SPOTIFY_CLIENT_ID, queueReview: !!lock, queueBusy: lock ? Number(lock.expires_at) > Date.now() : false });
+      return response({ signedIn: true, spotify: !!record.value.spotify, claude: !!record.value.claudeKey, provider: record.value.provider ?? (record.value.claudeKey ? 'claude' : 'chatgpt'), chatgpt: pc.connected, pc, model: record.value.model ?? '', count: record.value.count ?? 15, replacementAvailable: replacementAvailable(), mode: replacementAvailable() ? record.value.mode ?? 'append' : 'append', review: record.value.review ?? false, spotifyConfigured: !!env.SPOTIFY_CLIENT_ID, queueReview: !!lock, queueBusy: lock ? Number(lock.expires_at) > Date.now() : false });
     }
     if (path === '/api/playback') {
       const credentials = await spotifyAccess(person.userId);
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
       if (!Number.isInteger(input.count) || input.count < 1 || input.count > 50 || typeof input.model !== 'string' || input.model.length > 120) throw new AppError('Choose a valid count and model.');
       if (input.provider !== undefined && !['chatgpt', 'claude', 'spotify'].includes(input.provider)) throw new AppError('Choose a valid music source.');
       if (input.mode !== undefined && !['append', 'replace'].includes(input.mode) || input.review !== undefined && typeof input.review !== 'boolean') throw new AppError('Choose valid playback settings.');
+      requirePlaybackMode(input.mode ?? 'append');
       await saveAccount(person.userId, { ...record.value, ...(input.mode !== undefined ? { mode: input.mode } : {}), ...(input.review !== undefined ? { review: input.review } : {}), count: input.count, model: input.model, ...(input.provider !== undefined ? { provider: input.provider } : {}) }, record.revision); return response({ saved: true });
     }
     if (path === '/api/claude/connect') {

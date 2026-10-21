@@ -2,7 +2,7 @@ import { AppError, enqueueSequential, uniqueTracks } from './core.mjs';
 import { renewQueueLease, releaseReviewedLease } from './lease.mjs';
 import { chooseDevice, availableDevices, startSelection, continueSelection, recoverEmptyQueue, observeSelection, preparePlaybackOrder } from './playback.mjs';
 import { reviewedSelection } from './review.mjs';
-import { db, open, seal, spotifyAccess, spotify, account, song, type Song } from './server';
+import { db, open, seal, spotifyAccess, spotify, account, song, requirePlaybackMode, type Song } from './server';
 import { resolveDevice, rememberDevice } from './devices';
 
 async function getJob(userId: string, selectionId: string) {
@@ -41,6 +41,7 @@ export async function receipt(userId: string, selectionId: string) {
 // An explicit recovery is separate from delivery replay. Reuse a deterministic
 // child selection so double taps, reloads and lost responses cannot start twice.
 export async function restartSelection(userId: string, selectionId: string, keepUris?: string[], requestedDevice?: string) {
+  requirePlaybackMode('replace');
   const original = await receipt(userId, selectionId);
   if (!original || original.mode !== 'replace' || original.recoveryAttempt) throw new AppError('This selection cannot be restarted. Refresh its playback status first.', 409);
   const row = await db().prepare('SELECT sealed, expires_at FROM selections WHERE id = ? AND user_id = ? AND expires_at > ?').bind(selectionId, userId, Date.now()).first<{ sealed: string; expires_at: number }>();
@@ -67,7 +68,8 @@ export async function addSelection(userId: string, selectionId: string, keepUris
   const selection = await open<any>(row.sealed, userId);
   const reviewed = reviewedSelection(selection, keepUris), tracks = reviewed.tracks as Song[];
   if (!Array.isArray(tracks) || tracks.length < 1 || tracks.length > 50 || tracks.some(t => !/^spotify:track:[a-zA-Z0-9]{22}$/.test(t.uri))) throw new AppError('The selection is invalid. Nothing was queued.');
-  const mode = requestedMode ?? selection.mode ?? 'replace';
+  const mode = requestedMode ?? selection.mode ?? 'append';
+  requirePlaybackMode(mode);
   if (mode === 'replace') await reviewQueue(userId);
   const id = crypto.randomUUID();
   // A lock never expires by itself: a disconnected request may have reached Spotify.
