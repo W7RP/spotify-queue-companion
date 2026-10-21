@@ -565,7 +565,19 @@
   // src/curation.ts
   var selectionPolicy = {
     "schemaVersion": 1,
-    "version": "1.1.0",
+    "version": "1.2.0",
+    "collectives": [
+      {
+        "name": "Drain Gang",
+        "members": [
+          "Bladee",
+          "Ecco2k",
+          "Thaiboy Digital",
+          "Whitearmor"
+        ],
+        "source": "https://year0001.com/label/cases/yr0048"
+      }
+    ],
     "defaults": {
       "artistShareDivisor": 5,
       "minimumOtherArtistSongs": 2
@@ -602,18 +614,24 @@
   var artistKey = (track) => words(track.artistNames?.[0] ?? track.artist);
   function validateMusicBrief(value, prompt, count) {
     if (!value || typeof value !== "object" || Array.isArray(value)) throw Error("The music brief could not be read. Nothing was queued.");
-    const b = value;
+    let b = value;
     const names = (v) => Array.isArray(v) && v.length <= 6 && v.every((s) => typeof s === "string" && !!s.trim() && s.length <= 120 && !/[\u0000-\u001f]/.test(s));
     if (!["similarity", "artist-only", "discovery"].includes(b.kind) || !names(b.referenceArtists) || !names(b.excludedArtists) || !["balanced", "deep-cuts", "new-artists", "familiar"].includes(b.discovery) || !Number.isInteger(b.referenceCount) || b.referenceCount < -1 || b.referenceCount > count || !Array.isArray(b.excludedVersions) || b.excludedVersions.length > 4 || b.excludedVersions.some((v) => !["live", "acoustic", "remix", "cover"].includes(v)) || [b.genre, b.mood, b.era].some((s) => typeof s !== "string" || s.length > 200 || /[\u0000-\u001f]/.test(s))) throw Error("The music brief exceeded selection limits. Nothing was queued.");
     const text = " " + words(prompt) + " ";
+    const knownCollectives = selectionPolicy.collectives.filter((group) => b.referenceArtists.some((name) => words(name) === words(group.name)));
+    const collective = b.referenceType === "collective" || knownCollectives.length > 0;
+    const members = knownCollectives.length ? knownCollectives.flatMap((group) => [...group.members]) : b.collectiveMembers ?? [];
+    if (b.referenceType != null && !["artist", "collective", "none"].includes(b.referenceType) || b.collectiveMembers != null && (!Array.isArray(b.collectiveMembers) || b.collectiveMembers.length > 12 || b.collectiveMembers.some((s) => typeof s !== "string" || !s.trim() || s.length > 120 || /[\u0000-\u001f]/.test(s))) || collective && (!b.referenceArtists.length || !members.length) || !collective && (b.collectiveMembers?.length ?? 0) > 0) throw Error("The music brief exceeded selection limits. Nothing was queued.");
+    if (b.kind === "artist-only" && !b.referenceArtists.length) b = { ...b, kind: "discovery", referenceCount: -1 };
     if ([...b.referenceArtists, ...b.excludedArtists].some((a) => !text.includes(" " + words(a) + " "))) throw Error("The music brief introduced an artist restriction that was not requested. Nothing was queued.");
     if (b.kind === "artist-only" && (!b.referenceArtists.length || !b.referenceArtists.some((a) => {
       const name = words(a);
-      return ["only ", "only songs by ", "only music by ", "only tracks by ", "exclusively ", "exclusively by ", "songs by ", "music by ", "tracks by ", "nothing but "].some((prefix) => text.includes(" " + prefix + name + " "));
+      return text.trim() === name || ["only ", "only songs by ", "only music by ", "only tracks by ", "exclusively ", "exclusively by ", "songs by ", "music by ", "tracks by ", "songs from ", "music from ", "tracks from ", "nothing but "].some((prefix) => text.includes(" " + prefix + name + " "));
     }))) throw Error("The music brief changed an inspiration into an artist-only request. Nothing was queued.");
     if (b.excludedArtists.length && !/\b(?:no|not|without|avoid|exclude|excluding|except|none)\b/.test(words(prompt))) throw Error("The music brief invented an artist exclusion. Nothing was queued.");
-    return { kind: b.kind, referenceArtists: [...new Set(b.referenceArtists.map((a) => a.trim()))], excludedArtists: [...new Set(b.excludedArtists.map((a) => a.trim()))], genre: b.genre, mood: b.mood, era: b.era, discovery: b.discovery, referenceCount: b.referenceCount, excludedVersions: [...new Set(b.excludedVersions)] };
+    return { kind: b.kind, referenceArtists: [...new Set(b.referenceArtists.map((a) => a.trim()))], excludedArtists: [...new Set(b.excludedArtists.map((a) => a.trim()))], genre: b.genre, mood: b.mood, era: b.era, discovery: b.discovery, referenceCount: b.referenceCount, excludedVersions: [...new Set(b.excludedVersions)], ...collective ? { referenceType: "collective", collectiveMembers: [...new Set(members)] } : b.referenceType != null ? { referenceType: b.referenceType, collectiveMembers: [] } : {} };
   }
+  var referenceNames = (music) => music.referenceType === "collective" ? [...music.referenceArtists, ...music.collectiveMembers ?? []] : music.referenceArtists;
   function selectionBrief(prompt, count, modelBrief) {
     const music = modelBrief == null ? null : validateMusicBrief(modelBrief, prompt, count);
     const text = words(prompt);
@@ -626,7 +644,7 @@
     return {
       similarity: music ? music.kind === "similarity" : similarity,
       balance: music ? music.kind === "similarity" && explicitCount === null : similarity && !allocation,
-      referenceText: music ? music.referenceArtists.map(words) : referenceText,
+      referenceText: music ? referenceNames(music).map(words) : referenceText,
       count,
       music,
       explicitCount,
@@ -663,7 +681,19 @@
       ordered.push(track);
       previous = artistKey(track);
     }
-    if (!ordered.length) return familiar.slice(0, brief.count);
+    if (!ordered.length) {
+      if (brief.music?.referenceType !== "collective") return familiar.slice(0, brief.count);
+      const pool = familiar.slice(), result2 = [];
+      let previous2 = "";
+      while (pool.length && result2.length < brief.count) {
+        let index = pool.findIndex((track2) => artistKey(track2) !== previous2);
+        if (index < 0) index = 0;
+        const [track] = pool.splice(index, 1);
+        result2.push(track);
+        previous2 = artistKey(track);
+      }
+      return result2;
+    }
     const result = [];
     let at = 0;
     for (let i = 0; i < ordered.length; i++) {
@@ -676,7 +706,7 @@
     const artists = (track.artistNames?.length ? track.artistNames : [track.artist]).map(words), music = brief.music;
     if (!music) return true;
     if (music.excludedArtists.some((a) => artists.includes(words(a)))) return false;
-    if (music.kind === "artist-only" && !music.referenceArtists.some((a) => artists.includes(words(a)))) return false;
+    if (music.kind === "artist-only" && !referenceNames(music).some((a) => artists.includes(words(a)))) return false;
     const rawTitle = track.title ?? "";
     return !music.excludedVersions.some((v) => v === "live" ? /(?:[-–—(\[]\s*[^)\]]*\blive\b)|\blive (?:at|from|in|version|recording)\b/i.test(rawTitle) : new RegExp("[-\u2013\u2014(\\[]\\s*[^)\\]]*\\b" + v + "\\b", "i").test(rawTitle));
   }

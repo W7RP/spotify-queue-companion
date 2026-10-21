@@ -77,6 +77,12 @@ See `docs/STRUCTURED-SELECTION-VERIFICATION.md` for measured results and limits.
 
 ## Source updates and installed-app updates
 
+Policy 1.2.0 distinguishes collective identity from credited member artists using
+referenceType and collectiveMembers. Bare source names, source-only requests and
+similarity requests have separate behavior. Known collective membership entries
+and their source URLs live in policy.json; other membership is model-supplied and
+not independently verified. Artist exclusions still apply to Spotify credits.
+
 One source change now feeds both products. Publishing the mobile Site does not
 replace another person's installed desktop helper or Spotify extension. Those
 receive a new policy when the rebuilt application is installed; Spotify reloads

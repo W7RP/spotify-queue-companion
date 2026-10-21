@@ -1,6 +1,13 @@
 {
   "schemaVersion": 1,
-  "version": "1.1.0",
+  "version": "1.2.0",
+  "collectives": [
+    {
+      "name": "Drain Gang",
+      "members": ["Bladee", "Ecco2k", "Thaiboy Digital", "Whitearmor"],
+      "source": "https://year0001.com/label/cases/yr0048"
+    }
+  ],
   "defaults": {
     "artistShareDivisor": 5,
     "minimumOtherArtistSongs": 2

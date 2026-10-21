@@ -30,6 +30,7 @@ public static class SelectionRules
         catch (JsonException) { throw new InvalidOperationException("The music brief could not be read. Nothing was queued."); }
         bool Names(string[]? names) => names != null && names.Length <= 6 && names.All(n => !string.IsNullOrWhiteSpace(n) && n.Length <= 120 && !n.Any(char.IsControl));
         if (b.Kind is not ("similarity" or "artist-only" or "discovery") || !Names(b.ReferenceArtists) || !Names(b.ExcludedArtists) || b.Discovery is not ("balanced" or "deep-cuts" or "new-artists" or "familiar") || b.ReferenceCount < -1 || b.ReferenceCount > request.Count || b.ExcludedVersions == null || b.ExcludedVersions.Length > 4 || b.ExcludedVersions.Any(v => v is not ("live" or "acoustic" or "remix" or "cover")) || new[] { b.Genre, b.Mood, b.Era }.Any(t => t == null || t.Length > 200 || t.Any(char.IsControl))) throw new InvalidOperationException("The music brief exceeded selection limits. Nothing was queued.");
+        if (b.ReferenceType is not (null or "artist" or "collective" or "none") || b.CollectiveMembers?.Length > 12 || b.CollectiveMembers?.Any(n => string.IsNullOrWhiteSpace(n) || n.Length > 120 || n.Any(char.IsControl)) == true || b.ReferenceType != "collective" && b.CollectiveMembers?.Length > 0) throw new InvalidOperationException("The music brief exceeded collective limits. Nothing was queued.");
         return b;
     }
     public static string InstructionsFor(Generation request)

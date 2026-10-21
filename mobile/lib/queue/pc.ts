@@ -23,10 +23,11 @@ export async function computerEndpoint(request: Request) {
   const bridge = await db().prepare('SELECT user_id FROM pc_bridge WHERE id = 1').first<{ user_id: string }>();
   if (!bridge) throw new AppError('Pair this computer first.', 409);
   const owner = bridge.user_id, input = await body(request, 48_000), now = Date.now();
-  // Operator diagnostic: one fixed music request, no Spotify reads or writes.
+  // Operator diagnostic: bounded music inference only, no Spotify reads or writes.
   if (path === '/api/pc/verify') {
-    const songs = await proposeOnComputer(owner, 'Select one mellow song for work. Return a real released song.', 1);
-    return response({ passed: songs.songs.length > 0, suggestions: songs.songs.length });
+    if(input.prompt!==undefined&&(typeof input.prompt!=='string'||!input.prompt.trim()||input.prompt.length>1000))throw new AppError('Use a bounded music test request.');
+    const songs = await proposeOnComputer(owner, input.prompt ?? 'Select one mellow song for work. Return a real released song.', 1);
+    return response({ passed: songs.songs.length > 0, suggestions: songs.songs.length, kind: songs.brief.kind, referenceType: songs.brief.referenceType ?? (songs.brief.referenceArtists.length ? 'artist' : 'none'), memberCount: songs.brief.collectiveMembers?.length ?? 0 });
   }
   if (path === '/api/pc/poll' || path === '/api/pc/heartbeat') {
     if (typeof input.ready !== 'boolean' || !Array.isArray(input.models) || input.models.length > 100 || input.models.some((m: any) => typeof m.id !== 'string' || !/^[a-zA-Z0-9._:-]{1,120}$/.test(m.id) || typeof m.name !== 'string' || m.name.length > 120)) throw new AppError('Invalid computer status.');
@@ -45,7 +46,18 @@ export async function computerEndpoint(request: Request) {
     let value:object={error:'The PC could not finish music selection. Check the ChatGPT connection and plan usage in desktop Queue Companion, then try a fresh request.'};
     if(input.ok) {
       try {value={songs:musicProposals(input.songs,(original.refillCount||original.count)+original.reserve),brief:validateMusicBrief(input.brief,original.prompt,original.count)};}
-      catch {state='failed';value={error:'The PC returned an invalid music brief or song list. Update desktop Queue Companion, then try a fresh request. Nothing was queued.'};}
+      catch (error) {
+        const categories = new Map([
+          ['The computer returned an invalid song list.', 'songs'],
+          ['The music brief could not be read. Nothing was queued.', 'brief_missing'],
+          ['The music brief exceeded selection limits. Nothing was queued.', 'brief_limits'],
+          ['The music brief introduced an artist restriction that was not requested. Nothing was queued.', 'brief_artist'],
+          ['The music brief changed an inspiration into an artist-only request. Nothing was queued.', 'brief_artist_only'],
+          ['The music brief invented an artist exclusion. Nothing was queued.', 'brief_exclusion'],
+        ]);
+        console.warn(JSON.stringify({event:'pc_result_rejected',reason:categories.get(error instanceof Error ? error.message : '') ?? 'unexpected',hasBrief:!!input.brief,referenceArtistCount:Array.isArray(input.brief?.referenceArtists)?input.brief.referenceArtists.length:null,songCount:Array.isArray(input.songs)?input.songs.length:null}));
+        state='failed';value={error:input.brief == null ? 'The PC returned no music brief. Update desktop Queue Companion, then try a fresh request. Nothing was queued.' : 'The PC returned an invalid music brief or song list. Try a fresh request. Nothing was queued.'};
+      }
     }
     const result = await finishMusicJob(db(), owner, input.id, input.claim, await seal(value, owner), state, now);
     if (!result.meta.changes) throw new AppError('This music request has expired or finished.', 409);

@@ -78,3 +78,40 @@ era, energy and genre. Human listening review and broader live catalogue benchma
 are the next quality gates. The updated installed Windows helper passed the deployed
 Site's fixed one-song bridge diagnostic on 2026-10-19, exercising real ChatGPT
 inference and brief validation. This update did not perform live Spotify playback writes.
+
+## Genre and collective interpretation (2026-10-21)
+
+The user identified `drain gang` as a failing request. Production diagnostics
+recorded rejection of an artist-only interpretation; the old validator required a
+small set of literal prefixes and did not recognize a bare entity or its member
+credits. An earlier `lesser known metalcore` report also exposed the need to handle
+an artist-only label without any named artist. The generic update-desktop message
+incorrectly treated all these failures as missing helper support.
+
+Shared policy 1.2.0 adds referenceType and collectiveMembers to the same inference
+as the brief and songs. Bare names and explicit music-from requests can select
+their source; similarity remains distinct. Known Drain Gang membership comes from
+[YEAR0001's release notes](https://year0001.com/label/cases/yr0048). The server uses
+that bounded membership entry rather than accepting model-invented associates.
+Unknown collectives use model-supplied bounded membership; those identities are not
+independently verified. Library restrictions and explicit artist exclusions remain
+in force. Member credits count together toward a similarity request's familiar
+portion, and collective-only lists interleave members when choices permit.
+
+A contradictory artist-only label with no artist becomes discovery. Other invalid
+briefs still fail before Spotify writes. Error diagnostics contain categories and
+counts only, without requests, member names, songs or credentials. Missing brief
+support retains the update instruction; semantic failures do not blame an old app.
+
+Validation: 89 extension checks, 53 helper checks, 91 mobile backend checks and 60
+browser checks passed; both builds and mobile TypeScript passed. The generated
+exports share fingerprint `92829371b441`. The Windows helper and Repair installer
+were rebuilt and installed; plugin files were updated for the next Spotify start.
+No Spotify restart or live playback command was issued.
+
+Real inference through the deployed mailbox accepted `lesser known metalcore` at
+21:01 UTC. After policy 1.2.0, `drain gang` passed at 21:17 UTC as collective/member
+scope with four members; `songs like Drain Gang` passed at 21:17 UTC as similarity
+with four members. The first post-deployment diagnostic returned a generic 503;
+its cause was not established, and the subsequent two distinct requests passed.
+These are inference/validation checks, not listening-quality or live queue tests.

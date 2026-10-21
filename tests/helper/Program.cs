@@ -91,6 +91,14 @@ try
         var answer=await new ChatGptProvider(new OAuth(store,client),client).Select(new Generation("mellow rock",1,[],false,Structured:true),null,default);
         Assert(calls==1&&answer.Brief?.Genre=="rock","Brief lost or extra call made.");
     });
+    await Test("collective metadata is preserved and malformed member lists are rejected", () => {
+        var request=new Generation("drain gang",5,[],false,Structured:true);
+        var brief=new MusicBrief("artist-only",["Drain Gang"],[],"cloud rap","","","balanced",-1,[],"collective",["Bladee","Ecco2k","Thaiboy Digital","Whitearmor"]);
+        var parsed=SelectionRules.ParseBrief(JsonSerializer.SerializeToElement(brief,Storage.Json),request);
+        Assert(parsed.ReferenceType=="collective"&&parsed.CollectiveMembers!.Length==4,"Collective identities lost.");
+        try{SelectionRules.ParseBrief(JsonSerializer.SerializeToElement(brief with { CollectiveMembers=["Bad\nMember"] },Storage.Json),request);throw new Exception("Malformed members accepted.");}catch(InvalidOperationException){}
+        return Task.CompletedTask;
+    });
     await Test("quota errors remain explicit", () => Reject(() => Select("", true, HttpStatusCode.TooManyRequests), "usage limit"));
     await Test("identity-only scope cannot perform inference", async () => { Credentials(); var c = store.ReadSecret<Registration>("credentials.dat")!; store.WriteSecret("credentials.dat", c with { Scopes = ["openid"] }); using var client = new HttpClient(new FakeHandler(_ => throw new Exception("Network must not be reached."))); await Reject(() => new OAuth(store, client).Access(default), "not authorized"); });
     await Test("concurrent access rotates the refresh token once", async () => { Credentials(); var c=store.ReadSecret<Registration>("credentials.dat")!;store.WriteSecret("credentials.dat",c with{Expires=DateTimeOffset.UtcNow.AddMinutes(-1)});var calls=0;using var client=new HttpClient(new FakeHandler(async request=>{calls++;await Task.Delay(25);var form=await request.Content!.ReadAsStringAsync();Assert(form.Contains("client_id=test-registration")&&!form.Contains("dynamic_agent_client"),"Refresh used wrong registration.");return new(HttpStatusCode.OK){Content=new StringContent("{\"access_token\":\"FAKE_ROTATED_ACCESS\",\"refresh_token\":\"FAKE_ROTATED_REFRESH\",\"expires_in\":3600}")};}));var auth=new OAuth(store,client);var values=await Task.WhenAll(auth.Access(default),auth.Access(default));Assert(calls==1&&values.All(x=>x=="FAKE_ROTATED_ACCESS"),"Refresh was not serialized.");Assert(store.ReadSecret<Registration>("credentials.dat")!.RefreshToken=="FAKE_ROTATED_REFRESH","Rotation not saved."); });

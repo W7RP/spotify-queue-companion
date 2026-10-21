@@ -44,6 +44,14 @@
       "type": "integer",
       "description": "-1 for default; otherwise explicitly requested number from reference artists in the final queue."
     },
+    "referenceType": {
+      "type": "string",
+      "enum": ["artist", "collective", "none"]
+    },
+    "collectiveMembers": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
     "excludedVersions": {
       "type": "array",
       "items": {
@@ -66,6 +74,8 @@
     "era",
     "discovery",
     "referenceCount",
-    "excludedVersions"
+    "excludedVersions",
+    "referenceType",
+    "collectiveMembers"
   ]
 }

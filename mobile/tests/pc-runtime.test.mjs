@@ -24,8 +24,8 @@ export default {async fetch(request){try {
  return await computerEndpoint(request);
 }catch(error){return fail(error);}}};`;
 const token='a'.repeat(43),brief={kind:'similarity',referenceArtists:['Pearl Jam'],excludedArtists:[],genre:'grunge',mood:'',era:'',discovery:'balanced',referenceCount:-1,excludedVersions:[]};
-async function fixture() {
- const worker=new Miniflare({modules:true,compatibilityDate:'2026-05-15',script:source,d1Databases:['DB'],bindings:{DATA_ENCRYPTION_KEY:'01'.repeat(32),PC_BRIDGE_TOKEN_HASH:createHash('sha256').update(token).digest('base64url')},log:new Log(LogLevel.NONE)});
+async function fixture(prompt) {
+ const worker=new Miniflare({modules:true,compatibilityDate:'2026-05-15',script:prompt?source.replace("prompt:'songs like Pearl Jam'",'prompt:'+JSON.stringify(prompt)):source,d1Databases:['DB'],bindings:{DATA_ENCRYPTION_KEY:'01'.repeat(32),PC_BRIDGE_TOKEN_HASH:createHash('sha256').update(token).digest('base64url')},log:new Log(LogLevel.NONE)});
  try {const init=await worker.dispatchFetch('https://fixture.test/init');assert.equal(init.status,200,await init.text());}catch(error){await worker.dispose();throw error;}
  const complete=(changes={})=>worker.dispatchFetch('https://fixture.test/api/pc/complete',{method:'POST',headers:{authorization:'Bearer '+token,'content-type':'application/json'},body:JSON.stringify({id:'job',claim:'x'.repeat(43),ok:true,songs:[{title:'Different',artist:'Other'}],brief,...changes})});
  return {worker,complete};
@@ -41,6 +41,20 @@ test('PC completion carries a validated brief across the encrypted mailbox, is s
 test('an invalid or missing PC brief finishes as a clear failure instead of leaving a running job until timeout',async()=>{
  const {worker,complete}=await fixture();try {
   assert.equal((await complete({brief:null})).status,200);
-  const result=await (await worker.dispatchFetch('https://fixture.test/inspect')).json();assert.equal(result.state,'failed');assert.match(result.value.error,/invalid music brief/);
+  const result=await (await worker.dispatchFetch('https://fixture.test/inspect')).json();assert.equal(result.state,'failed');assert.match(result.value.error,/no music brief/);
+ }finally{await worker.dispose();}
+});
+
+test('a PC genre selection with an empty artist-only label survives the actual mailbox validator',async()=>{
+ const {worker,complete}=await fixture('lesser known metalcore');try {
+  assert.equal((await complete({brief:{...brief,kind:'artist-only',referenceArtists:[],genre:'metalcore',discovery:'deep-cuts'}})).status,200);
+  const result=await(await worker.dispatchFetch('https://fixture.test/inspect')).json();assert.equal(result.state,'complete');assert.equal(result.value.brief.kind,'discovery');assert.equal(result.value.songs.length,1);
+ }finally{await worker.dispose();}
+});
+
+test('a bare collective crosses the mailbox with its member identities intact',async()=>{
+ const {worker,complete}=await fixture('drain gang');try {
+  assert.equal((await complete({songs:[{title:'Released song',artist:'Bladee'}],brief:{...brief,kind:'artist-only',referenceArtists:['Drain Gang'],referenceType:'collective',collectiveMembers:['Bladee','Ecco2k','Thaiboy Digital','Whitearmor']}})).status,200);
+  const result=await(await worker.dispatchFetch('https://fixture.test/inspect')).json();assert.equal(result.state,'complete');assert.equal(result.value.brief.referenceType,'collective');assert.equal(result.value.brief.collectiveMembers.length,4);
  }finally{await worker.dispose();}
 });

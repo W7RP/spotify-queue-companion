@@ -42,7 +42,7 @@ public static class SelectionPolicy
     public static readonly string[] ClaudeLowEffortModels = ${list(policy.models.claude.lowEffortModels)};
     public const string Effort = ${literal(policy.models.effort)};
 }
-public record MusicBrief(${Object.entries(briefSchema.properties).map(([key,value])=>(value.type==='array'?'string[]':value.type==='integer'?'int':'string')+' '+key[0].toUpperCase()+key.slice(1)).join(', ')});
+public record MusicBrief(${Object.entries(briefSchema.properties).filter(([key])=>!['referenceType','collectiveMembers'].includes(key)).map(([key,value])=>(value.type==='array'?'string[]':value.type==='integer'?'int':'string')+' '+key[0].toUpperCase()+key.slice(1)).join(', ')}, string? ReferenceType = null, string[]? CollectiveMembers = null);
 `;
   const lock=JSON.stringify({schemaVersion:1,version:policy.version,sourceHash:fingerprint,generatedHash:createHash('sha256').update(ts).digest('hex')},null,2)+'\n';
   const outputs=new Map([['extension/src/curation.ts',ts],['mobile/lib/queue/curation.ts',ts],['mobile/selection-core.lock.json',lock],['helper/SelectionPolicy.g.cs',cs]]);

@@ -2,8 +2,28 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {curateArtists,selectionBrief,fastModel,isReferenceArtist,validateMusicBrief,canRefill} from '../extension/src/curation';
 
+test('a genre-only request repairs an artist-only label with no reference artist',()=>{
+  const brief=validateMusicBrief({kind:'artist-only',referenceArtists:[],excludedArtists:[],genre:'metalcore',mood:'',era:'',discovery:'deep-cuts',referenceCount:-1,excludedVersions:[]},'lesser known metalcore',5);
+  assert.equal(brief.kind,'discovery');assert.deepEqual(brief.referenceArtists,[]);
+});
+
 const song=(artist:string,n:number)=>({artist,artistNames:[artist],title:`Track ${n}`});
 const musicBrief=(overrides:any={})=>({kind:'similarity',referenceArtists:['Pearl Jam'],excludedArtists:[],genre:'grunge',mood:'',era:'',discovery:'balanced',referenceCount:-1,excludedVersions:[],...overrides});
+
+test('a bare collective selects members and collaborations rather than a literal collective artist',()=>{
+  const brief=selectionBrief('drain gang',10,musicBrief({kind:'artist-only',referenceArtists:['Drain Gang'],referenceType:'collective',collectiveMembers:['Bladee','Yung Lean']}));
+  assert.deepEqual(brief.music?.collectiveMembers,['Bladee','Ecco2k','Thaiboy Digital','Whitearmor']);
+  const selected=curateArtists([song('Bladee',1),song('Ecco2k',2),song('Thaiboy Digital',3),song('Whitearmor',4),song('Yung Lean',5)],brief);
+  assert.equal(selected.length,4);assert(!selected.some(t=>t.artist==='Yung Lean'));
+  assert.equal(selectionBrief('Pearl Jam',5,musicBrief({kind:'artist-only'})).music?.kind,'artist-only');
+});
+
+test('collective similarity limits the combined member portion and honors explicit exclusions',()=>{
+  const brief=selectionBrief('songs like Drain Gang but no Bladee',10,musicBrief({referenceArtists:['Drain Gang'],excludedArtists:['Bladee']}));
+  const selected=curateArtists([song('Bladee',1),song('Ecco2k',2),song('Thaiboy Digital',3),song('Whitearmor',4),...Array.from({length:10},(_,i)=>song('Other '+i,i+10))],brief);
+  assert.equal(selected.length,10);assert(!selected.some(t=>t.artist==='Bladee'));assert(!isReferenceArtist(selected[0],brief));assert.equal(selected.filter(t=>isReferenceArtist(t,brief)).length,2);
+  assert.throws(()=>validateMusicBrief(musicBrief({kind:'artist-only',referenceArtists:['Drain Gang']}),'songs like Drain Gang',10),/artist-only/);
+});
 test('structured briefs handle relative language and enforce exclusions without relying on similarity keywords',()=>{
   const brief=selectionBrief('heavier than Pearl Jam, without Pearl Jam or live versions',10,musicBrief({referenceCount:0,excludedArtists:['Pearl Jam'],excludedVersions:['live']}));
   const tracks=[song('Pearl Jam',1),{...song('Related',2),title:'Song - Live'},song('Other',3)];
