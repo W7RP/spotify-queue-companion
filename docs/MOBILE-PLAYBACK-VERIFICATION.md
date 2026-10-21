@@ -109,3 +109,17 @@ failure and recovery still need confirmation from the user's phone; passing tran
 fixtures is not evidence that Spotify's current iOS behavior is resolved.
 
 Verification for this update: 67 backend checks and 48 browser checks passed; TypeScript and the production build passed. Live-phone confirmation remains pending.
+
+## Playlist-context recovery (2026-10-21)
+
+The user's follow-up disproved the first-song warmup workaround above: both the original URI-list request and its explicit recovery returned success while clearing playback. The old recovery behavior is superseded by this update.
+
+Play now now requires `playlist-modify-private` and uses one private, non-collaborative Queue Companion playlist per Spotify account. Existing connections get a reconnect link; missing permission causes no Spotify writes and preserves the saved selection. Granted scopes are recorded during sign-in and preserved or updated on token refresh.
+
+Before playback, the server creates or reuses only its stored account-bound playlist ID, verifies ownership/privacy on reuse, replaces all items in one request, and reads back the complete ordered list. No player command is sent if this verification fails. Playback starts using `context_uri: spotify:playlist:<id>`, offset position zero. The bare `uris` form is no longer sent to the player endpoint. Append continues using the queue endpoint. Repeated receipts and status refreshes do not replay playback.
+
+An unconfirmed start retains a link to the full playlist; users can open it in Spotify and press Play. Read-only refresh can confirm it. Existing unconfirmed legacy URI jobs can migrate once to the playlist path, with deterministic recovery IDs and owner/source checks. The old first-song prerequisite is removed. Normal Spotify manual-queue limitations still apply.
+
+Evidence: production accepted both the initial and recovery URI-list commands without confirming playback. Other developers report the same failure and successful context-based playback in [Spotify Community](https://community.spotify.com/forum/en/discussion/7552922/web-api-me-player-play-returns-204-but-does-not-start-playback-and-clears-current-playback-desktop). This is a reported workaround, not a confirmed Spotify diagnosis. The implementation uses the documented [create playlist](https://developer.spotify.com/documentation/web-api/reference/create-playlist), [replace playlist items](https://developer.spotify.com/documentation/web-api/reference/reorder-or-replace-playlists-items), and [start playback](https://developer.spotify.com/documentation/web-api/reference/start-a-users-playback) endpoints.
+
+Validation: 70 backend/runtime/domain tests, 51 browser checks across phone, small phone and desktop, TypeScript, and the production build passed. The runtime fixture rejects every bare URI-list play command, including a warm recovery, while allowing playlist contexts. Additional cases cover missing permission with zero writes, playlist reuse, changed privacy, partial propagation, failed context playback without replay, manual confirmation by reads, and legacy migration. The final 10 commit-runtime cases were rerun after updating the legacy recovery namespace. No real Spotify playback writes were made by the assistant. Real-device verification remains pending after the user reconnects Spotify.

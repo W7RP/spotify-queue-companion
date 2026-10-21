@@ -24,9 +24,10 @@ export function refreshedDeviceId(id, previous, current) {
 }
 // The write response confirms acceptance of the entire list. Playback observation
 // is separate: a slow/missing read must never replay a successful PUT.
-export async function startSelection(tracks, send, checkpoint) {
+export async function startSelection(tracks, send, checkpoint, playlistId) {
+  if (!/^[a-zA-Z0-9]{22}$/.test(playlistId ?? '')) throw new AppError('A verified playback playlist is required. Nothing was started.', 409);
   await checkpoint({ state: 'sending', accepted: 0 });
-  try { await send({ uris: tracks.map(t => t.uri), position_ms: 0 }); }
+  try { await send({ context_uri: 'spotify:playlist:' + playlistId, offset: { position: 0 }, position_ms: 0 }); }
   catch (error) {
     const known = error instanceof AppError && error.status < 500;
     const result = { state: known ? 'failed' : 'uncertain', accepted: 0, total: tracks.length, message: known ? error.message : 'Spotify may have started this selection, but the response was lost. Check playback before trying again.' };

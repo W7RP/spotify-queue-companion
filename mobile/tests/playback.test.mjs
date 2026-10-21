@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { availableDevices, chooseDevice, startSelection, observeSelection, preparePlaybackOrder, refreshedDeviceId } from '../lib/queue/playback.mjs';
 import { spotifyResponse } from '../lib/queue/http.mjs';
 import { AppError } from '../lib/queue/core.mjs';
+const playlistId = 'P'.repeat(22);
 const tracks = Array.from({ length: 50 }, (_, i) => ({ uri: 'spotify:track:' + String(i).padStart(22, '0') }));
 
 test('a paused available device can start playback without any current song', () => {
@@ -14,10 +15,10 @@ test('a paused available device can start playback without any current song', ()
   assert.throws(() => chooseDevice([...devices, { id: 'computer' }]), /Choose which/);
 });
 
-test('Play now starts all 50 songs from the first URI in one write and records the full accepted list', async () => {
+test('Play now starts the verified playlist at position zero in one write and records the full accepted list', async () => {
   const writes = [], points = [];
-  const result = await startSelection(tracks, async body => writes.push(body), async point => points.push(point));
-  assert.equal(writes.length, 1); assert.deepEqual(writes[0], { uris: tracks.map(t => t.uri), position_ms: 0 });
+  const result = await startSelection(tracks, async body => writes.push(body), async point => points.push(point), playlistId);
+  assert.equal(writes.length, 1); assert.deepEqual(writes[0], { context_uri: 'spotify:playlist:' + playlistId, offset: { position: 0 }, position_ms: 0 });
   assert.deepEqual(result, { state: 'complete', accepted: 50, total: 50 });
   assert.deepEqual(points, [{ state: 'sending', accepted: 0 }, result]);
 });
@@ -25,7 +26,7 @@ test('Play now starts all 50 songs from the first URI in one write and records t
 test('a failed or uncertain playback command is not retried', async () => {
   for (const error of [new AppError('Unavailable device', 404), Error('Network lost')]) {
     let calls = 0; const points = [];
-    const result = await startSelection(tracks, async () => { calls++; throw error; }, async point => points.push(point));
+    const result = await startSelection(tracks, async () => { calls++; throw error; }, async point => points.push(point), playlistId);
     assert.equal(calls, 1); assert.equal(result.accepted, 0); assert.equal(result.state, error instanceof AppError ? 'failed' : 'uncertain');
   }
 });
@@ -83,4 +84,8 @@ test('a rotated device ID only follows a unique matching name and device type', 
   assert.equal(refreshedDeviceId('old', old, current), 'new');
   assert.equal(refreshedDeviceId('old', old, [...current, { ...current[0], id: 'another' }]), 'old');
   assert.equal(refreshedDeviceId('old', old, [{ id: 'computer', name: 'iPhone', type: 'Computer' }]), 'old');
+});
+
+test('missing playback context is rejected without sending the broken URI-list form', async () => {
+  let writes = 0; await assert.rejects(startSelection(tracks, async () => { writes++; }, async () => {}), /verified playback playlist/); assert.equal(writes, 0);
 });

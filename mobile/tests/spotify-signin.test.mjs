@@ -17,7 +17,7 @@ function fixture({ cookie = true, expired = false, tokenStatus = 200, profileSta
       if (url === 'https://accounts.spotify.com/api/token') {
         assert.equal(init.body.get('client_id'), 'FAKE_CLIENT'); assert.equal(init.body.get('code_verifier'), 'FAKE_VERIFIER');
         assert.equal(init.body.get('redirect_uri'), 'https://queue.example/api/spotify/callback');
-        return Response.json(tokenStatus === 200 ? { access_token: 'FAKE_ACCESS', refresh_token: 'FAKE_REFRESH', expires_in: 3600 } : { error: 'invalid_grant', error_description: 'RAW_PROVIDER_DETAIL_FAKE_CODE' }, { status: tokenStatus });
+        return Response.json(tokenStatus === 200 ? { access_token: 'FAKE_ACCESS', refresh_token: 'FAKE_REFRESH', scope: 'user-read-private playlist-modify-private', expires_in: 3600 } : { error: 'invalid_grant', error_description: 'RAW_PROVIDER_DETAIL_FAKE_CODE' }, { status: tokenStatus });
       }
       assert.equal(url, 'https://api.spotify.com/v1/me'); assert.equal(init.headers.Authorization, 'Bearer FAKE_ACCESS');
       return Response.json({ id: 'FAKE_SUBJECT', product, error: 'RAW_PROFILE_DETAIL' }, { status: profileStatus });
@@ -29,6 +29,7 @@ test('callback preserves existing settings and exchanges PKCE once before saving
   const f = fixture(); await finishSpotifySignIn(f.request, f.deps);
   assert.equal(f.saved.length, 1); assert.equal(f.saved[0].revision, 7); assert.equal(f.saved[0].value.claudeKey, 'FAKE_KEY');
   assert.equal(f.saved[0].value.spotify.subject, 'FAKE_SUBJECT');
+  assert.match(f.saved[0].value.spotify.scopes, /playlist-modify-private/);
   await assert.rejects(finishSpotifySignIn(f.request, f.deps), e => e.reason === 'state_expired');
   assert.equal(f.calls.length, 2); assert.equal(f.saved.length, 1);
 });
